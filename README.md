@@ -1,6 +1,4 @@
-# Readme
-
-Repo for Tasks Web STEP Pod.
+# Capstone Project for Tasks Web STEP Pod
 
 __Contributors:__
 

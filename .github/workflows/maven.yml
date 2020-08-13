@@ -20,5 +20,5 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - name: Build App with Maven
+      - name: Build and Test App with Maven
         run: mvn -B package --file pom.xml

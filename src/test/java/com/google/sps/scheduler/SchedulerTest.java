@@ -22,6 +22,7 @@ import static converter.TimeConverter.epochToDateTime;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
+import com.google.sps.api.tasks.TasksProvider;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -83,7 +84,7 @@ public class SchedulerTest {
         createEventWithSummary(
             createDateTime(day,13, 0, ZURICH_TIME_ZONE),
             createDateTime(day,13, 30, ZURICH_TIME_ZONE),
-            ZURICH_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(0)));
+            ZURICH_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(0)));
 
     Assert.assertEquals(expectedTasksEvents, actualTasksEvents);
   }
@@ -107,11 +108,11 @@ public class SchedulerTest {
         createEventWithSummary(
             createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
             createDateTime(day,9, 30, ZURICH_TIME_ZONE),
-            ZURICH_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(0)),
+            ZURICH_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(0)),
         createEventWithSummary(
             createDateTime(day,17, 30, ZURICH_TIME_ZONE),
             createDateTime(day, Scheduler.END_HOUR, Scheduler.END_MINUTE, ZURICH_TIME_ZONE),
-            ZURICH_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(1)));
+            ZURICH_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(1)));
 
     Assert.assertEquals(expectedTasksEvents, actualTasksEvents);
   }
@@ -140,23 +141,23 @@ public class SchedulerTest {
         createEventWithSummary(
             createDateTime(day,10, 0, ZURICH_TIME_ZONE),
             createDateTime(day,10, 30, ZURICH_TIME_ZONE),
-            ZURICH_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(0)),
+            ZURICH_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(0)),
         createEventWithSummary(
             createDateTime(day,10, 30, ZURICH_TIME_ZONE),
             createDateTime(day,11, 0, ZURICH_TIME_ZONE),
-            ZURICH_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(1)),
+            ZURICH_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(1)),
         createEventWithSummary(
             createDateTime(day,13, 0, ZURICH_TIME_ZONE),
             createDateTime(day,13, 30, ZURICH_TIME_ZONE),
-            ZURICH_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(2)),
+            ZURICH_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(2)),
         createEventWithSummary(
             createDateTime(day,13, 30, ZURICH_TIME_ZONE),
             createDateTime(day,14, 0, ZURICH_TIME_ZONE),
-            ZURICH_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(3)),
+            ZURICH_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(3)),
         createEventWithSummary(
             createDateTime(day,14, 0, ZURICH_TIME_ZONE),
             createDateTime(day,14, 30, ZURICH_TIME_ZONE),
-            ZURICH_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(4)));
+            ZURICH_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(4)));
 
     Assert.assertEquals(expectedTasksEvents, actualTasksEvents);
   }
@@ -195,15 +196,15 @@ public class SchedulerTest {
         createEventWithSummary(
             createDateTime(day,10, 0, ZURICH_TIME_ZONE),
             createDateTime(day,10, 30, ZURICH_TIME_ZONE),
-            ZURICH_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(0)),
+            ZURICH_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(0)),
         createEventWithSummary(
             createDateTime(day,13, 50, ZURICH_TIME_ZONE),
             createDateTime(day,14, 20, ZURICH_TIME_ZONE),
-            ZURICH_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(1)),
+            ZURICH_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(1)),
         createEventWithSummary(
             createDateTime(day,16, 34, ZURICH_TIME_ZONE),
             createDateTime(day,17, 4, ZURICH_TIME_ZONE),
-            ZURICH_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(2)));
+            ZURICH_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(2)));
 
     Assert.assertEquals(expectedTasksEvents, actualTasksEvents);
   }
@@ -254,11 +255,11 @@ public class SchedulerTest {
         createEventWithSummary(
             createDateTime(day,11, 0, ZURICH_TIME_ZONE),
             createDateTime( day,11, 30, ZURICH_TIME_ZONE),
-            ZURICH_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(0)),
+            ZURICH_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(0)),
         createEventWithSummary(
             createDateTime(day,16, 30, ZURICH_TIME_ZONE),
             createDateTime(day,17, 0, ZURICH_TIME_ZONE),
-            ZURICH_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(1)));
+            ZURICH_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(1)));
 
     Assert.assertEquals(expectedTasksEvents, actualTasksEvents);
   }
@@ -287,7 +288,7 @@ public class SchedulerTest {
         createEventWithSummary(
             createDateTime(day,13, 0, ZURICH_TIME_ZONE),
             createDateTime(day,13, 30, ZURICH_TIME_ZONE),
-            ZURICH_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(0)));
+            ZURICH_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(0)));
 
     Assert.assertEquals(expectedTasksEvents, actualTasksEvents);
   }
@@ -322,23 +323,23 @@ public class SchedulerTest {
         createEventWithSummary(
             createDateTime(day,10, 0, UTC_TIME_ZONE),
             createDateTime(day,10, 30, UTC_TIME_ZONE),
-            UTC_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(0)),
+            UTC_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(0)),
         createEventWithSummary(
             createDateTime(day,10, 30, UTC_TIME_ZONE),
             createDateTime(day,11, 0, UTC_TIME_ZONE),
-            UTC_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(1)),
+            UTC_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(1)),
         createEventWithSummary(
             createDateTime(day,16, 0, UTC_TIME_ZONE),
             createDateTime(day,16, 30, UTC_TIME_ZONE),
-            UTC_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(2)),
+            UTC_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(2)),
         createEventWithSummary(
             createDateTime(day,16, 30, UTC_TIME_ZONE),
             createDateTime(day,17, 0, UTC_TIME_ZONE),
-            UTC_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(3)),
+            UTC_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(3)),
         createEventWithSummary(
             createDateTime(day,17, 30, UTC_TIME_ZONE),
             createDateTime(day,18, 0, UTC_TIME_ZONE),
-            UTC_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(4)));
+            UTC_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(4)));
 
     Assert.assertEquals(expectedTasksEvents, actualTasksEvents);
   }
@@ -391,11 +392,11 @@ public class SchedulerTest {
         createEventWithSummary(
             createDateTime(day,11, 0, LOS_ANGELES_TIME_ZONE),
             createDateTime( day,11, 30, LOS_ANGELES_TIME_ZONE),
-            LOS_ANGELES_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(0)),
+            LOS_ANGELES_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(0)),
         createEventWithSummary(
             createDateTime(day,16, 30, LOS_ANGELES_TIME_ZONE),
             createDateTime(day,17, 0, LOS_ANGELES_TIME_ZONE),
-            LOS_ANGELES_TIME_ZONE, Scheduler.TASKS_SAMPLE.get(1)));
+            LOS_ANGELES_TIME_ZONE, TasksProvider.TASKS_SAMPLE.get(1)));
 
     Assert.assertEquals(expectedTasksEvents, actualTasksEvents);
   }

@@ -20,7 +20,7 @@ import static converter.TimeConverter.epochToDateTime;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
-import com.google.common.collect.ImmutableList;
+import com.google.sps.api.tasks.TasksProvider;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -38,9 +38,6 @@ public class Scheduler {
   public static final int END_HOUR = 18;
   public static final int END_MINUTE = 0;
   public static final long DEFAULT_DURATION_IN_MILLISECONDS = TimeUnit.MINUTES.toMillis(30);
-  // TODO: remove the sample tasks after the Tasks API integration (issue #8)
-  public static final ImmutableList<String> TASKS_SAMPLE = ImmutableList.of(
-      "Review code", "Write the design doc", "Talk to PM", "Investigate report", "Prepare slides");
 
   /**
    * Schedules the tasks in the free time slot of the calendar events, which must be of the same day
@@ -113,7 +110,7 @@ public class Scheduler {
    */
   public static List<Event> schedule(List<Event> calendarEvents, String timeZone, LocalDate dayDate) {
     // TODO: remove the sample tasks after the Tasks API integration (issue #8)
-    return schedule(calendarEvents, TASKS_SAMPLE, timeZone, dayDate);
+    return schedule(calendarEvents, TasksProvider.TASKS_SAMPLE, timeZone, dayDate);
   }
 
   /**

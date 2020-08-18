@@ -10,12 +10,17 @@ import com.google.appengine.api.users.UserServiceFactory;
 import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
+import java.io.*;
 
 public class CalendarInterface implements Serializable {
     public static final String PRIMARY = "primary";
     private Calendar calendarClient;
+    public static final ZoneId CET_ZONE_ID = ZoneId.of("Europe/Zurich");
 
     public CalendarInterface()  throws IOException{
         String userId = UserServiceFactory.getUserService().getCurrentUser().getUserId();
@@ -28,15 +33,14 @@ public class CalendarInterface implements Serializable {
         return calendarClient;
     }
 
-
-    //Todo: actually querry next day, try to use LocalDate instead as well
-    public List<Event> loadPrimaryCalendarEventsOfNext24Hour() throws IOException {
-        Date currentDate = new Date();
-        long unix = currentDate.getTime();
-        Date todayEndDate = new Date();
-        todayEndDate.setTime(unix + 86400);
-        DateTime startDate = new DateTime(currentDate);
-        DateTime endDate = new DateTime(todayEndDate);
+    public List<Event> loadPrimaryCalendarEventsOfTomorrow() throws IOException{
+        //Todo: get timezone of user's calendar
+        LocalDate todayHere = LocalDate.now(CET_ZONE_ID);
+        ZonedDateTime todayStart = todayHere.atStartOfDay(CET_ZONE_ID);
+        ZonedDateTime tomorrowStart = todayStart.plusDays(1);
+        ZonedDateTime tomorrowEnd = todayStart.plusDays(2);
+        DateTime startDate = new DateTime(tomorrowStart.toInstant().toEpochMilli());
+        DateTime endDate = new DateTime(tomorrowEnd.toInstant().toEpochMilli());
         return getAcceptedEventsInTimerange(startDate, endDate);
     }
 

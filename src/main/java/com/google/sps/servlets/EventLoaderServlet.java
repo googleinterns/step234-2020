@@ -43,7 +43,7 @@ public class EventLoaderServlet extends HttpServlet {
         response.setContentType("text/html");
         response.setCharacterEncoding("UTF-8");
         PrintWriter writer = response.getWriter();
-        List<Event> events = calendarInterface.loadPrimaryCalendarEventsOfNext24Hour();
+        List<Event> events = calendarInterface.loadPrimaryCalendarEventsOfTomorrow();
         for (Event event : events) {
             writer.println(event.getSummary());
             writer.println("\n");

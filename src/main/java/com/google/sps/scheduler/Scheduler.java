@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -37,6 +38,7 @@ public class Scheduler {
   public static final int END_HOUR = 18;
   public static final int END_MINUTE = 0;
   public static final long DEFAULT_DURATION_IN_MILLISECONDS = TimeUnit.MINUTES.toMillis(30);
+  // TODO: remove the sample tasks after the Tasks API integration (issue #8)
   public static final ImmutableList<String> TASKS_SAMPLE = ImmutableList.of(
       "Review code", "Write the design doc", "Talk to PM", "Investigate report", "Prepare slides");
 
@@ -60,7 +62,7 @@ public class Scheduler {
         epochInMilliseconds(dayDate, LocalTime.of(END_HOUR, END_MINUTE), timeZone);
 
     long lastEnd = dayStartEpochMilliseconds;
-    int indexNextTask = 0;
+    Iterator<String> tasksIterator = tasks.iterator();
 
     for (Event event : orderedCalendarEvents) {
       long eventEnd = event.getEnd().getDateTime().getValue();
@@ -74,16 +76,15 @@ public class Scheduler {
       }
 
       while (eventStart - lastEnd >= DEFAULT_DURATION_IN_MILLISECONDS &&
-          indexNextTask < tasks.size()) {
+          tasksIterator.hasNext()) {
         DateTime startTime = epochToDateTime(lastEnd, timeZone);
         lastEnd += DEFAULT_DURATION_IN_MILLISECONDS;
         DateTime endTime = epochToDateTime(lastEnd, timeZone);
         tasksEvents.add(
-            createEventWithSummary(startTime, endTime, timeZone, tasks.get(indexNextTask)));
-        indexNextTask++;
+            createEventWithSummary(startTime, endTime, timeZone, tasksIterator.next()));
       }
 
-      if (indexNextTask >= tasks.size()) {
+      if (!tasksIterator.hasNext()) {
         break;
       }
 
@@ -93,13 +94,12 @@ public class Scheduler {
     }
 
     while (dayEndEpochMilliseconds - lastEnd >= DEFAULT_DURATION_IN_MILLISECONDS &&
-        indexNextTask < tasks.size()) {
+        tasksIterator.hasNext()) {
       DateTime startTime = epochToDateTime(lastEnd, timeZone);
       lastEnd += DEFAULT_DURATION_IN_MILLISECONDS;
       DateTime endTime = epochToDateTime(lastEnd, timeZone);
       tasksEvents.add(
-          createEventWithSummary(startTime, endTime, timeZone, tasks.get(indexNextTask)));
-      indexNextTask++;
+          createEventWithSummary(startTime, endTime, timeZone, tasksIterator.next()));
     }
 
     return tasksEvents;
@@ -112,6 +112,7 @@ public class Scheduler {
    * all of them is returned.
    */
   public static List<Event> schedule(List<Event> calendarEvents, String timeZone, LocalDate dayDate) {
+    // TODO: remove the sample tasks after the Tasks API integration (issue #8)
     return schedule(calendarEvents, TASKS_SAMPLE, timeZone, dayDate);
   }
 
@@ -119,6 +120,7 @@ public class Scheduler {
    * Returns an event with the given start and end time in the specific time zone.
    */
   public static Event createEvent(DateTime startTime, DateTime endTime, String timeZone) {
+    // TODO: move this method to the class managing the calendar API (issue #7)
     Event event = new Event();
 
     EventDateTime eventStart = new EventDateTime()
@@ -141,6 +143,7 @@ public class Scheduler {
    */
   public static Event createEventWithSummary(
       DateTime startTime, DateTime endTime, String timeZone, String summary) {
+    // TODO: move this method to the class managing the calendar API (issue #7)
     Event event = createEvent(startTime, endTime, timeZone);
 
     event.setSummary(summary);

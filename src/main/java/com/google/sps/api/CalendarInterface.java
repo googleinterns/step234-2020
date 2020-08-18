@@ -4,6 +4,8 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventAttachment;
+import com.google.api.services.calendar.model.EventAttendee;
 import com.google.api.services.calendar.model.Events;
 import com.google.appengine.api.users.UserServiceFactory;
 
@@ -16,6 +18,7 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 import java.io.*;
+import java.util.stream.Collectors;
 
 public class CalendarInterface implements Serializable {
     public static final String PRIMARY = "primary";
@@ -52,10 +55,28 @@ public class CalendarInterface implements Serializable {
                 .setTimeMin(startTime)
                 .setTimeMax(endTime)
                 .execute();
-        return events.getItems();
+        return events.getItems().stream()
+                .filter(event -> isAttending(event))
+                .collect(Collectors.toList());
     }
 
     public void InsertEventToPrimary(Event event) throws IOException{
         calendarClient.events().insert(PRIMARY,event);
+    }
+
+
+    //Todo: write tests for this method
+    public boolean isAttending(Event event){
+        List<EventAttendee> attendeeList = event.getAttendees();
+        if(attendeeList != null){
+            for(EventAttendee attendee: attendeeList){
+                if(attendee.getSelf() != null && attendee.getSelf()){
+                    return "accepted".equals(attendee.getResponseStatus());
+                }
+            }
+        }else{
+            return true;
+        }
+        return false;
     }
 }

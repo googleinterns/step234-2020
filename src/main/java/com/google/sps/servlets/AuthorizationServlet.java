@@ -19,6 +19,7 @@ import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.extensions.appengine.auth.oauth2.AbstractAppEngineAuthorizationCodeServlet;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.sps.api.Utils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -28,20 +29,18 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@WebServlet("/loadEvents")
-public class LoadEventsServlet extends AbstractAppEngineAuthorizationCodeServlet {
+@WebServlet("/authorization")
+public class AuthorizationServlet extends AbstractAppEngineAuthorizationCodeServlet {
 
 
   @Override
-  protected void doGet(HttpServletRequest request, HttpServletResponse response)
-      throws IOException {
+  protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     response.setContentType("text/html");
     response.setCharacterEncoding("UTF-8");
     PrintWriter writer = response.getWriter();
     UserService userService = UserServiceFactory.getUserService();
+    writer.println("<a href=\"/load_events\">Show my events!</a>|");
     writer.println("<a href=\"" + userService.createLogoutURL(request.getRequestURL().toString()) + "\">Log out</a> | ");
-
-
   }
 
   @Override

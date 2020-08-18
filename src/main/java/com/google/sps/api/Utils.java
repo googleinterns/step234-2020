@@ -13,9 +13,8 @@
 // limitations under the License.
 
 
-package com.google.sps.servlets;
+package com.google.sps.api;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.appengine.datastore.AppEngineDataStoreFactory;
 import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
@@ -26,9 +25,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.Preconditions;
 import com.google.api.client.util.store.DataStoreFactory;
-import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
-import com.google.appengine.api.users.UserServiceFactory;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -36,7 +33,7 @@ import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
 
-class Utils {
+public class Utils {
 
   /**
    * Global instance of the {@link DataStoreFactory}. The best practice is to make it a single
@@ -46,14 +43,14 @@ class Utils {
       AppEngineDataStoreFactory.getDefaultInstance();
   
   /** Global instance of the HTTP transport. */
-  static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
+  public static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
 
   /** Global instance of the JSON factory. */
-  static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+  public static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
   private static GoogleClientSecrets clientSecrets = null;
 
-  static GoogleClientSecrets getClientCredential() throws IOException {
+  public static GoogleClientSecrets getClientCredential() throws IOException {
     if (clientSecrets == null) {
       clientSecrets = GoogleClientSecrets.load(JSON_FACTORY,
           new InputStreamReader(Utils.class.getResourceAsStream("/client_secrets.json")));
@@ -65,13 +62,13 @@ class Utils {
     return clientSecrets;
   }
 
-  static String getRedirectUri(HttpServletRequest req) {
+  public static String getRedirectUri(HttpServletRequest req) {
     GenericUrl url = new GenericUrl(req.getRequestURL().toString());
     url.setRawPath("/oauth2callback");
     return url.build();
   }
 
-  static GoogleAuthorizationCodeFlow newFlow() throws IOException {
+  public static GoogleAuthorizationCodeFlow newFlow() throws IOException {
     return new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
             getClientCredential(), Collections.singleton(CalendarScopes.CALENDAR_EVENTS)).setDataStoreFactory(
             DATA_STORE_FACTORY).setAccessType("offline").build();

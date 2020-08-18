@@ -15,7 +15,7 @@
 
 package com.google.sps.servlets;
 
-import com.google.sps.servlets.Utils;
+import com.google.sps.api.Utils;
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.Credential;
@@ -36,7 +36,7 @@ public class OAuth2Callback extends AbstractAppEngineAuthorizationCodeCallbackSe
   @Override
   protected void onSuccess(HttpServletRequest req, HttpServletResponse resp, Credential credential)
           throws ServletException, IOException {
-    resp.sendRedirect("/loginRequiredSample");
+    resp.sendRedirect("/authorization");
   }
 
   @Override

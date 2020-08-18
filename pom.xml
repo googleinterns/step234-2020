@@ -58,8 +58,18 @@
       <artifactId>google-api-services-calendar</artifactId>
       <version>v3-rev20200610-1.30.10</version>
     </dependency>
+    <dependency>
+      <groupId>com.google.appengine</groupId>
+      <artifactId>appengine-testing</artifactId>
+      <version>1.9.81</version>
+      <scope>test</scope>
+    </dependency>
 
-    <dependency><groupId>com.google.appengine</groupId><artifactId>appengine-api-1.0-sdk</artifactId><version>1.9.59</version></dependency>
+    <dependency>
+      <groupId>com.google.appengine</groupId>
+      <artifactId>appengine-api-1.0-sdk</artifactId>
+      <version>1.9.59</version>
+    </dependency>
   </dependencies>
 
   <dependencyManagement>

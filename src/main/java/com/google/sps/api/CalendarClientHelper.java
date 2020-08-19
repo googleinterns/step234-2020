@@ -28,7 +28,8 @@ public class CalendarClientHelper implements Serializable {
   //Q: Should I make this method static?
 
   /**
-   * This is a method used in CalendarClientHelp
+   * This is a method used in CalendarInterface to filter for events that are attended by the user
+   * The EventAttendee's getSelf() method indicates whether this entry represents the calendar on which this copy of the event appears.
    */
   public boolean isAttending(Event event) {
     List<EventAttendee> attendeeList = event.getAttendees();

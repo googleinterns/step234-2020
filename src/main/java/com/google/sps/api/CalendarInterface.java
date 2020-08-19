@@ -3,6 +3,7 @@ package com.google.sps.api;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.google.appengine.api.users.UserServiceFactory;
@@ -19,7 +20,7 @@ public class CalendarInterface implements Serializable {
     public static final String PRIMARY = "primary";
     private final CalendarClientHelper calendarClientHelper = new CalendarClientHelper();
     private Calendar calendarClient;
-    public static final ZoneId CET_ZONE_ID = ZoneId.of("Europe/Zurich");
+    public static final String CET_TIME_ZONE = "Europe/Zurich";
 
     public CalendarInterface()  throws IOException{
         String userId = UserServiceFactory.getUserService().getCurrentUser().getUserId();
@@ -27,13 +28,26 @@ public class CalendarInterface implements Serializable {
         calendarClient = new Calendar.Builder(Utils.HTTP_TRANSPORT, Utils.JSON_FACTORY, credential).build();
     }
 
+
+    public String getPrimaryCalendarTimeZone() {
+        String timeZone;
+        try {
+            CalendarListEntry calendarListEntryPrimary = calendarClient.calendarList().get("primary").execute();
+            timeZone = calendarListEntryPrimary.getTimeZone();
+        } catch (Exception e) {
+            timeZone = CET_TIME_ZONE;
+        }
+        return timeZone;
+    }
+
     public Calendar getCalendarClient() throws IOException {
         return calendarClient;
     }
 
     public List<Event> loadPrimaryCalendarEventsOfTomorrow() throws IOException{
-        LocalDate todayHere = LocalDate.now(CET_ZONE_ID);
-        ZonedDateTime todayStart = todayHere.atStartOfDay(CET_ZONE_ID);
+        ZoneId userZoneId = ZoneId.of(getPrimaryCalendarTimeZone());
+        LocalDate todayHere = LocalDate.now(userZoneId);
+        ZonedDateTime todayStart = todayHere.atStartOfDay(userZoneId);
         ZonedDateTime tomorrowStart = todayStart.plusDays(1);
         ZonedDateTime tomorrowEnd = todayStart.plusDays(2);
         DateTime startDate = new DateTime(tomorrowStart.toInstant().toEpochMilli());
@@ -45,7 +59,7 @@ public class CalendarInterface implements Serializable {
     public List<Event> getAcceptedEventsInTimerange(DateTime startTime, DateTime endTime) throws IOException {
 
         Events events = calendarClient.events().list(PRIMARY)
-                .setSingleEvents(true)
+                .setSingleEvents(true) //
                 .setTimeMin(startTime)
                 .setTimeMax(endTime)
                 .execute();

@@ -73,18 +73,4 @@ public class Utils {
             getClientCredential(), Collections.singleton(CalendarScopes.CALENDAR_EVENTS)).setDataStoreFactory(
             DATA_STORE_FACTORY).setAccessType("offline").build();
   }
-
-  /**
-   * Returns an {@link IOException} (but not a subclass) in order to work around restrictive GWT
-   * serialization policy.
-   */
-  static IOException wrappedIOException(IOException e) {
-    if (e.getClass() == IOException.class) {
-      return e;
-    }
-    return new IOException(e.getMessage());
-  }
-
-  private Utils() {
-  }
 }

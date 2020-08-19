@@ -20,13 +20,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.api.services.tasks.model.Task;
+import com.google.sps.api.tasks.TasksProvider;
 import java.io.IOException;
+import java.util.List;
 import javax.ws.rs.core.MediaType;
 
 /** Servlet that is an example. */
 @WebServlet("/load_tasks")
 public class LoadTasksServlet extends HttpServlet {
 
+  private TasksProvider tasksProvider = new TasksProvider();
   private ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
@@ -37,10 +41,10 @@ public class LoadTasksServlet extends HttpServlet {
   }
 
   private String getTasksJson(){
-    List<Comment> tasks =
+    List<Task> tasks = tasksProvider.getTasks();
     try{
-      String commentsJSON =  objectMapper.writeValueAsString(comments);
-      return commentsJSON;
+      String tasksJson =  objectMapper.writeValueAsString(tasks);
+      return tasksJson;
     }catch(JsonProcessingException e){
       return "";
     }

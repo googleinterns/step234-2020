@@ -19,7 +19,7 @@ import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.extensions.appengine.auth.oauth2.AbstractAppEngineAuthorizationCodeServlet;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import com.google.sps.api.Utils;
+import com.google.sps.api.Authorization.AuthorizationRequester;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -46,11 +46,11 @@ public class AuthorizationServlet extends AbstractAppEngineAuthorizationCodeServ
 
   @Override
   protected String getRedirectUri(HttpServletRequest req) throws ServletException, IOException {
-    return Utils.getRedirectUri(req);
+    return AuthorizationRequester.getRedirectUri(req);
   }
 
   @Override
   protected AuthorizationCodeFlow initializeFlow() throws IOException {
-    return Utils.newFlow();
+    return AuthorizationRequester.newFlow();
   }
 }

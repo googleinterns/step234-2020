@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.sps.api;
+package com.google.sps.api.Calendar;
 
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventAttendee;

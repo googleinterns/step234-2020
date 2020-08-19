@@ -15,7 +15,7 @@
 
 package com.google.sps.servlets;
 
-import com.google.sps.api.Utils;
+import com.google.sps.api.Authorization.AuthorizationRequester;
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.Credential;
@@ -51,11 +51,11 @@ public class OAuth2Callback extends AbstractAppEngineAuthorizationCodeCallbackSe
 
   @Override
   protected String getRedirectUri(HttpServletRequest req) throws ServletException, IOException {
-    return Utils.getRedirectUri(req);
+    return AuthorizationRequester.getRedirectUri(req);
   }
 
   @Override
   protected AuthorizationCodeFlow initializeFlow() throws IOException {
-    return Utils.newFlow();
+    return AuthorizationRequester.newFlow();
   }
 }

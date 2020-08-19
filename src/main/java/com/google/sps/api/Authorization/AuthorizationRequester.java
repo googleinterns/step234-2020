@@ -1,19 +1,21 @@
-// Copyright 2019 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+ * Copyright 2019 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
-package com.google.sps.api;
+package com.google.sps.api.Authorization;
 
 import com.google.api.client.extensions.appengine.datastore.AppEngineDataStoreFactory;
 import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
@@ -33,7 +35,7 @@ import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class Utils {
+public class AuthorizationRequester {
 
   /**
    * Global instance of the {@link DataStoreFactory}. The best practice is to make it a single
@@ -57,13 +59,17 @@ public class Utils {
    */
   public static GoogleClientSecrets getClientCredential() throws IOException {
     if (clientSecrets == null) {
-      clientSecrets = GoogleClientSecrets.load(JSON_FACTORY,
-          new InputStreamReader(Utils.class.getResourceAsStream(CLIENT_SECRETS_PATH)));
-      Preconditions.checkArgument(!clientSecrets.getDetails().getClientId().startsWith("Enter ")
-          && !clientSecrets.getDetails().getClientSecret().startsWith("Enter "),
-          "Download client_secrets.json file from the Google Cloud Dashboard Credentials into /src/main/resources/client_secrets.json");
+      InputStreamReader inputStreamReader = new InputStreamReader(AuthorizationRequester.class.getResourceAsStream(CLIENT_SECRETS_PATH));
+      clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, inputStreamReader);
+      checkForClientSecrets();
     }
     return clientSecrets;
+  }
+
+  private static void checkForClientSecrets() {
+    Preconditions.checkArgument(!clientSecrets.getDetails().getClientId().startsWith("Enter ")
+        && !clientSecrets.getDetails().getClientSecret().startsWith("Enter "),
+        "Download client_secrets.json file from the Google Cloud Dashboard Credentials into /src/main/resources/client_secrets.json");
   }
 
   public static String getRedirectUri(HttpServletRequest req) {

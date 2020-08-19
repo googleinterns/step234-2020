@@ -18,7 +18,7 @@ package com.google.sps.servlets;
 import java.io.IOException;
 
 import com.google.api.services.calendar.model.Event;
-import com.google.sps.api.CalendarInterface;
+import com.google.sps.api.Calendar.CalendarInterface;
 
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -28,8 +28,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
 
 @WebServlet("/load_events")
 public class EventLoaderServlet extends HttpServlet {

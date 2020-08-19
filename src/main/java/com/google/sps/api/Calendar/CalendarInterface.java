@@ -1,18 +1,20 @@
-// Copyright 2019 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+ * Copyright 2019 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-package com.google.sps.api;
+package com.google.sps.api.Calendar;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.util.DateTime;
@@ -21,6 +23,7 @@ import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.sps.api.Authorization.AuthorizationRequester;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -44,8 +47,8 @@ public class CalendarInterface implements Serializable {
    */
   public CalendarInterface() throws IOException {
     String userId = UserServiceFactory.getUserService().getCurrentUser().getUserId();
-    Credential credential = Utils.newFlow().loadCredential(userId);
-    calendarClient = new Calendar.Builder(Utils.HTTP_TRANSPORT, Utils.JSON_FACTORY, credential).build();
+    Credential credential = AuthorizationRequester.newFlow().loadCredential(userId);
+    calendarClient = new Calendar.Builder(AuthorizationRequester.HTTP_TRANSPORT, AuthorizationRequester.JSON_FACTORY, credential).build();
   }
 
   /**
@@ -53,10 +56,10 @@ public class CalendarInterface implements Serializable {
    */
   public String getPrimaryCalendarTimeZone() {
     String timeZone;
-    try {
+    try{
       CalendarListEntry calendarListEntryPrimary = calendarClient.calendarList().get(PRIMARY_CALENDAR_FLAG).execute();
       timeZone = calendarListEntryPrimary.getTimeZone();
-    } catch (Exception e) {
+    } catch (IOException exception) {
       timeZone = CET_TIME_ZONE;
     }
     return timeZone;

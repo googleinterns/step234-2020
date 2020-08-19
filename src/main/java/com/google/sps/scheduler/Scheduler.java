@@ -110,7 +110,7 @@ public class Scheduler {
    */
   public static List<Event> schedule(List<Event> calendarEvents, String timeZone, LocalDate dayDate) {
     // TODO: remove the sample tasks after the Tasks API integration (issue #8)
-    return schedule(calendarEvents, TasksProvider.TASKS_SAMPLE, timeZone, dayDate);
+    return schedule(calendarEvents, TasksProvider.getSampleAsString(), timeZone, dayDate);
   }
 
   /**

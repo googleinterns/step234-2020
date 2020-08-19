@@ -15,8 +15,31 @@
 package com.google.sps.api.tasks;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
+import java.util.List;
+import com.google.api.services.tasks.model.Task;
+import org.mockito.internal.util.reflection.FieldInitializationReport;
 
 public class TasksProvider {
   public static final ImmutableList<String> TASKS_SAMPLE = ImmutableList.of(
       "Review code", "Write the design doc", "Talk to PM", "Investigate report", "Prepare slides");
+
+  private static final Task FIRST = new Task();
+  private static final Task SECOND = new Task();
+  private static final Task ANOTHER = new Task();
+  private static final Task YET_ANOTHER = new Task();
+  private static final Task LAST = new Task();
+  public static final List<Task> TASK_MODEL_LIST = Arrays.asList(FIRST, SECOND, ANOTHER, YET_ANOTHER, LAST);
+
+  public TasksProvider() {
+    forEach
+  }
+
+  public static List<String> getSampleAsString() {
+    return TASKS_SAMPLE;
+  }
+
+  public ImmutableList<String> getTasks(){
+
+  }
 }

@@ -22,6 +22,9 @@ import java.io.Serializable;
 import java.util.List;
 
 public class CalendarClientHelper implements Serializable {
+
+  public static final String ACCEPTED = "accepted";
+
   public CalendarClientHelper() {
   }
 
@@ -33,14 +36,13 @@ public class CalendarClientHelper implements Serializable {
    */
   public static boolean isAttending(Event event) {
     List<EventAttendee> attendeeList = event.getAttendees();
-    if (attendeeList != null) {
-      for (EventAttendee attendee : attendeeList) {
-        if (attendee.getSelf() != null && attendee.getSelf()) {
-          return "accepted".equals(attendee.getResponseStatus());
-        }
-      }
-    } else {
+    if (attendeeList == null) {
       return true;
+    }
+    for (EventAttendee attendee : attendeeList) {
+      if (attendee.getSelf() != null && attendee.getSelf()) {
+        return ACCEPTED.equals(attendee.getResponseStatus());
+      }
     }
     return false;
   }

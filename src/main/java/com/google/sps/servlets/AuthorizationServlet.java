@@ -23,6 +23,7 @@ import com.google.sps.api.Utils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -36,7 +37,7 @@ public class AuthorizationServlet extends AbstractAppEngineAuthorizationCodeServ
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     response.setContentType("text/html");
-    response.setCharacterEncoding("UTF-8");
+    response.setCharacterEncoding(StandardCharsets.UTF_8.name());
     PrintWriter writer = response.getWriter();
     UserService userService = UserServiceFactory.getUserService();
     writer.println("<a href=\"/load_events\">Show my events!</a>|");

@@ -27,79 +27,84 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class CalendarInterface implements Serializable {
-    public static final String PRIMARY = "primary";
-    //Default timezone
-    public static final String CET_TIME_ZONE = "Europe/Zurich";
-    private final CalendarClientHelper calendarClientHelper = new CalendarClientHelper();
-    private Calendar calendarClient;
+  public static final String PRIMARY_CALENDAR_FLAG = "primary";
+  // Default timezone
+  public static final String CET_TIME_ZONE = "Europe/Zurich";
+  private final CalendarClientHelper calendarClientHelper = new CalendarClientHelper();
+  private Calendar calendarClient;
 
 
-    /**
-     * Upon instantiation create Calendar instance (calendarClient)
-     */
-    public CalendarInterface()  throws IOException{
-        String userId = UserServiceFactory.getUserService().getCurrentUser().getUserId();
-        Credential credential = Utils.newFlow().loadCredential(userId);
-        calendarClient = new Calendar.Builder(Utils.HTTP_TRANSPORT, Utils.JSON_FACTORY, credential).build();
+  /**
+   * Upon instantiation creates Calendar instance (calendarClient)
+   */
+  public CalendarInterface() throws IOException {
+    String userId = UserServiceFactory.getUserService().getCurrentUser().getUserId();
+    Credential credential = Utils.newFlow().loadCredential(userId);
+    calendarClient = new Calendar.Builder(Utils.HTTP_TRANSPORT, Utils.JSON_FACTORY, credential).build();
+  }
+
+  /**
+   * Gets the user's primary calendar's timezone
+   */
+  public String getPrimaryCalendarTimeZone() {
+    String timeZone;
+    try {
+      CalendarListEntry calendarListEntryPrimary = calendarClient.calendarList().get(PRIMARY_CALENDAR_FLAG).execute();
+      timeZone = calendarListEntryPrimary.getTimeZone();
+    } catch (Exception e) {
+      timeZone = CET_TIME_ZONE;
     }
+    return timeZone;
+  }
+
+  public Calendar getCalendarClient() throws IOException {
+    return calendarClient;
+  }
+
+  /**
+   * Returns the user's events of the next day, from the user's primary calendar.
+   * The start of the next day is based on the calendar's timezone setting.
+   */
+  public List<Event> loadPrimaryCalendarEventsOfTomorrow() throws IOException {
+    ZonedDateTime tomorrowStart = getUsersTomorrowStart();
+    ZonedDateTime tomorrowEnd = tomorrowStart.plusDays(1);
+    DateTime startDate = new DateTime(tomorrowStart.toInstant().toEpochMilli());
+    DateTime endDate = new DateTime(tomorrowEnd.toInstant().toEpochMilli());
+    return getAcceptedEventsInTimerange(startDate, endDate);
+  }
+
+  /**
+   * Returns ZoneDateTime corresponding to the next days 00:00 time point in user's timezone
+   */
+  public ZonedDateTime getUsersTomorrowStart() {
+    ZoneId userZoneId = ZoneId.of(getPrimaryCalendarTimeZone());
+    LocalDate tomorrowHere = LocalDate.now(userZoneId).plus(1, ChronoUnit.DAYS);
+    return tomorrowHere.atStartOfDay(userZoneId);
+  }
 
 
-    /**
-     * Get the user's primary calendar's timezone
-     */
-    public String getPrimaryCalendarTimeZone() {
-        String timeZone;
-        try {
-            CalendarListEntry calendarListEntryPrimary = calendarClient.calendarList().get("primary").execute();
-            timeZone = calendarListEntryPrimary.getTimeZone();
-        } catch (Exception e) {
-            timeZone = CET_TIME_ZONE;
-        }
-        return timeZone;
-    }
+  /**
+   * Gets the user's primary calendar's events in the given timerange
+   * Recurring events should be handled as separate single events, and only own events and events with accepted invitation should be returned
+   */
+  public List<Event> getAcceptedEventsInTimerange(DateTime startTime, DateTime endTime) throws IOException {
 
-    public Calendar getCalendarClient() throws IOException {
-        return calendarClient;
-    }
+    Events events = calendarClient.events().list(PRIMARY_CALENDAR_FLAG)
+        .setSingleEvents(true) // Handle recurring events as separate single events
+        .setTimeMin(startTime)
+        .setTimeMax(endTime)
+        .execute();
+    return events.getItems().stream()
+        .filter(event -> calendarClientHelper.isAttending(event))
+        .collect(Collectors.toList());
+  }
 
-    /**
-     * Return the user's events of the next day, from the user's primary calendar.
-     * The start of the next day is based on the calendar's timezone setting.
-     */
-
-    public List<Event> loadPrimaryCalendarEventsOfTomorrow() throws IOException{
-        ZoneId userZoneId = ZoneId.of(getPrimaryCalendarTimeZone());
-        LocalDate todayHere = LocalDate.now(userZoneId);
-        ZonedDateTime todayStart = todayHere.atStartOfDay(userZoneId);
-        ZonedDateTime tomorrowStart = todayStart.plusDays(1);
-        ZonedDateTime tomorrowEnd = todayStart.plusDays(2);
-        DateTime startDate = new DateTime(tomorrowStart.toInstant().toEpochMilli());
-        DateTime endDate = new DateTime(tomorrowEnd.toInstant().toEpochMilli());
-        return getAcceptedEventsInTimerange(startDate, endDate);
-    }
-
-
-    /**
-     * Get the user's primary calendar's events in the given timerange
-     * Recurring events should be handled as separate single events, and only own events and events with accepted invitation should be returned
-     */
-    public List<Event> getAcceptedEventsInTimerange(DateTime startTime, DateTime endTime) throws IOException {
-
-        Events events = calendarClient.events().list(PRIMARY)
-                .setSingleEvents(true) //Handle recurring events as separate single events
-                .setTimeMin(startTime)
-                .setTimeMax(endTime)
-                .execute();
-        return events.getItems().stream()
-                .filter(event -> calendarClientHelper.isAttending(event))
-                .collect(Collectors.toList());
-    }
-
-    public void InsertEventToPrimary(Event event) throws IOException{
-        calendarClient.events().insert(PRIMARY,event);
-    }
+  public void insertEventToPrimary(Event event) throws IOException {
+    calendarClient.events().insert(PRIMARY_CALENDAR_FLAG, event).execute();
+  }
 }

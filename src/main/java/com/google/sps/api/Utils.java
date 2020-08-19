@@ -47,20 +47,21 @@ public class Utils {
 
   /** Global instance of the JSON factory. */
   public static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+  public static final String CLIENT_SECRETS_PATH = "/client_secrets.json";
+  public static final String OFFLINE_ACCESS_TYPE = "offline";
 
   private static GoogleClientSecrets clientSecrets = null;
 
   /**
-   * Load the application's client secrets from the resources/client_secrets.json file
+   * Loads the application's client secrets from the resources/client_secrets.json file
    */
   public static GoogleClientSecrets getClientCredential() throws IOException {
     if (clientSecrets == null) {
       clientSecrets = GoogleClientSecrets.load(JSON_FACTORY,
-          new InputStreamReader(Utils.class.getResourceAsStream("/client_secrets.json")));
+          new InputStreamReader(Utils.class.getResourceAsStream(CLIENT_SECRETS_PATH)));
       Preconditions.checkArgument(!clientSecrets.getDetails().getClientId().startsWith("Enter ")
           && !clientSecrets.getDetails().getClientSecret().startsWith("Enter "),
-          "Download client_secrets.json file from https://code.google.com/apis/console/"
-          + "?api=calendar into calendar-appengine-sample/src/main/resources/client_secrets.json");
+          "Download client_secrets.json file from the Google Cloud Dashboard Credentials into /src/main/resources/client_secrets.json");
     }
     return clientSecrets;
   }
@@ -72,11 +73,11 @@ public class Utils {
   }
 
   /**
-   * Get a new OAuth2 authorization code flow for a request.
+   * Gets a new OAuth2 authorization code flow for a request.
    */
   public static GoogleAuthorizationCodeFlow newFlow() throws IOException {
     return new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
             getClientCredential(), Collections.singleton(CalendarScopes.CALENDAR_EVENTS)).setDataStoreFactory(
-            DATA_STORE_FACTORY).setAccessType("offline").build();
+            DATA_STORE_FACTORY).setAccessType(OFFLINE_ACCESS_TYPE).build();
   }
 }

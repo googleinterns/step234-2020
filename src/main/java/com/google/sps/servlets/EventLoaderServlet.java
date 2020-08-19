@@ -21,6 +21,7 @@ import com.google.api.services.calendar.model.Event;
 import com.google.sps.api.CalendarInterface;
 
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.servlet.annotation.WebServlet;
@@ -41,12 +42,12 @@ public class EventLoaderServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/html");
-        response.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         PrintWriter writer = response.getWriter();
         List<Event> events = calendarInterface.loadPrimaryCalendarEventsOfTomorrow();
         for (Event event : events) {
             writer.println(event.getSummary());
-            writer.println("\n");
+            writer.println("<br>");
         }
     }
 }

@@ -25,13 +25,9 @@ public class CalendarClientHelper implements Serializable {
 
   public static final String ACCEPTED = "accepted";
 
-  public CalendarClientHelper() {
-  }
-
-
 
   /**
-   * This is a method used in CalendarInterface to filter for events that are attended by the user
+   * Filters for events that are attended by the user (used in CalendarInterface)
    * The EventAttendee's getSelf() method indicates whether this entry represents the calendar on which this copy of the event appears.
    */
   public static boolean isAttending(Event event) {

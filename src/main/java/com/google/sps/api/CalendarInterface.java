@@ -18,10 +18,15 @@ import java.util.stream.Collectors;
 
 public class CalendarInterface implements Serializable {
     public static final String PRIMARY = "primary";
+    //Default timezone
+    public static final String CET_TIME_ZONE = "Europe/Zurich";
     private final CalendarClientHelper calendarClientHelper = new CalendarClientHelper();
     private Calendar calendarClient;
-    public static final String CET_TIME_ZONE = "Europe/Zurich";
 
+
+    /**
+     * Upon instantiation create Calendar instance (calendarClient)
+     */
     public CalendarInterface()  throws IOException{
         String userId = UserServiceFactory.getUserService().getCurrentUser().getUserId();
         Credential credential = Utils.newFlow().loadCredential(userId);
@@ -29,6 +34,9 @@ public class CalendarInterface implements Serializable {
     }
 
 
+    /**
+     * Get the user's primary calendar's timezone
+     */
     public String getPrimaryCalendarTimeZone() {
         String timeZone;
         try {
@@ -44,6 +52,11 @@ public class CalendarInterface implements Serializable {
         return calendarClient;
     }
 
+    /**
+     * Return the user's events of the next day, from the user's primary calendar.
+     * The start of the next day is based on the calendar's timezone setting.
+     */
+
     public List<Event> loadPrimaryCalendarEventsOfTomorrow() throws IOException{
         ZoneId userZoneId = ZoneId.of(getPrimaryCalendarTimeZone());
         LocalDate todayHere = LocalDate.now(userZoneId);
@@ -56,10 +69,14 @@ public class CalendarInterface implements Serializable {
     }
 
 
+    /**
+     * Get the user's primary calendar's events in the given timerange
+     * Recurring events should be handled as separate single events, and only own events and events with accepted invitation should be returned
+     */
     public List<Event> getAcceptedEventsInTimerange(DateTime startTime, DateTime endTime) throws IOException {
 
         Events events = calendarClient.events().list(PRIMARY)
-                .setSingleEvents(true) //
+                .setSingleEvents(true) //Handle recurring events as separate single events
                 .setTimeMin(startTime)
                 .setTimeMax(endTime)
                 .execute();

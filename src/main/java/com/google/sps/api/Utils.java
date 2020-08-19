@@ -50,6 +50,9 @@ public class Utils {
 
   private static GoogleClientSecrets clientSecrets = null;
 
+  /**
+   * Load the application's client secrets from the resources/client_secrets.json file
+   */
   public static GoogleClientSecrets getClientCredential() throws IOException {
     if (clientSecrets == null) {
       clientSecrets = GoogleClientSecrets.load(JSON_FACTORY,
@@ -68,6 +71,9 @@ public class Utils {
     return url.build();
   }
 
+  /**
+   * Get a new OAuth2 authorization code flow for a request.
+   */
   public static GoogleAuthorizationCodeFlow newFlow() throws IOException {
     return new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
             getClientCredential(), Collections.singleton(CalendarScopes.CALENDAR_EVENTS)).setDataStoreFactory(

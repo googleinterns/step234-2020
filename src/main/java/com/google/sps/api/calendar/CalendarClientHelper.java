@@ -24,6 +24,7 @@ import java.util.List;
 public class CalendarClientHelper implements Serializable {
 
   public static final String ACCEPTED = "accepted";
+  public static final String BUSY_FLAG = "opaque";
 
 
   /**
@@ -41,5 +42,12 @@ public class CalendarClientHelper implements Serializable {
       }
     }
     return false;
+  }
+
+  /**
+   * Filters out all-day events that do not have start.DateTime and end.Datetime set.
+   */
+  public static boolean isDateTimeSet(Event event) {
+    return event.getStart().getDateTime() != null;
   }
 }

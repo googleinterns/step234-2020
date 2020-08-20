@@ -103,6 +103,7 @@ public class CalendarInterface implements Serializable {
         .execute();
     return events.getItems().stream()
         .filter(event -> CalendarClientHelper.isAttending(event))
+        .filter(event -> CalendarClientHelper.isDateTimeSet(event))
         .collect(Collectors.toList());
   }
 

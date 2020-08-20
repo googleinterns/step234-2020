@@ -38,8 +38,6 @@ public class TasksProvider {
       task.setTitle(TASKS_SAMPLE_TITLES.get(index));
       index++;
     }
-    System.out.println(TASK_MODEL_LIST.stream().map(task -> task.getTitle()).collect(Collectors.toList()));
-    System.out.println(TASKS_SAMPLE_TITLES);
   }
 
   public List<String> getSampleAsString() {

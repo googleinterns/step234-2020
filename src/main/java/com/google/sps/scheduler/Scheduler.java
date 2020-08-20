@@ -40,6 +40,7 @@ public class Scheduler {
   public static final int END_HOUR = 18;
   public static final int END_MINUTE = 0;
   public static final long DEFAULT_DURATION_IN_MILLISECONDS = TimeUnit.MINUTES.toMillis(30);
+  private static TasksProvider tasksProvider = new TasksProvider();
 
   /**
    * Schedules the tasks in the free time slot of the calendar events, which must be of the same day
@@ -112,7 +113,7 @@ public class Scheduler {
    */
   public static List<Event> schedule(List<Event> calendarEvents, String timeZone, LocalDate dayDate) {
     // TODO: remove the sample tasks after the Tasks API integration (issue #8)
-    return schedule(calendarEvents, TasksProvider.getSampleAsString(), timeZone, dayDate);
+    return schedule(calendarEvents, tasksProvider.getSampleAsString(), timeZone, dayDate);
   }
 
   /**

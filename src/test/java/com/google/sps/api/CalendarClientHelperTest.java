@@ -42,13 +42,16 @@ public final class CalendarClientHelperTest {
   private EventAttendee DECLINED_GUEST = new EventAttendee();
   private EventAttendee NOT_RESPONDED_GUEST = new EventAttendee();
   private List<EventAttendee> allSelfAttendeeds = Arrays.asList(ATTENDING_SELF, DECLINED_SELF, NOT_RESPONDED_SELF);
-  private List<EventAttendee> allGuestAttendeeds = Arrays.asList(ATTENDING_GUEST, DECLINED_GUEST, NOT_RESPONDED_GUEST);
   public static final long EPOCH_TIMEPOINT = 1619827200;
 
   @Before
   public void setAttendees() {
-    allSelfAttendeeds.forEach((attendee)-> new EventAttendee());
-    allGuestAttendeeds.forEach((attendee)-> new EventAttendee());
+    ATTENDING_SELF = new EventAttendee();
+    DECLINED_SELF = new EventAttendee();
+    NOT_RESPONDED_SELF = new EventAttendee();
+    ATTENDING_GUEST = new EventAttendee();
+    DECLINED_GUEST = new EventAttendee();
+    NOT_RESPONDED_GUEST = new EventAttendee();
     allSelfAttendeeds.forEach((attendee) -> attendee.setSelf(true));
     ATTENDING_SELF.setResponseStatus(ACCEPTED);
     ATTENDING_GUEST.setResponseStatus(ACCEPTED);

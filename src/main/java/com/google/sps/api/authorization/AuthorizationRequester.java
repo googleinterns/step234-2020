@@ -25,7 +25,6 @@ import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.Preconditions;
 import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.services.calendar.CalendarScopes;
 import javax.servlet.http.HttpServletRequest;
@@ -58,13 +57,12 @@ public class AuthorizationRequester {
    */
   public static GoogleClientSecrets getClientCredential() throws IOException {
     if (clientSecrets == null) {
-      try{
-      InputStreamReader inputStreamReader = new InputStreamReader(AuthorizationRequester.class.getResourceAsStream(CLIENT_SECRETS_PATH));
-      clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, inputStreamReader);
-      }catch(NullPointerException exception){
+      try {
+        InputStreamReader inputStreamReader = new InputStreamReader(AuthorizationRequester.class.getResourceAsStream(CLIENT_SECRETS_PATH));
+        clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, inputStreamReader);
+      } catch (NullPointerException exception) {
         throw new IOException("Download client_secrets.json file from the Google Cloud Dashboard Credentials into /src/main/resources/client_secrets.json");
       }
-
     }
     return clientSecrets;
   }

@@ -24,7 +24,6 @@ import java.util.List;
 public class CalendarClientHelper implements Serializable {
 
   public static final String ACCEPTED = "accepted";
-  public static final String BUSY_FLAG = "opaque";
 
 
   /**

@@ -102,8 +102,8 @@ public class CalendarInterface implements Serializable {
         .setTimeMax(endTime)
         .execute();
     return events.getItems().stream()
-        .filter(event -> CalendarClientHelper.isAttending(event))
-        .filter(event -> CalendarClientHelper.isDateTimeSet(event))
+        .filter((event) -> CalendarClientHelper.isAttending(event))
+        .filter((event) -> CalendarClientHelper.isDateTimeSet(event))
         .collect(Collectors.toList());
   }
 

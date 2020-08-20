@@ -21,13 +21,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * Servlet that is an example.
+ * Servlet that requires user login to visit.
  */
-@WebServlet("/sample")
-public class SampleServlet extends HttpServlet {
+@WebServlet("/loginRequiredSample")
+public class LoginRequiredSampleServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     response.setContentType("text/html;");
-    response.getWriter().println("<h1>Hello world from the servlet!</h1>");
+    response.getWriter().println("<h1>You shouldn't see this unless logged in.</h1>");
   }
 }

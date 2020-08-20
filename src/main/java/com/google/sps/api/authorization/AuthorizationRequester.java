@@ -58,17 +58,15 @@ public class AuthorizationRequester {
    */
   public static GoogleClientSecrets getClientCredential() throws IOException {
     if (clientSecrets == null) {
+      try{
       InputStreamReader inputStreamReader = new InputStreamReader(AuthorizationRequester.class.getResourceAsStream(CLIENT_SECRETS_PATH));
       clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, inputStreamReader);
-      checkForClientSecrets();
+      }catch(NullPointerException exception){
+        throw new IOException("Download client_secrets.json file from the Google Cloud Dashboard Credentials into /src/main/resources/client_secrets.json");
+      }
+
     }
     return clientSecrets;
-  }
-
-  private static void checkForClientSecrets() {
-    Preconditions.checkArgument(!clientSecrets.getDetails().getClientId().startsWith("Enter ")
-            && !clientSecrets.getDetails().getClientSecret().startsWith("Enter "),
-        "Download client_secrets.json file from the Google Cloud Dashboard Credentials into /src/main/resources/client_secrets.json");
   }
 
   public static String getRedirectUri(HttpServletRequest req) {

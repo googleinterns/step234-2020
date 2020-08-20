@@ -15,19 +15,17 @@
 
 package com.google.sps.servlets;
 
-import com.google.sps.api.Authorization.AuthorizationRequester;
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.appengine.auth.oauth2.AbstractAppEngineAuthorizationCodeCallbackServlet;
 import com.google.appengine.api.users.UserServiceFactory;
-
-import java.io.IOException;
-
+import com.google.sps.api.authorization.AuthorizationRequester;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @WebServlet("/oauth2callback")
 public class OAuth2Callback extends AbstractAppEngineAuthorizationCodeCallbackServlet {
@@ -35,7 +33,7 @@ public class OAuth2Callback extends AbstractAppEngineAuthorizationCodeCallbackSe
 
   @Override
   protected void onSuccess(HttpServletRequest req, HttpServletResponse resp, Credential credential)
-          throws ServletException, IOException {
+      throws ServletException, IOException {
     resp.sendRedirect("/authorization");
   }
 

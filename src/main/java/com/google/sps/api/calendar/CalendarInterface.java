@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.sps.api.Calendar;
+package com.google.sps.api.calendar;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.util.DateTime;
@@ -23,8 +23,7 @@ import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.google.appengine.api.users.UserServiceFactory;
-import com.google.sps.api.Authorization.AuthorizationRequester;
-
+import com.google.sps.api.authorization.AuthorizationRequester;
 import java.io.IOException;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -56,7 +55,7 @@ public class CalendarInterface implements Serializable {
    */
   public String getPrimaryCalendarTimeZone() {
     String timeZone;
-    try{
+    try {
       CalendarListEntry calendarListEntryPrimary = calendarClient.calendarList().get(PRIMARY_CALENDAR_FLAG).execute();
       timeZone = calendarListEntryPrimary.getTimeZone();
     } catch (IOException exception) {
@@ -103,7 +102,7 @@ public class CalendarInterface implements Serializable {
         .setTimeMax(endTime)
         .execute();
     return events.getItems().stream()
-        .filter(event -> calendarClientHelper.isAttending(event))
+        .filter(event -> CalendarClientHelper.isAttending(event))
         .collect(Collectors.toList());
   }
 

@@ -20,7 +20,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/** Servlet that requires user login to visit. */
+/**
+ * Servlet that requires user login to visit.
+ */
 @WebServlet("/loginRequiredSample")
 public class LoginRequiredSampleServlet extends HttpServlet {
   @Override

@@ -15,37 +15,34 @@
 
 package com.google.sps.servlets;
 
-import java.io.IOException;
-
 import com.google.api.services.calendar.model.Event;
-import com.google.sps.api.Calendar.CalendarInterface;
-
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-
+import com.google.sps.api.calendar.CalendarInterface;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @WebServlet("/load_events")
 public class EventLoaderServlet extends HttpServlet {
 
-    private final CalendarInterface calendarInterface = new CalendarInterface();
+  private final CalendarInterface calendarInterface = new CalendarInterface();
 
-    public EventLoaderServlet() throws IOException {
-    }
+  public EventLoaderServlet() throws IOException {
+  }
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("text/html");
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        PrintWriter writer = response.getWriter();
-        List<Event> events = calendarInterface.loadPrimaryCalendarEventsOfTomorrow();
-        for (Event event : events) {
-            writer.println(event.getSummary());
-            writer.println("<br>");
-        }
+  @Override
+  protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    response.setContentType("text/html");
+    response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+    PrintWriter writer = response.getWriter();
+    List<Event> events = calendarInterface.loadPrimaryCalendarEventsOfTomorrow();
+    for (Event event : events) {
+      writer.println(event.getSummary());
+      writer.println("<br>");
     }
+  }
 }

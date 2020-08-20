@@ -16,7 +16,7 @@ package com.google.sps.api;
 
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventAttendee;
-import com.google.sps.api.Calendar.CalendarClientHelper;
+import com.google.sps.api.calendar.CalendarClientHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,17 +39,16 @@ public final class CalendarClientHelperTest {
   private EventAttendee NOT_RESPONDED_GUEST = new EventAttendee();
 
 
-
   @Before
-  public void setAttendees(){
-      ATTENDING_SELF.setSelf(true);
-      DECLINED_SELF.setSelf(true);
-      NOT_RESPONDED_SELF.setSelf(true);
-      ATTENDING_SELF.setResponseStatus(ACCEPTED);
-      ATTENDING_GUEST.setResponseStatus(ACCEPTED);
-      DECLINED_SELF.setResponseStatus(DECLINED);
-      DECLINED_GUEST.setResponseStatus(DECLINED);
-    }
+  public void setAttendees() {
+    ATTENDING_SELF.setSelf(true);
+    DECLINED_SELF.setSelf(true);
+    NOT_RESPONDED_SELF.setSelf(true);
+    ATTENDING_SELF.setResponseStatus(ACCEPTED);
+    ATTENDING_GUEST.setResponseStatus(ACCEPTED);
+    DECLINED_SELF.setResponseStatus(DECLINED);
+    DECLINED_GUEST.setResponseStatus(DECLINED);
+  }
 
 
   @Test

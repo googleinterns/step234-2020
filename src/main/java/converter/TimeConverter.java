@@ -22,7 +22,9 @@ import java.time.ZonedDateTime;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-/** Class that allows to convert time between different representations. */
+/**
+ * Class that allows to convert time between different representations.
+ */
 public class TimeConverter {
   /**
    * Returns the epoch in milliseconds of the given date and time.

@@ -20,7 +20,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/** Servlet that is an example. */
+/**
+ * Servlet that is an example.
+ */
 @WebServlet("/sample")
 public class SampleServlet extends HttpServlet {
   @Override

@@ -14,15 +14,14 @@
 
 package com.google.sps.api.tasks;
 
+import com.google.api.services.tasks.model.Task;
 import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import java.util.List;
-import com.google.api.services.tasks.model.Task;
-import org.mockito.internal.util.reflection.FieldInitializationReport;
-import sun.jvm.hotspot.debugger.linux.x86.LinuxX86CFrame;
+import java.util.stream.Collectors;
 
 public class TasksProvider {
-  public static final ImmutableList<String> TASKS_SAMPLE = ImmutableList.of(
+  public static final ImmutableList<String> TASKS_SAMPLE_TITLES = ImmutableList.of(
       "Review code", "Write the design doc", "Talk to PM", "Investigate report", "Prepare slides");
 
   private static final Task FIRST = new Task();
@@ -34,19 +33,20 @@ public class TasksProvider {
 
   public TasksProvider() {
     int index = 0;
-    for(Task task: TASK_MODEL_LIST){
+    for (Task task : TASK_MODEL_LIST) {
       task.setId(Integer.toString(index));
-      task.setTitle(Integer.toString(index));
+      task.setTitle(TASKS_SAMPLE_TITLES.get(index));
       index++;
     }
-
+    System.out.println(TASK_MODEL_LIST.stream().map(task -> task.getTitle()).collect(Collectors.toList()));
+    System.out.println(TASKS_SAMPLE_TITLES);
   }
 
-  public static List<String> getSampleAsString() {
-    return TASKS_SAMPLE;
+  public List<String> getSampleAsString() {
+    return TASK_MODEL_LIST.stream().map(task -> task.getTitle()).collect(Collectors.toList());
   }
 
-  public List<Task> getTasks(){
+  public List<Task> getTasks() {
     return TASK_MODEL_LIST;
   }
 }

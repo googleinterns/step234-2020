@@ -14,19 +14,21 @@
 
 package com.google.sps.servlets;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.services.tasks.model.Task;
+import com.google.sps.api.tasks.TasksProvider;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.api.services.tasks.model.Task;
-import com.google.sps.api.tasks.TasksProvider;
+import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.List;
-import javax.ws.rs.core.MediaType;
 
-/** Servlet that is an example. */
+/**
+ * Loads tasks as JSON
+ */
 @WebServlet("/load_tasks")
 public class LoadTasksServlet extends HttpServlet {
 
@@ -40,12 +42,12 @@ public class LoadTasksServlet extends HttpServlet {
     response.getWriter().println(tasksJson);
   }
 
-  private String getTasksJson(){
+  private String getTasksJson() {
     List<Task> tasks = tasksProvider.getTasks();
-    try{
-      String tasksJson =  objectMapper.writeValueAsString(tasks);
+    try {
+      String tasksJson = objectMapper.writeValueAsString(tasks);
       return tasksJson;
-    }catch(JsonProcessingException e){
+    } catch (JsonProcessingException e) {
       return "";
     }
 

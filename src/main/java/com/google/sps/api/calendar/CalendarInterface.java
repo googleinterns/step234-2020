@@ -37,7 +37,6 @@ public class CalendarInterface implements Serializable {
   public static final String PRIMARY_CALENDAR_FLAG = "primary";
   // Default timezone
   public static final String CET_TIME_ZONE = "Europe/Zurich";
-  private final CalendarClientHelper calendarClientHelper = new CalendarClientHelper();
   private Calendar calendarClient;
 
 
@@ -91,8 +90,9 @@ public class CalendarInterface implements Serializable {
 
 
   /**
-   * Gets the user's primary calendar's events in the given timerange
-   * Recurring events should be handled as separate single events, and only own events and events with accepted invitation should be returned
+   * Gets the user's primary calendar's events in the given timerange.
+   * Recurring events should be handled as separate single events, and only own events, events
+   * with accepted invitation, a start and end time and are busy (blocking time) should be returned
    */
   public List<Event> getAcceptedEventsInTimerange(DateTime startTime, DateTime endTime) throws IOException {
 
@@ -103,6 +103,7 @@ public class CalendarInterface implements Serializable {
         .execute();
     return events.getItems().stream()
         .filter((event) -> CalendarClientHelper.isAttending(event))
+        .filter((event) -> CalendarClientHelper.isBusy(event))
         .filter((event) -> CalendarClientHelper.isDateTimeSet(event))
         .collect(Collectors.toList());
   }

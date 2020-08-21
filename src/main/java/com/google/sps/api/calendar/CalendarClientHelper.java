@@ -16,14 +16,17 @@
 
 package com.google.sps.api.calendar;
 
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventAttendee;
+import com.google.api.services.calendar.model.EventDateTime;
 import java.io.Serializable;
 import java.util.List;
 
 public class CalendarClientHelper implements Serializable {
 
   public static final String ACCEPTED = "accepted";
+  public static final String BUSY_TRANSPARENCY = "opaque";
 
 
   /**
@@ -47,6 +50,48 @@ public class CalendarClientHelper implements Serializable {
    * Filters out all-day events that do not have start.DateTime and end.Datetime set.
    */
   public static boolean isDateTimeSet(Event event) {
-    return event.getStart().getDateTime() != null;
+    return event.getStart().getDateTime() != null && event.getEnd().getDateTime() != null;
+  }
+
+  /**
+   * Returns true if the event is set to busy, so it blocks time on the calendar,
+   * false if the event is set to free.
+   */
+  public static boolean isBusy(Event event) {
+    String transparency = event.getTransparency();
+    return transparency == null || transparency.equals(BUSY_TRANSPARENCY);
+  }
+
+  /**
+   * Returns an event with the given start and end time in the specific time zone.
+   */
+  public static Event createEvent(DateTime startTime, DateTime endTime, String timeZone) {
+    Event event = new Event();
+
+    EventDateTime eventStart = new EventDateTime()
+        .setDateTime(startTime)
+        .setTimeZone(timeZone);
+
+    EventDateTime eventEnd = new EventDateTime()
+        .setDateTime(endTime)
+        .setTimeZone(timeZone);
+
+    event.setStart(eventStart)
+        .setEnd(eventEnd);
+
+    return event;
+  }
+
+  /**
+   * Returns an event with the given start and end time in the specific time zone
+   * and with a summary.
+   */
+  public static Event createEventWithSummary(
+      DateTime startTime, DateTime endTime, String timeZone, String summary) {
+    Event event = createEvent(startTime, endTime, timeZone);
+
+    event.setSummary(summary);
+
+    return event;
   }
 }

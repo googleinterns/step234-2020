@@ -33,6 +33,8 @@ public final class CalendarClientHelperTest {
 
   private static final String ACCEPTED = "accepted";
   private static final String DECLINED = "declined";
+  private static final String OPAQUE = "opaque";
+  private static final String TRANSPARENT = "transparent";
   public static final String DATE_WITHOUT_TIME = "2019-06-20";
   public static final String RFC3339_WITH_TIME = "2019-10-12T07:20:50.52Z";
   private EventAttendee ATTENDING_SELF = new EventAttendee();
@@ -104,13 +106,34 @@ public final class CalendarClientHelperTest {
   }
 
   @Test
-  public void isDateTimeSet_WhenEventHasStartTime_ReturnsTrue(){
+  public void isDateTimeSet_WhenEventHasStartEndTime_ReturnsTrue(){
     Event event = new Event();
     DateTime dateWithTime = new DateTime(RFC3339_WITH_TIME);
-    EventDateTime start = new EventDateTime();
-    start.setDateTime(dateWithTime);
-    event.setStart(start);
+    EventDateTime eventDateTime = new EventDateTime();
+    eventDateTime.setDateTime(dateWithTime);
+    event.setStart(eventDateTime);
+    event.setEnd(eventDateTime);
     Assert.assertEquals(true, CalendarClientHelper.isDateTimeSet(event));
+  }
+
+  @Test
+  public void isBusy_WhenSetOpaque_ReturnsTrue(){
+    Event event = new Event();
+    event.setTransparency(OPAQUE);
+    Assert.assertEquals(true, CalendarClientHelper.isBusy(event));
+  }
+
+  @Test
+  public void isBusy_WhenTransparencyNotSet_ReturnsTrue(){
+    Event event = new Event();
+    Assert.assertEquals(true, CalendarClientHelper.isBusy(event));
+  }
+
+  @Test
+  public void isBusy_WhenTransparencySetTransparent_ReturnsFalse(){
+    Event event = new Event();
+    event.setTransparency(TRANSPARENT);
+    Assert.assertEquals(false, CalendarClientHelper.isBusy(event));
   }
 
   private Event getEventWithAttendees(List<EventAttendee> attendeeList) {

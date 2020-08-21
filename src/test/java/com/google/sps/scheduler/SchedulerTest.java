@@ -14,8 +14,8 @@
 
 package com.google.sps.scheduler;
 
-import static com.google.sps.scheduler.Scheduler.createEvent;
-import static com.google.sps.scheduler.Scheduler.createEventWithSummary;
+import static com.google.sps.api.calendar.CalendarClientHelper.createEvent;
+import static com.google.sps.api.calendar.CalendarClientHelper.createEventWithSummary;
 import static com.google.sps.scheduler.Scheduler.schedule;
 import static converter.TimeConverter.epochInMilliseconds;
 import static converter.TimeConverter.epochToDateTime;

@@ -14,24 +14,26 @@
 
 package com.google.sps.scheduler;
 
-import static com.google.sps.api.calendar.CalendarClientHelper.createEventWithSummary;
-import static converter.TimeConverter.epochInMilliseconds;
-import static converter.TimeConverter.epochToDateTime;
-
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.google.sps.api.tasks.TasksProvider;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Comparator;
 import java.util.concurrent.TimeUnit;
 
-/** Class that allows to schedule some tasks in the free time slot of the calendar. */
+import static com.google.sps.api.calendar.CalendarClientHelper.createEventWithSummary;
+import static converter.TimeConverter.epochInMilliseconds;
+import static converter.TimeConverter.epochToDateTime;
+
+/**
+ * Schedules some tasks in the free time slot of the calendar.
+ */
 public class Scheduler {
   public static final int START_HOUR = 9;
   public static final int START_MINUTE = 0;
@@ -110,6 +112,7 @@ public class Scheduler {
    */
   public static List<Event> schedule(List<Event> calendarEvents, String timeZone, LocalDate dayDate) {
     // TODO: remove the sample tasks after the Tasks API integration (issue #8)
-    return schedule(calendarEvents, TasksProvider.TASKS_SAMPLE, timeZone, dayDate);
+    TasksProvider tasksProvider = new TasksProvider();
+    return schedule(calendarEvents, tasksProvider.getSampleAsString(), timeZone, dayDate);
   }
 }

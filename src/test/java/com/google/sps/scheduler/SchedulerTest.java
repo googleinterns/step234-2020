@@ -15,12 +15,6 @@
 package com.google.sps.scheduler;
 
 
-import static com.google.sps.api.calendar.CalendarClientHelper.createEvent;
-import static com.google.sps.api.calendar.CalendarClientHelper.createEventWithSummary;
-import static com.google.sps.scheduler.Scheduler.schedule;
-import static converter.TimeConverter.epochInMilliseconds;
-import static converter.TimeConverter.epochToDateTime;
-
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.google.sps.api.tasks.TasksProvider;
@@ -34,7 +28,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.google.sps.scheduler.Scheduler.*;
+import static com.google.sps.api.calendar.CalendarClientHelper.createEvent;
+import static com.google.sps.api.calendar.CalendarClientHelper.createEventWithSummary;
+import static com.google.sps.scheduler.Scheduler.schedule;
 import static converter.TimeConverter.epochInMilliseconds;
 import static converter.TimeConverter.epochToDateTime;
 

@@ -17,7 +17,6 @@ package com.google.sps.api.tasks;
 import com.google.api.services.tasks.model.Task;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,22 +25,22 @@ public class TasksProvider {
       "Review code", "Write the design doc", "Talk to PM", "Investigate report", "Prepare slides");
 
 
-  private final List<Task> TASK_MODEL_LIST = new ArrayList<Task>();
+  private final List<Task> taskModelList = new ArrayList<Task>();
 
   public TasksProvider() {
     for (int i = 0; i < TASKS_SAMPLE_TITLES.size(); i++) {
       Task task = new Task();
       task.setId(Integer.toString(i));
       task.setTitle(TASKS_SAMPLE_TITLES.get(i));
-      TASK_MODEL_LIST.add(task);
+      taskModelList.add(task);
     }
   }
 
   public List<String> getSampleAsString() {
-    return TASK_MODEL_LIST.stream().map(task -> task.getTitle()).collect(Collectors.toList());
+    return taskModelList.stream().map(task -> task.getTitle()).collect(Collectors.toList());
   }
 
   public List<Task> getTasks() {
-    return TASK_MODEL_LIST;
+    return taskModelList;
   }
 }

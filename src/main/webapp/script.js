@@ -21,7 +21,7 @@ function init() {
 function loadTasks() {
   fetchData("/load_tasks")
       .then((tasks) => renderTasks(tasks))
-      .catch((status)=>console.error(status));
+      .catch((status) => console.error(status));
 }
 
 function renderTasks(tasks) {
@@ -72,7 +72,7 @@ function postData(url, data) {
       .catch((error) => handleFetchError(error));
 }
 
-function handleNetworkError(exception){
+function handleNetworkError(exception) {
   console.error("There was a network error that prevented the completition of the request.");
   console.error(exception);
 }
@@ -82,7 +82,7 @@ function getJsonIfOk(response) {
     console.error('Server error detected: ' + respons.status);
     console.error(response.statusText);
     throw response.status;
-  }else{
+  } else {
     return response.json();
   }
 }

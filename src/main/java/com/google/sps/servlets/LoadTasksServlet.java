@@ -32,7 +32,6 @@ import java.util.List;
 @WebServlet("/load_tasks")
 public class LoadTasksServlet extends HttpServlet {
 
-  private TasksProvider tasksProvider = new TasksProvider();
   private ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
@@ -42,14 +41,11 @@ public class LoadTasksServlet extends HttpServlet {
     response.getWriter().println(tasksJson);
   }
 
-  private String getTasksJson() {
+  private String getTasksJson() throws JsonProcessingException {
+    TasksProvider tasksProvider = new TasksProvider();
     List<Task> tasks = tasksProvider.getTasks();
-    try {
-      String tasksJson = objectMapper.writeValueAsString(tasks);
-      return tasksJson;
-    } catch (JsonProcessingException e) {
-      return "";
-    }
+    String tasksJson = objectMapper.writeValueAsString(tasks);
+    return tasksJson;
 
   }
 }

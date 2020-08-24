@@ -37,9 +37,18 @@ function renderSingleTask(task) {
   newTask.appendTo("#task-list");
 }
 
+/**
+ * Provides feedback to the user that tasks were scheduled, and
+ * reports if there are problems.
+ */
+function updateView(results) {
+  // TODO: show how many tasks were scheduled, notify about conflicts/problems
+}
+
 function schedule() {
   const formContent = new FormData($("#task-list")[0]);
-  postData("/load_events", new URLSearchParams(formContent).toString()); //This is still returning a promise
+  postData("/schedule", new URLSearchParams(formContent).toString())
+      .then((results) => updateView(results)); //This is still returning a promise
 }
 
 function fetchData(url) {

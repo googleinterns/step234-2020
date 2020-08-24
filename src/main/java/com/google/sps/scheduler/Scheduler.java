@@ -14,7 +14,6 @@
 
 package com.google.sps.scheduler;
 
-
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.google.sps.api.tasks.TasksProvider;

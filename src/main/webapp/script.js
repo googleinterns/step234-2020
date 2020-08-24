@@ -55,7 +55,8 @@ function schedule() {
 
 function fetchData(url) {
   return fetch(url)
-      .then((response) => getJsonIfOk(response));
+      .then((response) => getJsonIfOk(response))
+      .catch((error) => handleNetworkError(error));
 }
 
 
@@ -69,17 +70,17 @@ function postData(url, data) {
       }
   )
       .then((response) => getJsonIfOk(response))
-      .catch((error) => handleFetchError(error));
+      .catch((error) => handleNetworkError(error));
 }
 
 function handleNetworkError(exception) {
-  console.error("There was a network error that prevented the completition of the request.");
+  console.error("There was a network error that prevented the completion of the request.");
   console.error(exception);
 }
 
 function getJsonIfOk(response) {
   if (!response.ok) {
-    console.error('Server error detected: ' + respons.status);
+    console.error('Server error detected: ' + response.status);
     console.error(response.statusText);
     throw response.status;
   } else {

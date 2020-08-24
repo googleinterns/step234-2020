@@ -24,6 +24,7 @@ function loadTasks() {
 }
 
 function renderTasks(tasks) {
+  $("task-list").empty();
   tasks.forEach(renderSingleTask);
 }
 
@@ -53,14 +54,10 @@ function schedule() {
 
 function fetchData(url) {
   return fetch(url)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Network error detected');
-        }
-        return response.json();
-      })
+      .then((response) => getJsonIfOk(response))
       .catch((error) => handleFetchError(error));
 }
+
 
 function postData(url, data) {
   return fetch(url, {
@@ -71,15 +68,14 @@ function postData(url, data) {
         body: data
       }
   )
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Network error detected');
-        }
-        return response.json();
-      })
+      .then((response) => getJsonIfOk(response))
       .catch((error) => handleFetchError(error));
 }
 
-function handleFetchError(exception) {
-  console.error(exception);
+function getJsonIfOk(response) {
+  if (!response.ok) {
+    console.error('Network error detected');
+  }
+  return response.json();
 }
+

@@ -51,6 +51,7 @@ Thumbs.db
 # BEGIN Whitelisted Files
 # -------------------------
 target/
+src/main/resources/
 
 # ignore Intellij configuration files
 .idea

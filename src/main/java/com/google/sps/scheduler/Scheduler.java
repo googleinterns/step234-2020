@@ -14,9 +14,13 @@
 
 package com.google.sps.scheduler;
 
+
+import static com.google.sps.api.calendar.CalendarClientHelper.createEventWithSummary;
+import static converter.TimeConverter.epochInMilliseconds;
+import static converter.TimeConverter.epochToDateTime;
+
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.EventDateTime;
 import com.google.sps.api.tasks.TasksProvider;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -114,40 +118,5 @@ public class Scheduler {
     // TODO: remove the sample tasks after the Tasks API integration (issue #8)
     TasksProvider tasksProvider = new TasksProvider();
     return schedule(calendarEvents, tasksProvider.getSampleAsString(), timeZone, dayDate);
-  }
-
-  /**
-   * Returns an event with the given start and end time in the specific time zone.
-   */
-  public static Event createEvent(DateTime startTime, DateTime endTime, String timeZone) {
-    // TODO: move this method to the class managing the calendar API (issue #7)
-    Event event = new Event();
-
-    EventDateTime eventStart = new EventDateTime()
-        .setDateTime(startTime)
-        .setTimeZone(timeZone);
-
-    EventDateTime eventEnd = new EventDateTime()
-        .setDateTime(endTime)
-        .setTimeZone(timeZone);
-
-    event.setStart(eventStart)
-        .setEnd(eventEnd);
-
-    return event;
-  }
-
-  /**
-   * Returns an event with the given start and end time in the specific time zone
-   * and with a summary.
-   */
-  public static Event createEventWithSummary(
-      DateTime startTime, DateTime endTime, String timeZone, String summary) {
-    // TODO: move this method to the class managing the calendar API (issue #7)
-    Event event = createEvent(startTime, endTime, timeZone);
-
-    event.setSummary(summary);
-
-    return event;
   }
 }

@@ -26,14 +26,13 @@ public class TasksProvider {
       "Review code", "Write the design doc", "Talk to PM", "Investigate report", "Prepare slides");
 
 
-  private static final List<Task> TASK_MODEL_LIST = new ArrayList<Task>();
+  private final List<Task> TASK_MODEL_LIST = new ArrayList<Task>();
 
   public TasksProvider() {
     for (int i = 0; i < TASKS_SAMPLE_TITLES.size(); i++) {
       Task task = new Task();
       task.setId(Integer.toString(i));
       task.setTitle(TASKS_SAMPLE_TITLES.get(i));
-      i++;
       TASK_MODEL_LIST.add(task);
     }
   }

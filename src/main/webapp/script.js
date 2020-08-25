@@ -118,8 +118,8 @@ function loadCalendar() {
  */
 function setCalendar(email) {
   const calendarIframe = document.getElementById("calendar");
-  calendarIframe.src = "https://calendar.google.com/calendar/embed?src=" +
-    email + "&mode=WEEK";
+  calendarIframe.src =
+      `https://calendar.google.com/calendar/embed?src=${email}&mode=WEEK`;
 }
 
 /**
@@ -127,6 +127,8 @@ function setCalendar(email) {
  */
 function refreshCalendar() {
   let calendarIframe = document.getElementById("calendar");
+  // setting it’s src attribute to itself is the only cross-domain and cross-browser
+  // solution to reload an iframe (https://stackoverflow.com/a/4062084)
   calendarIframe.src = calendarIframe.src;
 }
 

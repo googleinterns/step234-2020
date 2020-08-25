@@ -82,7 +82,7 @@ function getJsonIfOk(response) {
   if (!response.ok) {
     console.error('Server error detected: ' + response.status);
     console.error(response.statusText);
-    throw response.status;
+    throw new Error(response.status);
   } else {
     return response.json();
   }

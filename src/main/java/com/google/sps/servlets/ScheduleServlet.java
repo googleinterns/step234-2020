@@ -15,7 +15,9 @@
 package com.google.sps.servlets;
 
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.tasks.model.Task;
 import com.google.sps.api.calendar.CalendarInterface;
+import com.google.sps.api.tasks.TasksProvider;
 import com.google.sps.scheduler.Scheduler;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -25,20 +27,33 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Servlet that schedules tasks on tomorrow.
  */
 @WebServlet("/schedule")
 public class ScheduleServlet extends HttpServlet {
+
+  public static final String TASK_ID_LIST_KEY = "taskId";
+
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    Set<String> idsToSchedule = Arrays.stream(request.getParameterValues(TASK_ID_LIST_KEY)).collect(Collectors.toSet());
+    TasksProvider taskProvider = new TasksProvider();
+    List<Task> tasks = taskProvider.getTasks();
+    List<String> titlesOfTasksToSchedule = tasks.stream().filter((task) -> idsToSchedule.contains(task.getId())).map(Task::getTitle).collect(Collectors.toList());
+
     CalendarInterface calendarInterface = new CalendarInterface();
     List<Event> calendarEvents = calendarInterface.loadPrimaryCalendarEventsOfTomorrow();
     String timeZone = calendarInterface.getPrimaryCalendarTimeZone();
     LocalDate tomorrow = calendarInterface.getUsersTomorrowStart().toLocalDate();
-    List<Event> tasksEvent = Scheduler.schedule(calendarEvents, timeZone, tomorrow);
+
+
+    List<Event> tasksEvent = Scheduler.schedule(calendarEvents, titlesOfTasksToSchedule, timeZone, tomorrow);
     for (Event event : tasksEvent) {
       calendarInterface.insertEventToPrimary(event);
     }

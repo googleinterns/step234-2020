@@ -32,7 +32,7 @@ function renderTasks(tasks) {
 function renderSingleTask(task) {
   id = task.id;
   newTask = $("<p></p>", {"id": id});
-  checkBox = $("<input>", {"name": id, "type": "checkbox"});
+  checkBox = $("<input>", {"name": "taskId","value": id, "type": "checkbox"});
   checkBox.appendTo(newTask);
   newTask.append(task.title);
   newTask.addClass("task");

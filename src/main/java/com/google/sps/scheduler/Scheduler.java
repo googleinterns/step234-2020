@@ -28,8 +28,8 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.sps.api.calendar.CalendarClientHelper.createEventWithSummary;
-import static converter.TimeConverter.epochInMilliseconds;
-import static converter.TimeConverter.epochToDateTime;
+import static com.google.sps.converter.TimeConverter.epochInMilliseconds;
+import static com.google.sps.converter.TimeConverter.epochToDateTime;
 
 /**
  * Schedules some tasks in the free time slot of the calendar.

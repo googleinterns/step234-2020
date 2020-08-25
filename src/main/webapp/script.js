@@ -44,7 +44,7 @@ function renderSingleTask(task) {
  * reports if there are problems.
  */
 function updateView(results) {
-  // TODO: show how many tasks were scheduled, notify about conflicts/problems
+  alert(results.message);
 }
 
 function schedule() {

@@ -31,6 +31,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Servlet that schedules tasks on tomorrow.
@@ -57,9 +59,15 @@ public class ScheduleServlet extends HttpServlet {
       calendarInterface.insertEventToPrimary(event);
     }
 
-    response.setContentType(MediaType.TEXT_PLAIN);
+    response.setContentType(MediaType.APPLICATION_JSON);
     response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-    response.getWriter().println(tasksEvent.size() + " tasks inserted on " + tomorrow);
+    try{
+      JSONObject resultJSON = new JSONObject();
+      resultJSON.put("message", tasksEvent.size() + " tasks inserted on " + tomorrow);
+      response.getWriter().println(resultJSON);
+    }catch(JSONException exception){
+      throw new IOException(exception);
+    }
   }
 
   //Q: is it worth to write a test for this method?

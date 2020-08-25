@@ -29,13 +29,12 @@ import java.util.List;
 @WebServlet("/load_events")
 public class EventLoaderServlet extends HttpServlet {
 
-  private final CalendarInterface calendarInterface = new CalendarInterface();
-
   public EventLoaderServlet() throws IOException {
   }
 
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    CalendarInterface calendarInterface = new CalendarInterface();
     response.setContentType("text/html");
     response.setCharacterEncoding(StandardCharsets.UTF_8.name());
     PrintWriter writer = response.getWriter();

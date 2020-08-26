@@ -44,8 +44,7 @@ function renderSingleTask(task) {
  * reports if there are problems.
  */
 function updateView(results) {
-  //TODO: Use html alert instead
-  alert(results.message);
+  $("#message").html(results.message);
 }
 
 function schedule() {

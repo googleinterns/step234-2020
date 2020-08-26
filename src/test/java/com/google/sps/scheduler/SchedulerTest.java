@@ -31,8 +31,8 @@ import java.util.List;
 import static com.google.sps.api.calendar.CalendarClientHelper.createEvent;
 import static com.google.sps.api.calendar.CalendarClientHelper.createEventWithSummary;
 import static com.google.sps.scheduler.Scheduler.schedule;
-import static converter.TimeConverter.epochInMilliseconds;
-import static converter.TimeConverter.epochToDateTime;
+import static com.google.sps.converter.TimeConverter.epochInMilliseconds;
+import static com.google.sps.converter.TimeConverter.epochToDateTime;
 
 @RunWith(JUnit4.class)
 public class SchedulerTest {

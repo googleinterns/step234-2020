@@ -27,6 +27,8 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.services.calendar.CalendarScopes;
+import com.google.appengine.api.users.User;
+import com.google.appengine.api.users.UserServiceFactory;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -80,5 +82,13 @@ public class AuthorizationRequester {
     return new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
         getClientCredential(), Collections.singleton(CalendarScopes.CALENDAR_EVENTS)).setDataStoreFactory(
         DATA_STORE_FACTORY).setAccessType(OFFLINE_ACCESS_TYPE).build();
+  }
+
+  /**
+   * Returns the user's email.
+   */
+  public static String getUserEmail() {
+    User user = UserServiceFactory.getUserService().getCurrentUser();
+    return user.getEmail();
   }
 }

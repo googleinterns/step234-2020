@@ -43,4 +43,12 @@ public class TimeConverter {
     return new DateTime(
         epoch, (int) TimeUnit.MILLISECONDS.toMinutes(timeZoneShiftInMilliseconds));
   }
+
+  /**
+   * Returns the epoch of the given date (a RFC 3339 timestamp).
+   */
+  public static long dateToEpoch(String dateRfc3339) {
+    DateTime date = new DateTime(dateRfc3339);
+    return date.getValue();
+  }
 }

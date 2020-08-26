@@ -80,6 +80,6 @@ public class ScheduleServlet extends HttpServlet {
   }
 
   List<String> filterSelectedTaskTitles(Set<String> selectedIds, List<Task> tasks) {
-    return tasks.stream().filter((task) -> selectedIds.contains(task.getId())).map(Task::getTitle).collect(Collectors.toList()); //Java question: does a new array get created here?
+    return tasks.stream().filter((task) -> selectedIds.contains(task.getId())).map(Task::getTitle).collect(Collectors.toList());
   }
 }

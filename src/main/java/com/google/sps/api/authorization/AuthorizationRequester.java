@@ -43,7 +43,7 @@ public class AuthorizationRequester {
    */
   public static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
   public static final String CLIENT_SECRETS_PATH = "/client_secrets.json";
-  public static final String OFFLINE_ACCESS_TYPE = "offline";
+  public static final String OFFLINE_ACCESS_TYPE = "online";
   /**
    * Global instance of the {@link DataStoreFactory}. The best practice is to make it a single
    * globally shared instance across your application.

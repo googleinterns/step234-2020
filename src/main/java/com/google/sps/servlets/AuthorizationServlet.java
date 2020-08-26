@@ -20,6 +20,7 @@ import com.google.api.client.extensions.appengine.auth.oauth2.AbstractAppEngineA
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.sps.api.authorization.AuthorizationRequester;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -32,14 +33,16 @@ import java.nio.charset.StandardCharsets;
 public class AuthorizationServlet extends AbstractAppEngineAuthorizationCodeServlet {
 
 
+  public static final String INDEX_PATH = "WEB-INF/index.html";
+
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    response.setContentType("text/html");
-    response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-    PrintWriter writer = response.getWriter();
-    UserService userService = UserServiceFactory.getUserService();
-    writer.println("<a href=\"/load_events\">Show my events!</a>|");
-    writer.println("<a href=\"" + userService.createLogoutURL(request.getRequestURL().toString()) + "\">Log out</a> | ");
+    try{
+      RequestDispatcher requestDispatcher = request.getRequestDispatcher(INDEX_PATH);
+      requestDispatcher.forward(request, response);
+    }catch(ServletException exception){
+      throw new IOException(exception);
+    }
   }
 
   @Override

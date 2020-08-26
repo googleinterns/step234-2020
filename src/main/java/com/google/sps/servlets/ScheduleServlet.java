@@ -46,6 +46,10 @@ public class ScheduleServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     TasksProvider taskProvider = new TasksProvider();
     List<Task> tasks = taskProvider.getTasks();
+    if(!request.getParameterMap().containsKey(TASK_ID_LIST_KEY)){
+      sendJsonResponse(response, "Select some tasks to schedule.");
+      return;
+    }
     Set<String> selectedIds = Arrays.stream(request.getParameterValues(TASK_ID_LIST_KEY)).collect(Collectors.toSet());
     List<String> titlesOfTasksToSchedule = filterSelectedTaskTitles(selectedIds, tasks);
 
@@ -60,11 +64,15 @@ public class ScheduleServlet extends HttpServlet {
       calendarInterface.insertEventToPrimary(event);
     }
 
+    sendJsonResponse(response, tasksEvent.size() + " tasks inserted on " + tomorrow);
+  }
+
+  private void sendJsonResponse(HttpServletResponse response, String responseMessage) throws IOException {
     response.setContentType(MediaType.APPLICATION_JSON);
     response.setCharacterEncoding(StandardCharsets.UTF_8.name());
     try{
       JSONObject resultJSON = new JSONObject();
-      resultJSON.put("message", tasksEvent.size() + " tasks inserted on " + tomorrow);
+      resultJSON.put("message", responseMessage);
       response.getWriter().println(resultJSON);
     }catch(JSONException exception){
       throw new IOException(exception);

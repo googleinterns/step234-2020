@@ -107,7 +107,7 @@ function handleTextResponse(response) {
  */
 function loadCalendar() {
   fetch("/user")
-    .then(handleTextResponse)
+    .then(getJsonIfOk)
     .then(setCalendar)
     .catch(handleNetworkError);
 }
@@ -116,10 +116,10 @@ function loadCalendar() {
  * Sets the source of the calendar iframe including
  * the email of the user.
  */
-function setCalendar(email) {
+function setCalendar(user) {
   const calendarIframe = document.getElementById("calendar");
   calendarIframe.src =
-      `https://calendar.google.com/calendar/embed?src=${email}&mode=WEEK`;
+      `https://calendar.google.com/calendar/embed?src=${user.email}&mode=WEEK`;
 }
 
 /**

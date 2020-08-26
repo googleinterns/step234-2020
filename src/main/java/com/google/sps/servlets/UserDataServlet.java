@@ -14,7 +14,9 @@
 
 package com.google.sps.servlets;
 
+import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserServiceFactory;
+import org.json.JSONObject;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -29,8 +31,20 @@ import java.io.IOException;
 public class UserDataServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    response.setContentType(MediaType.TEXT_PLAIN);
+    response.setContentType(MediaType.APPLICATION_JSON);
     response.getWriter().print(
-        UserServiceFactory.getUserService().getCurrentUser().getEmail());
+        createJSON());
+  }
+
+  /**
+   * Returns a JSON string containing the user's email.
+   */
+  private String createJSON() {
+    User user = UserServiceFactory.getUserService().getCurrentUser();
+    JSONObject formatter = new JSONObject();
+
+    formatter.put("email", user.getEmail());
+
+    return formatter.toString();
   }
 }

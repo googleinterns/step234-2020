@@ -35,7 +35,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Servlet that schedules tasks on tomorrow.
+ * Schedules tasks on tomorrow.
  */
 @WebServlet("/schedule")
 public class ScheduleServlet extends HttpServlet {
@@ -46,7 +46,8 @@ public class ScheduleServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     TasksProvider taskProvider = new TasksProvider();
     List<Task> tasks = taskProvider.getTasks();
-    List<String> titlesOfTasksToSchedule = filterSelectedTaskTitles(request, tasks);
+    Set<String> selectedIds = Arrays.stream(request.getParameterValues(TASK_ID_LIST_KEY)).collect(Collectors.toSet());
+    List<String> titlesOfTasksToSchedule = filterSelectedTaskTitles(selectedIds, tasks);
 
     CalendarInterface calendarInterface = new CalendarInterface();
     List<Event> calendarEvents = calendarInterface.loadPrimaryCalendarEventsOfTomorrow();
@@ -70,9 +71,7 @@ public class ScheduleServlet extends HttpServlet {
     }
   }
 
-  //Q: is it worth to write a test for this method?
-  private List<String> filterSelectedTaskTitles(HttpServletRequest request, List<Task> tasks) {
-    Set<String> idsToSchedule = Arrays.stream(request.getParameterValues(TASK_ID_LIST_KEY)).collect(Collectors.toSet());
-    return tasks.stream().filter((task) -> idsToSchedule.contains(task.getId())).map(Task::getTitle).collect(Collectors.toList());
+  List<String> filterSelectedTaskTitles(Set<String> selectedIds, List<Task> tasks) {
+    return tasks.stream().filter((task) -> selectedIds.contains(task.getId())).map(Task::getTitle).collect(Collectors.toList()); //Java question: does a new array get created here?
   }
 }

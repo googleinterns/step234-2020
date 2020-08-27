@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 public class ScheduleServlet extends HttpServlet {
 
   public static final String TASK_ID_LIST_KEY = "taskId";
-  private ObjectMapper objectMapper;
+  private ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -73,7 +73,7 @@ public class ScheduleServlet extends HttpServlet {
     response.setContentType(MediaType.APPLICATION_JSON);
     response.setCharacterEncoding(StandardCharsets.UTF_8.name());
     try {
-      ScheduleMessage messageObject = new ScheduleMessage(responseMessage)
+      ScheduleMessage messageObject = new ScheduleMessage(responseMessage);
       String jsonMessage = objectMapper.writeValueAsString(messageObject);
       response.getWriter().println(jsonMessage);
     } catch (JsonProcessingException exception) {

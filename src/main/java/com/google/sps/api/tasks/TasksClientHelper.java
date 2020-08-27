@@ -14,26 +14,22 @@
 
 package com.google.sps.api.tasks;
 
-import com.google.api.client.util.DateTime;
 import com.google.api.services.tasks.model.Task;
 import com.google.api.services.tasks.model.TaskList;
 import com.google.sps.converter.TimeConverter;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * Provides some helper methods for tasks.
  */
-public class TasksHelper {
+public class TasksClientHelper {
   /**
    * Returns a list of tasks containing only those without a date or past their due date.
    */
   public static List<Task> filterTasks(List<Task> tasks) {
-    DateTime dateTimeNow = new DateTime(
-        new Date());
-    long epochNow = dateTimeNow.getValue();
+    long epochNow = System.currentTimeMillis();
 
     return tasks.stream()
         .filter(task -> task.getDue() == null || TimeConverter.dateToEpoch(task.getDue()) < epochNow)

@@ -15,7 +15,7 @@
 package com.google.sps.servlets;
 
 import com.google.api.services.calendar.model.Event;
-import com.google.sps.api.calendar.CalendarInterface;
+import com.google.sps.api.calendar.CalendarClientAdapter;
 import com.google.sps.scheduler.Scheduler;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -34,13 +34,13 @@ import java.util.List;
 public class ScheduleServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    CalendarInterface calendarInterface = new CalendarInterface();
-    List<Event> calendarEvents = calendarInterface.loadPrimaryCalendarEventsOfTomorrow();
-    String timeZone = calendarInterface.getPrimaryCalendarTimeZone();
-    LocalDate tomorrow = calendarInterface.getUsersTomorrowStart().toLocalDate();
+    CalendarClientAdapter calendarClientAdapter = new CalendarClientAdapter();
+    List<Event> calendarEvents = calendarClientAdapter.loadPrimaryCalendarEventsOfTomorrow();
+    String timeZone = calendarClientAdapter.getPrimaryCalendarTimeZone();
+    LocalDate tomorrow = calendarClientAdapter.getUsersTomorrowStart().toLocalDate();
     List<Event> tasksEvent = Scheduler.schedule(calendarEvents, timeZone, tomorrow);
     for (Event event : tasksEvent) {
-      calendarInterface.insertEventToPrimary(event);
+      calendarClientAdapter.insertEventToPrimary(event);
     }
 
     response.setContentType(MediaType.TEXT_PLAIN);

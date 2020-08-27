@@ -16,7 +16,8 @@
 package com.google.sps.servlets;
 
 import com.google.api.services.calendar.model.Event;
-import com.google.sps.api.calendar.CalendarInterface;
+import com.google.sps.api.calendar.CalendarClientAdapter;
+import com.google.sps.api.tasks.TasksClientAdapter;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -34,11 +35,11 @@ public class EventLoaderServlet extends HttpServlet {
 
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    CalendarInterface calendarInterface = new CalendarInterface();
+    CalendarClientAdapter calendarClientAdapter = new CalendarClientAdapter();
     response.setContentType("text/html");
     response.setCharacterEncoding(StandardCharsets.UTF_8.name());
     PrintWriter writer = response.getWriter();
-    List<Event> events = calendarInterface.loadPrimaryCalendarEventsOfTomorrow();
+    List<Event> events = calendarClientAdapter.loadPrimaryCalendarEventsOfTomorrow();
     for (Event event : events) {
       writer.println(event.getSummary());
       writer.println("<br>");

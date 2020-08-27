@@ -31,7 +31,7 @@ import static com.google.sps.converter.TimeConverter.epochInMilliseconds;
 import static com.google.sps.converter.TimeConverter.epochToDateTime;
 
 @RunWith(JUnit4.class)
-public class TasksHelperTest {
+public class TasksClientHelperTest {
   private final static String ZURICH_TIME_ZONE = "Europe/Zurich";
   private final static String UTC_TIME_ZONE = "UTC";
 
@@ -41,7 +41,7 @@ public class TasksHelperTest {
     List<Task> tasks = new ArrayList<>();
 
     List<Task> expectedTasks = new ArrayList<>();
-    List<Task> actualTasks = TasksHelper.filterTasks(tasks);
+    List<Task> actualTasks = TasksClientHelper.filterTasks(tasks);
 
     Assert.assertEquals(expectedTasks, actualTasks);
   }
@@ -59,7 +59,7 @@ public class TasksHelperTest {
     tasks.add(taskC);
 
     List<Task> expectedTasks = new ArrayList<>(tasks);
-    List<Task> actualTasks = TasksHelper.filterTasks(tasks);
+    List<Task> actualTasks = TasksClientHelper.filterTasks(tasks);
 
     Assert.assertEquals(expectedTasks, actualTasks);
   }
@@ -84,7 +84,7 @@ public class TasksHelperTest {
     tasks.add(taskC);
 
     List<Task> expectedTasks = new ArrayList<>(tasks);
-    List<Task> actualTasks = TasksHelper.filterTasks(tasks);
+    List<Task> actualTasks = TasksClientHelper.filterTasks(tasks);
 
     Assert.assertEquals(expectedTasks, actualTasks);
   }
@@ -109,7 +109,7 @@ public class TasksHelperTest {
     tasks.add(taskC);
 
     List<Task> expectedTasks = new ArrayList<>();
-    List<Task> actualTasks = TasksHelper.filterTasks(tasks);
+    List<Task> actualTasks = TasksClientHelper.filterTasks(tasks);
 
     Assert.assertEquals(expectedTasks, actualTasks);
   }
@@ -143,7 +143,7 @@ public class TasksHelperTest {
     tasks.add(taskF);
 
     List<Task> expectedTasks = Arrays.asList(taskA, taskB, taskE, taskF);
-    List<Task> actualTasks = TasksHelper.filterTasks(tasks);
+    List<Task> actualTasks = TasksClientHelper.filterTasks(tasks);
 
     Assert.assertEquals(expectedTasks, actualTasks);
   }
@@ -161,7 +161,7 @@ public class TasksHelperTest {
     taskList.add(taskListA);
 
     String expectedId = "A";
-    String actualId = TasksHelper.getIdMostRecentTaskList(taskList);
+    String actualId = TasksClientHelper.getIdMostRecentTaskList(taskList);
 
     Assert.assertEquals(expectedId, actualId);
   }
@@ -193,7 +193,7 @@ public class TasksHelperTest {
     taskList.add(taskListD);
 
     String expectedId = "C";
-    String actualId = TasksHelper.getIdMostRecentTaskList(taskList);
+    String actualId = TasksClientHelper.getIdMostRecentTaskList(taskList);
 
     Assert.assertEquals(expectedId, actualId);
   }

@@ -33,7 +33,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CalendarInterface implements Serializable {
+public class CalendarClientAdapter implements Serializable {
   public static final String PRIMARY_CALENDAR_FLAG = "primary";
   // Default timezone
   public static final String CET_TIME_ZONE = "Europe/Zurich";
@@ -43,7 +43,7 @@ public class CalendarInterface implements Serializable {
   /**
    * Upon instantiation creates Calendar instance (calendarClient)
    */
-  public CalendarInterface() throws IOException {
+  public CalendarClientAdapter() throws IOException {
     String userId = UserServiceFactory.getUserService().getCurrentUser().getUserId();
     Credential credential = AuthorizationRequester.newFlow().loadCredential(userId);
     calendarClient = new Calendar.Builder(AuthorizationRequester.HTTP_TRANSPORT, AuthorizationRequester.JSON_FACTORY, credential).build();

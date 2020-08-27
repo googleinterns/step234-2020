@@ -8,9 +8,10 @@
 <body>
 <div class="container">
   <div class="tasks-container">
-    <div id="left-widget"></div>
     <form id="task-list"></form>
-    <button onclick="schedule()">Schedule!</button>
+    <button id="schedule-button" onclick="schedule()">Schedule!</button>
+    <br>
+    <span id="message"></span>
   </div>
   <div class="calendar-container">
     <iframe id="calendar" frameborder="0" scrolling="no"></iframe>

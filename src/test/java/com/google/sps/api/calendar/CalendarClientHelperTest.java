@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.sps.api;
+package com.google.sps.api.calendar;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventAttendee;
 import com.google.api.services.calendar.model.EventDateTime;
-import com.google.sps.api.calendar.CalendarClientHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,27 +61,27 @@ public final class CalendarClientHelperTest {
 
 
   @Test
-  public void isAttending_WhenOneAttendeeAccepted_ReturnsTrue() throws IOException {
+  public void isAttending_WhenOneAttendeeAccepted_ReturnsTrue() {
     List<EventAttendee> attendeeList = Arrays.asList(ATTENDING_SELF);
     Event event = getEventWithAttendees(attendeeList);
     Assert.assertEquals(true, CalendarClientHelper.isAttending(event));
   }
 
   @Test
-  public void isAttending_WhenOneAttendeeDeclined_ReturnsFalse() throws IOException {
+  public void isAttending_WhenOneAttendeeDeclined_ReturnsFalse() {
     List<EventAttendee> attendeeList = Arrays.asList(DECLINED_SELF);
     Event event = getEventWithAttendees(attendeeList);
     Assert.assertEquals(false, CalendarClientHelper.isAttending(event));
   }
 
   @Test
-  public void isAttending_WhenNoAttendeesSpecified_ReturnsTrue() throws IOException {
+  public void isAttending_WhenNoAttendeesSpecified_ReturnsTrue() {
     Event event = new Event();
     Assert.assertEquals(true, CalendarClientHelper.isAttending(event));
   }
 
   @Test
-  public void isAttending_WhenHasMultipleAttendeesAndSelfAccepted_ReturnsTrue() throws IOException {
+  public void isAttending_WhenHasMultipleAttendeesAndSelfAccepted_ReturnsTrue() {
     List<EventAttendee> attendeeList = Arrays.asList(ATTENDING_SELF, ATTENDING_GUEST, DECLINED_GUEST, NOT_RESPONDED_GUEST);
     Event event = getEventWithAttendees(attendeeList);
     Assert.assertEquals(true, CalendarClientHelper.isAttending(event));

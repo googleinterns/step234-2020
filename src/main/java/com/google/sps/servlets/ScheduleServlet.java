@@ -18,7 +18,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.tasks.model.Task;
-import com.google.sps.api.calendar.CalendarInterface;
+import com.google.sps.api.calendar.CalendarClientAdapter;
 import com.google.sps.api.tasks.TasksProvider;
 import com.google.sps.data.ScheduleMessage;
 import com.google.sps.scheduler.Scheduler;
@@ -54,16 +54,15 @@ public class ScheduleServlet extends HttpServlet {
     }
     Set<String> selectedIds = Arrays.stream(request.getParameterValues(TASK_ID_LIST_KEY)).collect(Collectors.toSet());
     List<String> titlesOfTasksToSchedule = filterSelectedTaskTitles(selectedIds, tasks);
-
-    CalendarInterface calendarInterface = new CalendarInterface();
-    List<Event> calendarEvents = calendarInterface.loadPrimaryCalendarEventsOfTomorrow();
-    String timeZone = calendarInterface.getPrimaryCalendarTimeZone();
-    LocalDate scheduleDate = calendarInterface.getUsersTomorrowStart().toLocalDate();
-
+    
+    CalendarClientAdapter calendarClientAdapter = new CalendarClientAdapter();
+    List<Event> calendarEvents = calendarClientAdapter.loadPrimaryCalendarEventsOfTomorrow();
+    String timeZone = calendarClientAdapter.getPrimaryCalendarTimeZone();
+    LocalDate scheduleDate = calendarClientAdapter.getUsersTomorrowStart().toLocalDate();
 
     List<Event> tasksEvent = Scheduler.schedule(calendarEvents, titlesOfTasksToSchedule, timeZone, scheduleDate);
     for (Event event : tasksEvent) {
-      calendarInterface.insertEventToPrimary(event);
+      calendarClientAdapter.insertEventToPrimary(event);
     }
 
     sendJsonResponse(response, tasksEvent.size() + " tasks inserted on " + scheduleDate);

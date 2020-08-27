@@ -18,12 +18,13 @@ $(document).ready(init);
 
 function init() {
   loadTasks();
+  loadCalendar();
 }
 
 function loadTasks() {
   fetchData("/load_tasks")
-      .then((tasks) => renderTasks(tasks))
-      .catch((status) => console.error(status));
+      .then(renderTasks)
+      .catch(handleNetworkError);
 }
 
 function renderTasks(tasks) {
@@ -52,13 +53,16 @@ function updateView(results) {
 function schedule() {
   const formContent = new FormData($("#task-list")[0]);
   postData("/schedule", new URLSearchParams(formContent).toString())
-      .then((results) => updateView(results)); //This is still returning a promise
+      .then(handleTextResponse)
+      .then(updateView)
+      .then(refreshCalendar)
+      .catch(handleNetworkError);
 }
 
 function fetchData(url) {
   return fetch(url)
-      .then((response) => getJsonIfOk(response))
-      .catch((error) => handleNetworkError(error));
+      .then(getJsonIfOk)
+      .catch(handleNetworkError);
 }
 
 
@@ -70,9 +74,7 @@ function postData(url, data) {
         },
         body: data
       }
-  )
-      .then((response) => getJsonIfOk(response))
-      .catch((error) => handleNetworkError(error));
+  );
 }
 
 function handleNetworkError(exception) {
@@ -84,9 +86,51 @@ function getJsonIfOk(response) {
   if (!response.ok) {
     console.error('Server error detected: ' + response.status);
     console.error(response.statusText);
-    throw response.status;
+    throw new Error(response.status);
   } else {
     return response.json();
   }
+}
+
+/**
+ * Handles response by checking it and converting it to text.
+ */
+function handleTextResponse(response) {
+  if (!response.ok) {
+    throw new Error("Response error while fetching data: " +
+        response.status + " (" + response.statusText + ")");
+  }
+  return response.text();
+}
+
+/**
+ * Loads the user's email and sets the source
+ * of the calendar iframe.
+ */
+function loadCalendar() {
+  fetch("/user")
+    .then(getJsonIfOk)
+    .then(setCalendar)
+    .catch(handleNetworkError);
+}
+
+/**
+ * Sets the source of the calendar iframe including
+ * the email of the user.
+ */
+function setCalendar(user) {
+  const calendarIframe = document.getElementById("calendar");
+  calendarIframe.src =
+      `https://calendar.google.com/calendar/embed?src=${user.email}&mode=WEEK`;
+}
+
+/**
+ * Refreshes the calendar iframe.
+ */
+function refreshCalendar() {
+  let calendarIframe = document.getElementById("calendar");
+  // setting it’s src attribute to itself is the only cross-domain and cross-browser
+  // solution to reload an iframe (https://stackoverflow.com/a/4062084)
+  calendarIframe.src = calendarIframe.src;
 }
 

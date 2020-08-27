@@ -8,7 +8,11 @@
 <body>
 <div class="container">
   <div class="tasks-container">
-    <form id="task-list"></form>
+    <form id="schedule-form">
+      <div id="task-list">
+      </div>
+    </form>
+    <input id="daterange" type="daterange" name="daterange">
     <button id="schedule-button" onclick="schedule()">Schedule!</button>
     <br>
     <span id="message"></span>
@@ -20,4 +24,8 @@
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="script.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<script src="datepicker.js"></script>
 </html>

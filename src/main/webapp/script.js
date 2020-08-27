@@ -28,7 +28,7 @@ function loadTasks() {
 }
 
 function renderTasks(tasks) {
-  $("task-list").empty();
+  $("#task-list").empty();
   tasks.forEach(renderSingleTask);
 }
 
@@ -51,7 +51,11 @@ function updateView(results) {
 }
 
 function schedule() {
-  const formContent = new FormData($("#task-list")[0]);
+  const formContent = new FormData($("#schedule-form")[0]);
+  daterange = $("#daterange").val();
+  [startDate, endDate] = daterange.split(' - ');
+  formContent.append("startDate", startDate.trim());
+  formContent.append("endDate", endDate.trim());
   postData("/schedule", new URLSearchParams(formContent).toString())
       .then(handleTextResponse)
       .then(updateView)

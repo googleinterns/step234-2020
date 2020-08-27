@@ -17,10 +17,7 @@ package com.google.sps.servlets;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.services.calendar.model.Event;
-import com.google.api.services.tasks.model.Task;
-import com.google.sps.api.calendar.CalendarClientAdapter;
-import com.google.sps.api.tasks.TasksProvider;
-import com.google.sps.data.ScheduleMessage;
+import com.google.sps.api.calendar.CalendarInterface;
 import com.google.sps.scheduler.Scheduler;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -36,7 +33,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Schedules tasks on tomorrow.
+ * Servlet that schedules tasks on tomorrow.
  */
 @WebServlet("/schedule")
 public class ScheduleServlet extends HttpServlet {
@@ -54,13 +51,19 @@ public class ScheduleServlet extends HttpServlet {
     }
     Set<String> selectedIds = Arrays.stream(request.getParameterValues(TASK_ID_LIST_KEY)).collect(Collectors.toSet());
     List<String> titlesOfTasksToSchedule = filterSelectedTaskTitles(selectedIds, tasks);
-    
+
     CalendarClientAdapter calendarClientAdapter = new CalendarClientAdapter();
     List<Event> calendarEvents = calendarClientAdapter.loadPrimaryCalendarEventsOfTomorrow();
     String timeZone = calendarClientAdapter.getPrimaryCalendarTimeZone();
-    LocalDate scheduleDate = calendarClientAdapter.getUsersTomorrowStart().toLocalDate();
 
-    List<Event> tasksEvent = Scheduler.schedule(calendarEvents, titlesOfTasksToSchedule, timeZone, scheduleDate);
+    String startDateString = request.getParameter("startDate");
+    String endDateString = request.getParameter("endDate");
+    LocalDate startDate = LocalDate.parse(startDateString);
+    LocalDate endDate =  LocalDate.parse(endDateString);
+
+    LocalDate tomorrow = calendarInterface.getUsersTomorrowStart().toLocalDate();
+    List<Event> tasksEvent = Scheduler.schedule(calendarEvents, timeZone, startDate);
+
     for (Event event : tasksEvent) {
       calendarClientAdapter.insertEventToPrimary(event);
     }

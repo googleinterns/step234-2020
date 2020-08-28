@@ -23,6 +23,7 @@ import com.google.api.services.tasks.model.TaskLists;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.sps.api.authorization.AuthorizationRequester;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -54,6 +55,9 @@ public class TasksClientAdapter {
    */
   public List<Task> getTasks(String tasksListId) throws IOException {
     List<Task> tasks = tasksClient.tasks().list(tasksListId).execute().getItems();
+    if (tasks == null) {
+      return new ArrayList<>();
+    }
     return TasksClientHelper.filterTasks(tasks);
   }
 
@@ -96,4 +100,14 @@ public class TasksClientAdapter {
   public void updateDateTimeTask(String taskListId, String taskId, DateTime dateTime) throws IOException {
     updateDateTimeTask(taskListId, taskId, dateTime.toStringRfc3339());
   }
+
+  /**
+   * Updates the tasks.
+   */
+  public void updateTasks(String taskListId, List<Task> tasks) throws IOException {
+    for (Task task : tasks) {
+      updateTask(taskListId, task);
+    }
+  }
+
 }

@@ -14,10 +14,9 @@
 
 package com.google.sps.servlets;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.services.tasks.model.Task;
-import com.google.sps.api.tasks.TasksProvider;
+import com.google.sps.api.tasks.TasksClientAdapter;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -41,11 +40,10 @@ public class LoadTasksServlet extends HttpServlet {
     response.getWriter().println(tasksJson);
   }
 
-  private String getTasksJson() throws JsonProcessingException {
-    TasksProvider tasksProvider = new TasksProvider();
-    List<Task> tasks = tasksProvider.getTasks();
+  private String getTasksJson() throws IOException {
+    TasksClientAdapter tasksInterface = new TasksClientAdapter();
+    List<Task> tasks = tasksInterface.getTasksOfMostRecentList();
     String tasksJson = objectMapper.writeValueAsString(tasks);
     return tasksJson;
-
   }
 }

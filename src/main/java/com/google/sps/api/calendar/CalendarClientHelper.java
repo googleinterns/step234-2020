@@ -27,7 +27,7 @@ public class CalendarClientHelper implements Serializable {
 
   public static final String ACCEPTED = "accepted";
   public static final String BUSY_TRANSPARENCY = "opaque";
-
+  public static final String PRIVATE_VISIBILITY = "private";
 
   /**
    * Filters for events that are attended by the user (used in CalendarInterface)
@@ -91,6 +91,20 @@ public class CalendarClientHelper implements Serializable {
     Event event = createEvent(startTime, endTime, timeZone);
 
     event.setSummary(summary);
+
+    return event;
+  }
+
+  /**
+   * Returns a private event with the given start and end time in the specific time zone
+   * and with a summary and a description.
+   */
+  public static Event createPrivateEventWithSummaryAndDescription(
+      DateTime startTime, DateTime endTime, String timeZone, String summary, String description) {
+    Event event = createEventWithSummary(startTime, endTime, timeZone, summary);
+
+    event.setVisibility(PRIVATE_VISIBILITY);
+    event.setDescription(description);
 
     return event;
   }

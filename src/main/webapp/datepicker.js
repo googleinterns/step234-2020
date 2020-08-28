@@ -25,44 +25,14 @@ $('input[name="daterange"]').daterangepicker({
   },
   "locale": {
     "format": "YYYY-MM-DD",
-    "separator": " - ",
-    "applyLabel": "Apply",
-    "cancelLabel": "Cancel",
-    "fromLabel": "From",
-    "toLabel": "To",
-    "customRangeLabel": "Custom",
-    "weekLabel": "W",
-    "daysOfWeek": [
-      "Su",
-      "Mo",
-      "Tu",
-      "We",
-      "Th",
-      "Fr",
-      "Sa"
-    ],
-    "monthNames": [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December"
-    ],
-    "firstDay": 1
+    "separator": " - "
   },
   "linkedCalendars": false,
   "alwaysShowCalendars": true,
   "startDate": moment().add(1, 'days'),
   "endDate": moment().add(1, 'days'),
-  "minDate": moment().add(1, 'days'), // This should be checked serverside as well
-  "maxDate": moment().add(200, 'days') // Q: is it a good limit?
+  "minDate": moment().add(1, 'days'),
+  "maxDate": moment().add(200, 'days')
 }, function(start, end, label) {
   console.log('New date range selected: ' + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD') + ' (predefined range: ' + label + ')');
 });

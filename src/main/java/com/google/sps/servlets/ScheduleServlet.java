@@ -56,12 +56,17 @@ public class ScheduleServlet extends HttpServlet {
     List<Event> calendarEvents = calendarClientAdapter.loadPrimaryCalendarEventsOfTomorrow();
     String timeZone = calendarClientAdapter.getPrimaryCalendarTimeZone();
 
-    String startDateString = request.getParameter("startDate");
-    String endDateString = request.getParameter("endDate");
-    LocalDate startDate = LocalDate.parse(startDateString);
-    LocalDate endDate =  LocalDate.parse(endDateString);
+    LocalDate startDate, endDate;
+    try {
+      String startDateString = request.getParameter("startDate");
+      String endDateString = request.getParameter("endDate");
+      startDate = LocalDate.parse(startDateString);
+      endDate = LocalDate.parse(endDateString);
+    } catch(Exception exception) {
+      startDate = calendarInterface.getUsersTomorrowStart().toLocalDate();
+      endDate = startDate;
+    }
 
-    LocalDate tomorrow = calendarInterface.getUsersTomorrowStart().toLocalDate();
     List<Event> tasksEvent = Scheduler.schedule(calendarEvents, timeZone, startDate);
 
     for (Event event : tasksEvent) {

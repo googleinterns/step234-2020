@@ -14,6 +14,9 @@
             <role-name>*</role-name>
         </auth-constraint>
     </security-constraint>
+    <welcome-file-list>
+        <welcome-file>authorization</welcome-file>
+    </welcome-file-list>
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>sample</web-resource-name>

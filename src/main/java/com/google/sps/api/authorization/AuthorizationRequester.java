@@ -43,7 +43,7 @@ public class AuthorizationRequester {
    */
   public static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
   public static final String CLIENT_SECRETS_PATH = "/client_secrets.json";
-  public static final String OFFLINE_ACCESS_TYPE = "online";
+  public static final String ACCESS_TYPE = "online";
   /**
    * Global instance of the {@link DataStoreFactory}. The best practice is to make it a single
    * globally shared instance across your application.
@@ -79,6 +79,6 @@ public class AuthorizationRequester {
   public static GoogleAuthorizationCodeFlow newFlow() throws IOException {
     return new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
         getClientCredential(), Collections.singleton(CalendarScopes.CALENDAR_EVENTS)).setDataStoreFactory(
-        DATA_STORE_FACTORY).setAccessType(OFFLINE_ACCESS_TYPE).build();
+        DATA_STORE_FACTORY).setAccessType(ACCESS_TYPE).build();
   }
 }

@@ -57,12 +57,15 @@ public class ScheduleServlet extends HttpServlet {
       return;
     }
 
-    CalendarClientAdapter calendarClientAdapter = new CalendarClientAdapter();
+    // Scheduler parameters
+
     TasksClientAdapter tasksClientAdapter = new TasksClientAdapter();
     String tasksListId = TasksClientHelper.getMostRecentTaskListId(
         tasksClientAdapter.getTasksLists());
+    List<Task> tasksToSchedule = getSelectedTasks(
+        request.getParameterValues(TASK_ID_LIST_KEY), tasksClientAdapter, tasksListId);
 
-    // Scheduler parameters
+    CalendarClientAdapter calendarClientAdapter = new CalendarClientAdapter();
     String timeZone = calendarClientAdapter.getPrimaryCalendarTimeZone();
     ZoneId zoneId = ZoneId.of(timeZone);
 
@@ -84,8 +87,7 @@ public class ScheduleServlet extends HttpServlet {
 
     List<Event> calendarEvents = calendarClientAdapter.getAcceptedEventsInTimerange(startDateTime, endDateTime);
 
-    List<Task> tasksToSchedule = getSelectedTasks(
-        request.getParameterValues(TASK_ID_LIST_KEY), tasksClientAdapter, tasksListId);
+
 
     // Schedules
     //TODO: Schedule to an interval of days, from startDate to endDate

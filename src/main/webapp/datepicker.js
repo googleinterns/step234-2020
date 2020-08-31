@@ -18,7 +18,7 @@ $('input[name="daterange"]').daterangepicker({
   ranges: {
     'Tomorrow': [moment().add(1, 'days'), moment().add(1, 'days')],
     'Next week': [moment().startOf('week').add(1, 'weeks').add(1, 'days'), moment().startOf('week').add(2, 'weeks')],
-    'Weekend': [moment().startOf('week').add(6, 'days'), moment().startOf('week').add(7, 'days')],
+    'Saturday - Sunday': [moment().startOf('week').add(6, 'days'), moment().startOf('week').add(7, 'days')],
     'Next 7 Days': [moment(), moment().add(7, 'days')],
     'Until end of this month': [moment(), moment().endOf('month')],
     'Next Month': [moment().add(1, 'month').startOf('month').add(), moment().add(1, 'month').endOf('month')]

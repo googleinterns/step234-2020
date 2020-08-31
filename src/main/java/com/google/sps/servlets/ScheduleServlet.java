@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -56,13 +57,13 @@ public class ScheduleServlet extends HttpServlet {
     List<Event> calendarEvents = calendarClientAdapter.loadPrimaryCalendarEventsOfTomorrow();
     String timeZone = calendarClientAdapter.getPrimaryCalendarTimeZone();
 
+    String startDateString = request.getParameter("startDate");
+    String endDateString = request.getParameter("endDate");
     LocalDate startDate, endDate;
     try {
-      String startDateString = request.getParameter("startDate");
-      String endDateString = request.getParameter("endDate");
       startDate = LocalDate.parse(startDateString);
       endDate = LocalDate.parse(endDateString);
-    } catch(Exception exception) {
+    } catch(DateTimeParseException | NullPointerException exception) { //If date was not received or is in wrong format, schedule for tomorrow
       startDate = calendarInterface.getUsersTomorrowStart().toLocalDate();
       endDate = startDate;
     }

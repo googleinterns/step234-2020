@@ -81,6 +81,7 @@ public class ScheduleServlet extends HttpServlet {
     DateTime endDateTime = new DateTime(zonedEndpoint.toInstant().toEpochMilli());
 
     List<Event> calendarEvents = calendarClientAdapter.getAcceptedEventsInTimerange(startDateTime, endDateTime);
+    //TODO: Schedule to an interval of days, from startDate to endDate
     List<Event> tasksEvent = Scheduler.schedule(calendarEvents, timeZone, startDate);
 
     for (Event event : tasksEvent) {

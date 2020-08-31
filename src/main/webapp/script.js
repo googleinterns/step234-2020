@@ -22,12 +22,14 @@ function init() {
 }
 
 function loadTasks() {
-  fetchData("/load_tasks")
+  fetch("/load_tasks")
+      .then(getJsonIfOk)
       .then(renderTasks)
       .catch(handleNetworkError);
 }
 
 function renderTasks(tasks) {
+  // TODO: check the size of tasks and show a warning if zero
   $("#task-list").empty();
   tasks.forEach(renderSingleTask);
 }
@@ -48,6 +50,7 @@ function renderSingleTask(task) {
  */
 function updateView(results) {
   $("#message").html(results.message);
+  loadTasks();
 }
 
 function schedule() {
@@ -57,18 +60,11 @@ function schedule() {
   formContent.append("startDate", startDate.trim());
   formContent.append("endDate", endDate.trim());
   postData("/schedule", new URLSearchParams(formContent).toString())
-      .then(handleTextResponse)
+      .then(getJsonIfOk)
       .then(updateView)
       .then(refreshCalendar)
       .catch(handleNetworkError);
 }
-
-function fetchData(url) {
-  return fetch(url)
-      .then(getJsonIfOk)
-      .catch(handleNetworkError);
-}
-
 
 function postData(url, data) {
   return fetch(url, {
@@ -88,9 +84,7 @@ function handleNetworkError(exception) {
 
 function getJsonIfOk(response) {
   if (!response.ok) {
-    console.error('Server error detected: ' + response.status);
-    console.error(response.statusText);
-    throw new Error(response.status);
+    throw new Error(`Server error detected: ${response.status} (${response.statusText})`);
   } else {
     return response.json();
   }

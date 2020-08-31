@@ -14,6 +14,7 @@
 
 package com.google.sps.api.tasks;
 
+import com.google.api.client.util.DateTime;
 import com.google.api.services.tasks.model.Task;
 import com.google.api.services.tasks.model.TaskList;
 import com.google.sps.converter.TimeConverter;
@@ -39,10 +40,19 @@ public class TasksClientHelper {
   /**
    * Returns the task list ID of the most recent updated list.
    */
-  public static String getIdMostRecentTaskList(List<TaskList> taskList) {
+  public static String getMostRecentTaskListId(List<TaskList> taskList) {
     return taskList.stream()
         .max(Comparator.comparingLong(tasksList -> TimeConverter.dateToEpoch(tasksList.getUpdated())))
         .map(TaskList::getId)
         .get();
+  }
+
+  /**
+   * Returns a task with the given due date.
+   */
+  public static Task createTaskWithDue(DateTime dueDate) {
+    Task task = new Task();
+    task.setDue(dueDate.toStringRfc3339());
+    return task;
   }
 }

@@ -161,7 +161,7 @@ public class TasksClientHelperTest {
     taskList.add(taskListA);
 
     String expectedId = "A";
-    String actualId = TasksClientHelper.getIdMostRecentTaskList(taskList);
+    String actualId = TasksClientHelper.getMostRecentTaskListId(taskList);
 
     Assert.assertEquals(expectedId, actualId);
   }
@@ -193,7 +193,7 @@ public class TasksClientHelperTest {
     taskList.add(taskListD);
 
     String expectedId = "C";
-    String actualId = TasksClientHelper.getIdMostRecentTaskList(taskList);
+    String actualId = TasksClientHelper.getMostRecentTaskListId(taskList);
 
     Assert.assertEquals(expectedId, actualId);
   }

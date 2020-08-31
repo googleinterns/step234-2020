@@ -108,7 +108,19 @@ public class CalendarClientAdapter implements Serializable {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Inserts the event in the primary calendar.
+   */
   public void insertEventToPrimary(Event event) throws IOException {
     calendarClient.events().insert(PRIMARY_CALENDAR_FLAG, event).execute();
+  }
+
+  /**
+   * Inserts the events in the primary calendar.
+   */
+  public void insertEventsToPrimary(List<Event> events) throws IOException {
+    for (Event event : events) {
+      insertEventToPrimary(event);
+    }
   }
 }

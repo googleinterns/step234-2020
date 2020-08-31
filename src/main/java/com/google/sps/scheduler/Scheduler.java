@@ -46,7 +46,17 @@ public class Scheduler {
    * For each task that can be scheduled, the due time is set and a list of all scheduled tasks
    * is returned.
    */
-  public static List<Task> schedule(
+  public static List<Task> scheduleInRange(List<Event> calendarEvents, List <Task> tasks, String timeZone, LocalDate startDate, LocalDate endDate){
+    LocalDate scheduleDate = startDate;
+    List<Task> scheduledTasks = new ArrayList<>();
+    while(0 >= scheduleDate.compareTo(endDate)){
+      scheduledTasks.addAll(scheduleForADay(calendarEvents, tasks.subList(scheduledTasks.size(), tasks.size()), timeZone, scheduleDate));
+      scheduleDate = scheduleDate.plusDays(1);
+    }
+    return scheduledTasks;
+  }
+
+  public static List<Task> scheduleForADay(
       List<Event> calendarEvents, List<Task> tasks, String timeZone, LocalDate dayDate) {
     List<Task> scheduledTasks = new ArrayList<>();
 

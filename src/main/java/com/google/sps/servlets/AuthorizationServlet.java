@@ -20,7 +20,6 @@ import com.google.api.client.extensions.appengine.auth.oauth2.AbstractAppEngineA
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.sps.api.authorization.AuthorizationRequester;
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,7 +29,6 @@ import java.nio.charset.StandardCharsets;
 
 @WebServlet("/authorization")
 public class AuthorizationServlet extends AbstractAppEngineAuthorizationCodeServlet {
-
 
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -43,7 +41,7 @@ public class AuthorizationServlet extends AbstractAppEngineAuthorizationCodeServ
   }
 
   @Override
-  protected String getRedirectUri(HttpServletRequest req) throws ServletException, IOException {
+  protected String getRedirectUri(HttpServletRequest req) {
     return AuthorizationRequester.getRedirectUri(req);
   }
 

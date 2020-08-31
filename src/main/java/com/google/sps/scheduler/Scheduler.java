@@ -16,7 +16,7 @@ package com.google.sps.scheduler;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
-import com.google.sps.api.tasks.TasksProvider;
+import com.google.api.services.tasks.model.Task;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
-import static com.google.sps.api.calendar.CalendarClientHelper.createEventWithSummary;
 import static com.google.sps.converter.TimeConverter.epochInMilliseconds;
 import static com.google.sps.converter.TimeConverter.epochToDateTime;
 
@@ -44,12 +43,12 @@ public class Scheduler {
   /**
    * Schedules the tasks in the free time slot of the calendar events, which must be of the same day
    * specified in the parameter.
-   * For each task that can be scheduled, a new calendar event object is created and a list of
-   * all of them is returned.
+   * For each task that can be scheduled, the due time is set and a list of all scheduled tasks
+   * is returned.
    */
-  public static List<Event> schedule(
-      List<Event> calendarEvents, List<String> tasks, String timeZone, LocalDate dayDate) {
-    List<Event> tasksEvents = new ArrayList<>();
+  public static List<Task> schedule(
+      List<Event> calendarEvents, List<Task> tasks, String timeZone, LocalDate dayDate) {
+    List<Task> scheduledTasks = new ArrayList<>();
 
     Set<Event> orderedCalendarEvents = new TreeSet<>(
         Comparator.comparingLong(event -> event.getStart().getDateTime().getValue()));
@@ -61,7 +60,7 @@ public class Scheduler {
         epochInMilliseconds(dayDate, LocalTime.of(END_HOUR, END_MINUTE), timeZone);
 
     long lastEnd = dayStartEpochMilliseconds;
-    Iterator<String> tasksIterator = tasks.iterator();
+    Iterator<Task> tasksIterator = tasks.iterator();
 
     for (Event event : orderedCalendarEvents) {
       long eventEnd = event.getEnd().getDateTime().getValue();
@@ -74,14 +73,7 @@ public class Scheduler {
         break;
       }
 
-      while (eventStart - lastEnd >= DEFAULT_DURATION_IN_MILLISECONDS &&
-          tasksIterator.hasNext()) {
-        DateTime startTime = epochToDateTime(lastEnd, timeZone);
-        lastEnd += DEFAULT_DURATION_IN_MILLISECONDS;
-        DateTime endTime = epochToDateTime(lastEnd, timeZone);
-        tasksEvents.add(
-            createEventWithSummary(startTime, endTime, timeZone, tasksIterator.next()));
-      }
+      lastEnd = scheduleInterval(eventStart, lastEnd, timeZone, tasksIterator, scheduledTasks);
 
       if (!tasksIterator.hasNext()) {
         break;
@@ -92,27 +84,25 @@ public class Scheduler {
       }
     }
 
-    while (dayEndEpochMilliseconds - lastEnd >= DEFAULT_DURATION_IN_MILLISECONDS &&
-        tasksIterator.hasNext()) {
-      DateTime startTime = epochToDateTime(lastEnd, timeZone);
-      lastEnd += DEFAULT_DURATION_IN_MILLISECONDS;
-      DateTime endTime = epochToDateTime(lastEnd, timeZone);
-      tasksEvents.add(
-          createEventWithSummary(startTime, endTime, timeZone, tasksIterator.next()));
-    }
+    scheduleInterval(dayEndEpochMilliseconds, lastEnd, timeZone, tasksIterator, scheduledTasks);
 
-    return tasksEvents;
+    return scheduledTasks;
   }
 
   /**
-   * Schedules some sample tasks in the free time slot of the calendar events, which must be of
-   * the same day specified in the parameter.
-   * For each task that can be scheduled, a new calendar event object is created and a list of
-   * all of them is returned.
+   * Schedules the tasks in the free intervals between lastEnd and limit.
    */
-  public static List<Event> schedule(List<Event> calendarEvents, String timeZone, LocalDate dayDate) {
-    // TODO: remove the sample tasks after the Tasks API integration (issue #8)
-    TasksProvider tasksProvider = new TasksProvider();
-    return schedule(calendarEvents, tasksProvider.getSampleAsString(), timeZone, dayDate);
+  private static long scheduleInterval(
+      long limit, long lastEnd, String timeZone, Iterator<Task> tasksIterator, List<Task> scheduledTasks) {
+
+    while (limit - lastEnd >= DEFAULT_DURATION_IN_MILLISECONDS && tasksIterator.hasNext()) {
+      DateTime startTime = epochToDateTime(lastEnd, timeZone);
+      Task task = tasksIterator.next();
+      task.setDue(startTime.toStringRfc3339());
+      scheduledTasks.add(task);
+      lastEnd += DEFAULT_DURATION_IN_MILLISECONDS;
+    }
+
+    return lastEnd;
   }
 }

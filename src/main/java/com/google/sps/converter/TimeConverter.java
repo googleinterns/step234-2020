@@ -52,4 +52,12 @@ public class TimeConverter {
     DateTime dateTime = new DateTime(date);
     return dateTime.getValue();
   }
+
+  /**
+   * Returns a DateTime object representing the given date and time in the time zone.
+   */
+  public static DateTime createDateTime(LocalDate day, int hour, int minute, String timeZone) {
+    long epoch = epochInMilliseconds(day, LocalTime.of(hour, minute), timeZone);
+    return epochToDateTime(epoch, timeZone);
+  }
 }

@@ -14,82 +14,151 @@
 
 package com.google.sps.servlets;
 
+import com.google.api.services.calendar.model.Event;
 import com.google.api.services.tasks.model.Task;
+import com.google.common.collect.ImmutableSet;
+import com.google.sps.api.calendar.CalendarClientHelper;
+import com.google.sps.api.tasks.TasksClientAdapter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.mockito.Mockito;
 import java.io.IOException;
-import java.util.Arrays;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-@RunWith(JUnit4.class)
-public final class ScheduleServletTest {
+import static com.google.sps.api.calendar.CalendarClientHelper.createEventWithSummary;
+import static com.google.sps.api.calendar.CalendarClientHelper.createPrivateEventWithSummaryAndDescription;
+import static com.google.sps.api.tasks.TasksClientHelper.createTaskWithDue;
+import static com.google.sps.converter.TimeConverter.createDateTime;
+import static org.mockito.AdditionalMatchers.not;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 
-  private static final Set<String> SOME_SELECTED_IDS;
-  private static final Set<String> EMPTY_IDS = new HashSet<>(Collections.emptyList());
+public class ScheduleServletTest {
+  private final static ImmutableSet<String> TASKS_IDS = ImmutableSet.of(
+      "1", "2", "abcd", "RferEhJ65ytas", "656344234", "sdff&$%rewrETwe");
+  private final static String TASKS_LIST_ID = "GgwefaUJHTyr34gsd";
+  private final static String ZURICH_TIME_ZONE = "Europe/Zurich";
+  private final static String UTC_TIME_ZONE = "UTC";
 
-  private static final Task ZERO = new Task();
-  private static final Task ONE = new Task();
-  private static final Task TWO = new Task();
-  private static final Task THREE = new Task();
-  private static final Task FOUR = new Task();
-  private static final Task FIVE = new Task();
-  private static final Task SIX = new Task();
-  private static final Task SEVEN = new Task();
-
-  static {
-    Set<String> idList = Stream.of("1", "0", "4", "6").collect(Collectors.toCollection(HashSet::new));
-    SOME_SELECTED_IDS = Collections.unmodifiableSet(idList);
-  }
-
-  private List<Task> allTasks = Arrays.asList(ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN);
-  private List<Task> someTasks = Arrays.asList(ZERO, FOUR, FIVE, SEVEN);
-  private List<Task> emptyTasks = Collections.emptyList();
+  private ScheduleServlet scheduleServlet;
+  private TasksClientAdapter tasksClientAdapter;
+  private List<Task> tasks;
 
   @Before
-  public void setTaskIds() {
-    for (int i = 0; i < allTasks.size(); i++) {
-      allTasks.get(i).setId(Integer.toString(i));
-      allTasks.get(i).setTitle("Title of task with id " + i);
+  public void setUp() throws IOException {
+    scheduleServlet = new ScheduleServlet();
+    tasks = new ArrayList<>();
+    tasksClientAdapter = Mockito.mock(TasksClientAdapter.class);
+    for (String taskId : TASKS_IDS) {
+      Task task = new Task();
+      task.setId(taskId);
+      Mockito.when(tasksClientAdapter.getTask(TASKS_LIST_ID, taskId)).thenReturn(task);
+      tasks.add(task);
     }
-  }
-
-
-  @Test
-  public void filterSelectedTaskTitles_allSelectedExist_returnsIntersection() throws IOException {
-    ScheduleServlet servlet = new ScheduleServlet();
-    List<String> intersection = Stream.of(ZERO, ONE, FOUR, SIX).map(Task::getTitle).collect(Collectors.toList());
-    List<String> result = servlet.filterSelectedTaskTitles(SOME_SELECTED_IDS, allTasks);
-    Assert.assertEquals(intersection, result);
-  }
-
-  @Test
-  public void filterSelectedTaskTitles_selectionHasIntersection_returnsIntersection() throws IOException {
-    ScheduleServlet servlet = new ScheduleServlet();
-    List<String> intersection = Stream.of(ZERO, FOUR).map(Task::getTitle).collect(Collectors.toList());
-    List<String> result = servlet.filterSelectedTaskTitles(SOME_SELECTED_IDS, someTasks);
-    Assert.assertEquals(intersection, result);
+    // Throws an exception whenever the tasks list id is not valid
+    Mockito.when(tasksClientAdapter.getTask(not(eq(TASKS_LIST_ID)), anyString()))
+        .thenThrow(new IOException());
+    // Throws an exception whenever the task id is not valid
+    Mockito.when(
+        tasksClientAdapter.getTask(anyString(), argThat((taskId) -> !TASKS_IDS.contains(taskId))))
+        .thenThrow(new IOException());
   }
 
   @Test
-  public void filterSelectedTaskTitiles_emptyTaskList_returnsEmptyList() {
-    ScheduleServlet servlet = new ScheduleServlet();
-    List<String> result = servlet.filterSelectedTaskTitles(SOME_SELECTED_IDS, emptyTasks);
-    Assert.assertEquals(Collections.emptyList(), result);
+  public void getSelectedTasks_emptyIds() {
+    String[] tasksIds = new String[0];
+
+    List<Task> expectedTasks = Collections.emptyList();
+    List<Task> actualTasks = scheduleServlet.getSelectedTasks(
+        tasksIds, tasksClientAdapter, TASKS_LIST_ID);
+
+    Assert.assertEquals(expectedTasks, actualTasks);
   }
 
   @Test
-  public void filterSelectedTaskTitiles_emptyIdList_returnsEmptyList() {
-    ScheduleServlet servlet = new ScheduleServlet();
-    List<String> result = servlet.filterSelectedTaskTitles(EMPTY_IDS, someTasks);
-    Assert.assertEquals(Collections.emptyList(), result);
+  public void getSelectedTasks_allExistingTasks() {
+    String[] tasksIds = new String[TASKS_IDS.size()];
+    TASKS_IDS.toArray(tasksIds);
+
+    List<Task> expectedTasks = new ArrayList<>(tasks);
+    List<Task> actualTasks = scheduleServlet.getSelectedTasks(
+        tasksIds, tasksClientAdapter, TASKS_LIST_ID);
+
+    Assert.assertEquals(expectedTasks, actualTasks);
   }
 
+  @Test
+  public void getSelectedTasks_someNonExistingTasks() {
+    String[] tasksIds = new String[TASKS_IDS.size() + 2];
+    int indexTasksIds = 0;
+    tasksIds[indexTasksIds++] = "0";
+    for (String tasksId : TASKS_IDS) {
+      tasksIds[indexTasksIds++] = tasksId;
+    }
+    tasksIds[indexTasksIds] = "qaz";
+
+    List<Task> expectedTasks = new ArrayList<>(tasks);
+    List<Task> actualTasks = scheduleServlet.getSelectedTasks(
+        tasksIds, tasksClientAdapter, TASKS_LIST_ID);
+
+    Assert.assertEquals(expectedTasks, actualTasks);
+  }
+
+  @Test
+  public void getSelectedTasks_wrongTasksListId() {
+    String[] tasksIds = new String[TASKS_IDS.size()];
+    TASKS_IDS.toArray(tasksIds);
+
+    List<Task> expectedTasks = Collections.emptyList();
+    List<Task> actualTasks = scheduleServlet.getSelectedTasks(
+        tasksIds, tasksClientAdapter, TASKS_LIST_ID + "QwErTy");
+
+    Assert.assertEquals(expectedTasks, actualTasks);
+  }
+
+  @Test
+  public void createEventFromTask_withoutDescription() {
+    LocalDate day = LocalDate.of(2020, 11, 9);
+    Task task = createTaskWithDue(
+        createDateTime(day, 11, 30, ZURICH_TIME_ZONE)
+    );
+    String title = "Task without description";
+    task.setTitle(title);
+
+    Event expectedEvent = createEventWithSummary(
+        createDateTime(day, 11, 30, ZURICH_TIME_ZONE),
+        createDateTime(day, 12, 0, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE, title
+    );
+    expectedEvent.setVisibility(CalendarClientHelper.PRIVATE_VISIBILITY);
+    Event actualEvent = scheduleServlet.createEventFromTask(task, ZURICH_TIME_ZONE);
+
+    Assert.assertEquals(expectedEvent, actualEvent);
+  }
+
+  @Test
+  public void createEventFromTask_withDescription() {
+    LocalDate day = LocalDate.of(2022, 4, 9);
+    Task task = createTaskWithDue(
+        createDateTime(day, 15, 0, UTC_TIME_ZONE)
+    );
+    String title = "Task with description";
+    task.setTitle(title);
+    String description = "Description of the task";
+    task.setNotes(description);
+
+    Event expectedEvent = createPrivateEventWithSummaryAndDescription(
+        createDateTime(day, 15, 0, UTC_TIME_ZONE),
+        createDateTime(day, 15, 30, UTC_TIME_ZONE),
+        UTC_TIME_ZONE, title, description
+    );
+    Event actualEvent = scheduleServlet.createEventFromTask(task, UTC_TIME_ZONE);
+
+    Assert.assertEquals(expectedEvent, actualEvent);
+  }
 }

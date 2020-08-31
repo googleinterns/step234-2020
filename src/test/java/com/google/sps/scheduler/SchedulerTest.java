@@ -14,8 +14,6 @@
 
 package com.google.sps.scheduler;
 
-
-import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.tasks.model.Task;
 import org.junit.Assert;
@@ -24,15 +22,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static com.google.sps.api.calendar.CalendarClientHelper.createEvent;
+import static com.google.sps.api.tasks.TasksClientHelper.createTaskWithDue;
+import static com.google.sps.converter.TimeConverter.createDateTime;
 import static com.google.sps.scheduler.Scheduler.schedule;
-import static com.google.sps.converter.TimeConverter.epochInMilliseconds;
-import static com.google.sps.converter.TimeConverter.epochToDateTime;
 
 @RunWith(JUnit4.class)
 public class SchedulerTest {
@@ -47,6 +44,8 @@ public class SchedulerTest {
   public void setUp() {
     sampleTasks = new ArrayList<>();
     for (int i = 0; i < TOTAL_SAMPLES; i++) {
+      Task task = new Task();
+      task.setId("Index " + i);
       sampleTasks.add(new Task());
     }
   }
@@ -368,22 +367,5 @@ public class SchedulerTest {
             createDateTime(day, 16, 30, LOS_ANGELES_TIME_ZONE)));
 
     Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
-  }
-
-  /**
-   * Returns a task with the given due date.
-   */
-  private Task createTaskWithDue(DateTime dueDate) {
-    Task task = new Task();
-    task.setDue(dueDate.toStringRfc3339());
-    return task;
-  }
-
-  /**
-   * Returns a DateTime object representing the given date and time in the time zone.
-   */
-  private DateTime createDateTime(LocalDate day, int hour, int minute, String timeZone) {
-    long epoch = epochInMilliseconds(day, LocalTime.of(hour, minute), timeZone);
-    return epochToDateTime(epoch, timeZone);
   }
 }

@@ -23,6 +23,7 @@ import com.google.sps.api.calendar.CalendarClientAdapter;
 import com.google.sps.api.calendar.CalendarClientHelper;
 import com.google.sps.api.tasks.TasksClientAdapter;
 import com.google.sps.api.tasks.TasksClientHelper;
+import com.google.sps.converter.TimeConverter;
 import com.google.sps.data.ScheduleMessage;
 import com.google.sps.scheduler.Scheduler;
 import javax.servlet.annotation.WebServlet;
@@ -54,8 +55,8 @@ public class ScheduleServlet extends HttpServlet {
 
     CalendarClientAdapter calendarClientAdapter = new CalendarClientAdapter();
     TasksClientAdapter tasksClientAdapter = new TasksClientAdapter();
-    String tasksListId = TasksClientHelper.getIdMostRecentTaskList(
-        tasksClientAdapter.getTasksList());
+    String tasksListId = TasksClientHelper.getMostRecentTaskListId(
+        tasksClientAdapter.getTasksLists());
 
     // Scheduler parameters
     List<Event> calendarEvents = calendarClientAdapter.loadPrimaryCalendarEventsOfTomorrow();
@@ -79,7 +80,7 @@ public class ScheduleServlet extends HttpServlet {
   /**
    * Returns the task objects having the ids contained in the array.
    */
-  private List<Task> getSelectedTasks(
+   List<Task> getSelectedTasks(
       String[] tasksIds, TasksClientAdapter tasksClientAdapter, String tasksListId) {
     List<Task> tasks = new ArrayList<>();
 
@@ -99,7 +100,7 @@ public class ScheduleServlet extends HttpServlet {
    * Creates a calendar event for each task with the same title, description and
    * start time. The duration is the default one.
    */
-  private List<Event> createEventsFromTasks(List<Task> tasks, String timeZone) {
+   List<Event> createEventsFromTasks(List<Task> tasks, String timeZone) {
     List<Event> calendarEvents = new ArrayList<>();
 
     for (Task task : tasks) {
@@ -114,10 +115,10 @@ public class ScheduleServlet extends HttpServlet {
    * Creates a calendar event with the same title, description and
    * start time of the task. The duration is the default one.
    */
-  private Event createEventFromTask(Task task, String timeZone) {
+   Event createEventFromTask(Task task, String timeZone) {
     DateTime startTime = new DateTime(task.getDue());
     long endEpoch = startTime.getValue() + Scheduler.DEFAULT_DURATION_IN_MILLISECONDS;
-    DateTime endTime = new DateTime(endEpoch);
+    DateTime endTime = TimeConverter.epochToDateTime(endEpoch, timeZone);
 
     return CalendarClientHelper.createPrivateEventWithSummaryAndDescription(
         startTime, endTime, timeZone, task.getTitle(), task.getNotes());

@@ -14,6 +14,7 @@
 
 package com.google.sps.servlets;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.services.tasks.model.Task;
 import com.google.sps.api.tasks.TasksClientAdapter;
@@ -36,14 +37,22 @@ public class LoadTasksServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     response.setContentType(MediaType.APPLICATION_JSON);
-    String tasksJson = getTasksJson();
+    String tasksJson = tasksToJson(getTasks());
     response.getWriter().println(tasksJson);
   }
 
-  private String getTasksJson() throws IOException {
-    TasksClientAdapter tasksInterface = new TasksClientAdapter();
-    List<Task> tasks = tasksInterface.getTasksOfMostRecentList();
-    String tasksJson = objectMapper.writeValueAsString(tasks);
-    return tasksJson;
+  /**
+   * Converts the list of tasks into a JSON string.
+   */
+  private String tasksToJson(List<Task> tasks) throws JsonProcessingException {
+    return objectMapper.writeValueAsString(tasks);
+  }
+
+  /**
+   * Returns the tasks belonging to the most recently updated list.
+   */
+  private List<Task> getTasks() throws IOException {
+    TasksClientAdapter tasksClientAdapter = new TasksClientAdapter();
+    return tasksClientAdapter.getTasksOfMostRecentList();
   }
 }

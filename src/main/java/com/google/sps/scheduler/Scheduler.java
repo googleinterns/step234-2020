@@ -73,14 +73,7 @@ public class Scheduler {
         break;
       }
 
-      while (eventStart - lastEnd >= DEFAULT_DURATION_IN_MILLISECONDS &&
-          tasksIterator.hasNext()) {
-        DateTime startTime = epochToDateTime(lastEnd, timeZone);
-        Task task = tasksIterator.next();
-        task.setDue(startTime.toStringRfc3339());
-        scheduledTasks.add(task);
-        lastEnd += DEFAULT_DURATION_IN_MILLISECONDS;
-      }
+      lastEnd = scheduleInterval(eventStart, lastEnd, timeZone, tasksIterator, scheduledTasks);
 
       if (!tasksIterator.hasNext()) {
         break;
@@ -91,8 +84,18 @@ public class Scheduler {
       }
     }
 
-    while (dayEndEpochMilliseconds - lastEnd >= DEFAULT_DURATION_IN_MILLISECONDS &&
-        tasksIterator.hasNext()) {
+    scheduleInterval(dayEndEpochMilliseconds, lastEnd, timeZone, tasksIterator, scheduledTasks);
+
+    return scheduledTasks;
+  }
+
+  /**
+   * Schedules the tasks in the free intervals between lastEnd and limit.
+   */
+  private static long scheduleInterval(
+      long limit, long lastEnd, String timeZone, Iterator<Task> tasksIterator, List<Task> scheduledTasks) {
+
+    while (limit - lastEnd >= DEFAULT_DURATION_IN_MILLISECONDS && tasksIterator.hasNext()) {
       DateTime startTime = epochToDateTime(lastEnd, timeZone);
       Task task = tasksIterator.next();
       task.setDue(startTime.toStringRfc3339());
@@ -100,6 +103,6 @@ public class Scheduler {
       lastEnd += DEFAULT_DURATION_IN_MILLISECONDS;
     }
 
-    return scheduledTasks;
+    return lastEnd;
   }
 }

@@ -23,7 +23,7 @@ import com.google.api.services.tasks.model.TaskLists;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.sps.api.authorization.AuthorizationRequester;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -44,7 +44,7 @@ public class TasksClientAdapter {
   /**
    * Returns the list of the user task lists.
    */
-  public List<TaskList> getTasksList() throws IOException {
+  public List<TaskList> getTasksLists() throws IOException {
     TaskLists tasksLists = tasksClient.tasklists().list().execute();
     return tasksLists.getItems();
   }
@@ -56,7 +56,7 @@ public class TasksClientAdapter {
   public List<Task> getTasks(String tasksListId) throws IOException {
     List<Task> tasks = tasksClient.tasks().list(tasksListId).execute().getItems();
     if (tasks == null) {
-      return new ArrayList<>();
+      return Collections.emptyList();
     }
     return TasksClientHelper.filterTasks(tasks);
   }
@@ -65,7 +65,7 @@ public class TasksClientAdapter {
    * Returns the tasks belonging to the most recently updated task list.
    */
   public List<Task> getTasksOfMostRecentList() throws IOException {
-    return getTasks(TasksClientHelper.getIdMostRecentTaskList(getTasksList()));
+    return getTasks(TasksClientHelper.getMostRecentTaskListId(getTasksLists()));
   }
 
   /**

@@ -54,7 +54,11 @@ function updateView(results) {
 }
 
 function schedule() {
-  const formContent = new FormData($("#task-list")[0]);
+  const formContent = new FormData($("#schedule-form")[0]);
+  daterange = $("#daterange").val();
+  [startDate, endDate] = daterange.split(' - ');
+  formContent.append("startDate", startDate.trim());
+  formContent.append("endDate", endDate.trim());
   postData("/schedule", new URLSearchParams(formContent).toString())
       .then(getJsonIfOk)
       .then(updateView)
@@ -84,6 +88,17 @@ function getJsonIfOk(response) {
   } else {
     return response.json();
   }
+}
+
+/**
+ * Handles response by checking it and converting it to text.
+ */
+function handleTextResponse(response) {
+  if (!response.ok) {
+    throw new Error("Response error while fetching data: " +
+        response.status + " (" + response.statusText + ")");
+  }
+  return response.text();
 }
 
 /**

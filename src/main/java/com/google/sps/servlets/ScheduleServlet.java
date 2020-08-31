@@ -34,7 +34,11 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 /**
@@ -53,28 +57,49 @@ public class ScheduleServlet extends HttpServlet {
       return;
     }
 
-    CalendarClientAdapter calendarClientAdapter = new CalendarClientAdapter();
+    // Scheduler parameters
+
     TasksClientAdapter tasksClientAdapter = new TasksClientAdapter();
     String tasksListId = TasksClientHelper.getMostRecentTaskListId(
         tasksClientAdapter.getTasksLists());
-
-    // Scheduler parameters
-    List<Event> calendarEvents = calendarClientAdapter.loadPrimaryCalendarEventsOfTomorrow();
-    String timeZone = calendarClientAdapter.getPrimaryCalendarTimeZone();
-    LocalDate scheduleDate = calendarClientAdapter.getUsersTomorrowStart().toLocalDate();
     List<Task> tasksToSchedule = getSelectedTasks(
         request.getParameterValues(TASK_ID_LIST_KEY), tasksClientAdapter, tasksListId);
 
+    CalendarClientAdapter calendarClientAdapter = new CalendarClientAdapter();
+    String timeZone = calendarClientAdapter.getPrimaryCalendarTimeZone();
+    ZoneId zoneId = ZoneId.of(timeZone);
+
+    String startDateString = request.getParameter("startDate");
+    String endDateString = request.getParameter("endDate");
+    LocalDate startDate, endDate;
+    try {
+      startDate = LocalDate.parse(startDateString);
+      endDate = LocalDate.parse(endDateString);
+    } catch(DateTimeParseException | NullPointerException exception) { //If date was not received or is in wrong format, schedule for tomorrow
+      startDate = calendarClientAdapter.getUsersTomorrowStart().toLocalDate();
+      endDate = startDate;
+    }
+
+    ZonedDateTime zonedStartpoint = startDate.atStartOfDay(zoneId);
+    DateTime startDateTime = new DateTime(zonedStartpoint.toInstant().toEpochMilli());
+    ZonedDateTime zonedEndpoint = endDate.atStartOfDay(zoneId).plusDays(1);
+    DateTime endDateTime = new DateTime(zonedEndpoint.toInstant().toEpochMilli());
+
+    List<Event> calendarEvents = calendarClientAdapter.getAcceptedEventsInTimerange(startDateTime, endDateTime);
+
+
+
     // Schedules
+    //TODO: Schedule to an interval of days, from startDate to endDate
     List<Task> scheduledTasks = Scheduler.schedule(
-        calendarEvents, tasksToSchedule, timeZone, scheduleDate);
+        calendarEvents, tasksToSchedule, timeZone, startDate);
 
     // Updates Tasks and Calendar
     tasksClientAdapter.updateTasks(tasksListId, scheduledTasks);
     calendarClientAdapter.insertEventsToPrimary(
         createEventsFromTasks(scheduledTasks, timeZone));
 
-    sendJsonResponse(response, scheduledTasks.size() + " tasks inserted on " + scheduleDate);
+    sendJsonResponse(response, scheduledTasks.size() + " tasks inserted on " + startDate);
   }
 
   /**

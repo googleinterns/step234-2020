@@ -16,8 +16,12 @@ package com.google.sps.servlets;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
-import com.google.sps.api.calendar.CalendarInterface;
+import com.google.api.services.tasks.model.Task;
+import com.google.sps.api.calendar.CalendarClientAdapter;
+import com.google.sps.api.tasks.TasksProvider;
+import com.google.sps.data.ScheduleMessage;
 import com.google.sps.scheduler.Scheduler;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -27,7 +31,10 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Arrays;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Set;
@@ -54,8 +61,8 @@ public class ScheduleServlet extends HttpServlet {
     List<String> titlesOfTasksToSchedule = filterSelectedTaskTitles(selectedIds, tasks);
 
     CalendarClientAdapter calendarClientAdapter = new CalendarClientAdapter();
-    List<Event> calendarEvents = calendarClientAdapter.loadPrimaryCalendarEventsOfTomorrow();
     String timeZone = calendarClientAdapter.getPrimaryCalendarTimeZone();
+    ZoneId zoneId = ZoneId.of(timeZone);
 
     String startDateString = request.getParameter("startDate");
     String endDateString = request.getParameter("endDate");
@@ -64,17 +71,23 @@ public class ScheduleServlet extends HttpServlet {
       startDate = LocalDate.parse(startDateString);
       endDate = LocalDate.parse(endDateString);
     } catch(DateTimeParseException | NullPointerException exception) { //If date was not received or is in wrong format, schedule for tomorrow
-      startDate = calendarInterface.getUsersTomorrowStart().toLocalDate();
+      startDate = calendarClientAdapter.getUsersTomorrowStart().toLocalDate();
       endDate = startDate;
     }
 
+    ZonedDateTime zonedStartpoint = startDate.atStartOfDay(zoneId);
+    DateTime startDateTime = new DateTime(zonedStartpoint.toInstant().toEpochMilli());
+    ZonedDateTime zonedEndpoint = endDate.atStartOfDay(zoneId).plusDays(1);
+    DateTime endDateTime = new DateTime(zonedEndpoint.toInstant().toEpochMilli());
+
+    List<Event> calendarEvents = calendarClientAdapter.getAcceptedEventsInTimerange(startDateTime, endDateTime);
     List<Event> tasksEvent = Scheduler.schedule(calendarEvents, timeZone, startDate);
 
     for (Event event : tasksEvent) {
       calendarClientAdapter.insertEventToPrimary(event);
     }
 
-    sendJsonResponse(response, tasksEvent.size() + " tasks inserted on " + scheduleDate);
+    sendJsonResponse(response, tasksEvent.size() + " tasks inserted on " + startDate);
   }
 
   private void sendJsonResponse(HttpServletResponse response, String responseMessage) throws IOException {

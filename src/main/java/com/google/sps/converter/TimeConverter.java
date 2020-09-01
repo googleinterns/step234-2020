@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package converter;
+package com.google.sps.converter;
 
 import com.google.api.client.util.DateTime;
 import java.time.LocalDate;
@@ -42,5 +42,22 @@ public class TimeConverter {
     long timeZoneShiftInMilliseconds = TimeZone.getTimeZone(timeZone).getOffset(epoch);
     return new DateTime(
         epoch, (int) TimeUnit.MILLISECONDS.toMinutes(timeZoneShiftInMilliseconds));
+  }
+
+  /**
+   * Returns the epoch of the given date (a RFC 3339 timestamp).
+   * @param date an <a href='http://tools.ietf.org/html/rfc3339'>RFC 3339</a> date/time value.
+   */
+  public static long dateToEpoch(String date) {
+    DateTime dateTime = new DateTime(date);
+    return dateTime.getValue();
+  }
+
+  /**
+   * Returns a DateTime object representing the given date and time in the time zone.
+   */
+  public static DateTime createDateTime(LocalDate day, int hour, int minute, String timeZone) {
+    long epoch = epochInMilliseconds(day, LocalTime.of(hour, minute), timeZone);
+    return epochToDateTime(epoch, timeZone);
   }
 }

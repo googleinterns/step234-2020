@@ -42,7 +42,7 @@ public class AuthorizationServlet extends AbstractAppEngineAuthorizationCodeServ
   }
 
   @Override
-  protected String getRedirectUri(HttpServletRequest req) throws ServletException, IOException {
+  protected String getRedirectUri(HttpServletRequest req) {
     return AuthorizationRequester.getRedirectUri(req);
   }
 

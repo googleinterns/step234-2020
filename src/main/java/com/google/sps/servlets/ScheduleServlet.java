@@ -14,8 +14,17 @@
 
 package com.google.sps.servlets;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
-import com.google.sps.api.calendar.CalendarInterface;
+import com.google.api.services.tasks.model.Task;
+import com.google.sps.api.calendar.CalendarClientAdapter;
+import com.google.sps.api.calendar.CalendarClientHelper;
+import com.google.sps.api.tasks.TasksClientAdapter;
+import com.google.sps.api.tasks.TasksClientHelper;
+import com.google.sps.converter.TimeConverter;
+import com.google.sps.data.ScheduleMessage;
 import com.google.sps.scheduler.Scheduler;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -25,26 +34,130 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 /**
- * Servlet that schedules tasks on tomorrow.
+ * Schedules tasks on tomorrow.
  */
 @WebServlet("/schedule")
 public class ScheduleServlet extends HttpServlet {
+
+  public static final String TASK_ID_LIST_KEY = "taskId";
+  private ObjectMapper objectMapper = new ObjectMapper();
+
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    CalendarInterface calendarInterface = new CalendarInterface();
-    List<Event> calendarEvents = calendarInterface.loadPrimaryCalendarEventsOfTomorrow();
-    String timeZone = calendarInterface.getPrimaryCalendarTimeZone();
-    LocalDate tomorrow = calendarInterface.getUsersTomorrowStart().toLocalDate();
-    List<Event> tasksEvent = Scheduler.schedule(calendarEvents, timeZone, tomorrow);
-    for (Event event : tasksEvent) {
-      calendarInterface.insertEventToPrimary(event);
+    if (!request.getParameterMap().containsKey(TASK_ID_LIST_KEY)) {
+      sendJsonResponse(response, "Select some tasks to schedule.");
+      return;
     }
 
-    response.setContentType(MediaType.TEXT_PLAIN);
+    // Scheduler parameters
+
+    TasksClientAdapter tasksClientAdapter = new TasksClientAdapter();
+    String tasksListId = TasksClientHelper.getMostRecentTaskListId(
+        tasksClientAdapter.getTasksLists());
+    List<Task> tasksToSchedule = getSelectedTasks(
+        request.getParameterValues(TASK_ID_LIST_KEY), tasksClientAdapter, tasksListId);
+
+    CalendarClientAdapter calendarClientAdapter = new CalendarClientAdapter();
+    String timeZone = calendarClientAdapter.getPrimaryCalendarTimeZone();
+    ZoneId zoneId = ZoneId.of(timeZone);
+
+    String startDateString = request.getParameter("startDate");
+    String endDateString = request.getParameter("endDate");
+    LocalDate startDate, endDate;
+    try {
+      startDate = LocalDate.parse(startDateString);
+      endDate = LocalDate.parse(endDateString);
+    } catch(DateTimeParseException | NullPointerException exception) { //If date was not received or is in wrong format, schedule for tomorrow
+      startDate = calendarClientAdapter.getUsersTomorrowStart().toLocalDate();
+      endDate = startDate;
+    }
+
+    ZonedDateTime zonedStartpoint = startDate.atStartOfDay(zoneId);
+    DateTime startDateTime = new DateTime(zonedStartpoint.toInstant().toEpochMilli());
+    ZonedDateTime zonedEndpoint = endDate.atStartOfDay(zoneId).plusDays(1);
+    DateTime endDateTime = new DateTime(zonedEndpoint.toInstant().toEpochMilli());
+
+    List<Event> calendarEvents = calendarClientAdapter.getAcceptedEventsInTimerange(startDateTime, endDateTime);
+
+
+
+    // Schedules
+    //TODO: Schedule to an interval of days, from startDate to endDate
+    List<Task> scheduledTasks = Scheduler.schedule(
+        calendarEvents, tasksToSchedule, timeZone, startDate);
+
+    // Updates Tasks and Calendar
+    tasksClientAdapter.updateTasks(tasksListId, scheduledTasks);
+    calendarClientAdapter.insertEventsToPrimary(
+        createEventsFromTasks(scheduledTasks, timeZone));
+
+    sendJsonResponse(response, scheduledTasks.size() + " tasks inserted on " + startDate);
+  }
+
+  /**
+   * Returns the task objects having the ids contained in the array.
+   */
+   List<Task> getSelectedTasks(
+      String[] tasksIds, TasksClientAdapter tasksClientAdapter, String tasksListId) {
+    List<Task> tasks = new ArrayList<>();
+
+    for (String id : tasksIds) {
+      try {
+        Task task = tasksClientAdapter.getTask(tasksListId, id);
+        tasks.add(task);
+      } catch (IOException IoException) {
+        // Continue the loop if the id doesn't exist
+      }
+    }
+
+    return tasks;
+  }
+
+  /**
+   * Creates a calendar event for each task with the same title, description and
+   * start time. The duration is the default one.
+   */
+   List<Event> createEventsFromTasks(List<Task> tasks, String timeZone) {
+    List<Event> calendarEvents = new ArrayList<>();
+
+    for (Task task : tasks) {
+      calendarEvents.add(
+          createEventFromTask(task, timeZone));
+    }
+
+    return calendarEvents;
+  }
+
+  /**
+   * Creates a calendar event with the same title, description and
+   * start time of the task. The duration is the default one.
+   */
+   Event createEventFromTask(Task task, String timeZone) {
+    DateTime startTime = new DateTime(task.getDue());
+    long endEpoch = startTime.getValue() + Scheduler.DEFAULT_DURATION_IN_MILLISECONDS;
+    DateTime endTime = TimeConverter.epochToDateTime(endEpoch, timeZone);
+
+    return CalendarClientHelper.createPrivateEventWithSummaryAndDescription(
+        startTime, endTime, timeZone, task.getTitle(), task.getNotes());
+  }
+
+  private void sendJsonResponse(HttpServletResponse response, String responseMessage) throws IOException {
+    response.setContentType(MediaType.APPLICATION_JSON);
     response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-    response.getWriter().println(tasksEvent.size() + " tasks inserted on " + tomorrow);
+    try {
+      ScheduleMessage messageObject = new ScheduleMessage(responseMessage);
+      String jsonMessage = objectMapper.writeValueAsString(messageObject);
+      response.getWriter().println(jsonMessage);
+    } catch (JsonProcessingException exception) {
+      throw new IOException(exception);
+    }
   }
 }

@@ -14,45 +14,36 @@
 
 package com.google.sps.servlets;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.services.tasks.model.Task;
-import com.google.sps.api.tasks.TasksClientAdapter;
+import com.google.sps.api.authorization.AuthorizationRequester;
+import org.json.JSONObject;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
-import java.util.List;
 
 /**
- * Loads tasks as JSON
+ * Servlet that retrieves the email address of the user.
  */
-@WebServlet("/load_tasks")
-public class LoadTasksServlet extends HttpServlet {
-
-  private ObjectMapper objectMapper = new ObjectMapper();
-
+@WebServlet("/user")
+public class UserDataServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    String email = AuthorizationRequester.getUserEmail();
     response.setContentType(MediaType.APPLICATION_JSON);
-    String tasksJson = tasksToJson(getTasks());
-    response.getWriter().println(tasksJson);
+    response.getWriter().print(
+        createJsonEmail(email));
   }
 
   /**
-   * Converts the list of tasks into a JSON string.
+   * Returns a JSON string containing the email.
    */
-  private String tasksToJson(List<Task> tasks) throws JsonProcessingException {
-    return objectMapper.writeValueAsString(tasks);
-  }
+  private String createJsonEmail(String email) {
+    JSONObject formatter = new JSONObject();
 
-  /**
-   * Returns the tasks belonging to the most recently updated list.
-   */
-  private List<Task> getTasks() throws IOException {
-    TasksClientAdapter tasksClientAdapter = new TasksClientAdapter();
-    return tasksClientAdapter.getTasksOfMostRecentList();
+    formatter.put("email", email);
+
+    return formatter.toString();
   }
 }

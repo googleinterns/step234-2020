@@ -17,27 +17,28 @@ package com.google.sps.servlets;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.extensions.appengine.auth.oauth2.AbstractAppEngineAuthorizationCodeServlet;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.google.sps.api.authorization.AuthorizationRequester;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 
 @WebServlet("/authorization")
 public class AuthorizationServlet extends AbstractAppEngineAuthorizationCodeServlet {
 
+
+  public static final String INDEX_PATH = "WEB-INF/index.html";
+
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    response.setContentType("text/html");
-    response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-    PrintWriter writer = response.getWriter();
-    UserService userService = UserServiceFactory.getUserService();
-    writer.println("<a href=\"/load_events\">Show my events!</a>|");
-    writer.println("<a href=\"" + userService.createLogoutURL(request.getRequestURL().toString()) + "\">Log out</a> | ");
+    try {
+      RequestDispatcher requestDispatcher = request.getRequestDispatcher(INDEX_PATH);
+      requestDispatcher.forward(request, response);
+    } catch (ServletException exception) {
+      throw new IOException(exception);
+    }
   }
 
   @Override

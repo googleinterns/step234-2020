@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.List;
 
 public class AuthorizationRequester {
 
@@ -57,6 +58,7 @@ public class AuthorizationRequester {
    */
   private static final AppEngineDataStoreFactory DATA_STORE_FACTORY =
       AppEngineDataStoreFactory.getDefaultInstance();
+  public static final List<String> ACCESS_SCOPES = Arrays.asList(CalendarScopes.CALENDAR_EVENTS, TasksScopes.TASKS);
   private static GoogleClientSecrets clientSecrets = null;
 
   /**
@@ -84,9 +86,12 @@ public class AuthorizationRequester {
    * Gets a new OAuth2 authorization code flow for a request.
    */
   public static GoogleAuthorizationCodeFlow newFlow() throws IOException {
-    return new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
-        getClientCredential(), Arrays.asList(CalendarScopes.CALENDAR_EVENTS, TasksScopes.TASKS)).setDataStoreFactory(
-        DATA_STORE_FACTORY).setAccessType(ACCESS_TYPE).setApprovalPrompt(APPROVAL_PROMPT).addRefreshListener(new DataStoreCredentialRefreshListener(getUserId(), DATA_STORE_FACTORY)).build();
+    return new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, getClientCredential(), ACCESS_SCOPES)
+        .setDataStoreFactory(DATA_STORE_FACTORY)
+        .setAccessType(ACCESS_TYPE)
+        .setApprovalPrompt(APPROVAL_PROMPT)
+        .addRefreshListener(new DataStoreCredentialRefreshListener(getUserId(), DATA_STORE_FACTORY))
+        .build();
   }
 
   /**

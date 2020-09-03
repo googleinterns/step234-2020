@@ -48,7 +48,7 @@ public class AuthorizationRequester {
   public static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
   public static final String CLIENT_SECRETS_PATH = "/client_secrets.json";
   public static final String ACCESS_TYPE = "offline";
-
+  public static final String APPROVAL_PROMPT = "force";
 
   /**
    * Global instance of the {@link DataStoreFactory}. The best practice is to make it a single
@@ -56,7 +56,7 @@ public class AuthorizationRequester {
    */
   private static final AppEngineDataStoreFactory DATA_STORE_FACTORY =
       AppEngineDataStoreFactory.getDefaultInstance();
-  public static final String APPROVAL_PROMPT = "force";
+
   private static GoogleClientSecrets clientSecrets = null;
 
   /**
@@ -86,7 +86,7 @@ public class AuthorizationRequester {
   public static GoogleAuthorizationCodeFlow newFlow() throws IOException {
     return new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
         getClientCredential(), Arrays.asList(CalendarScopes.CALENDAR_EVENTS, TasksScopes.TASKS)).setDataStoreFactory(
-        DATA_STORE_FACTORY).setAccessType(ACCESS_TYPE).setApprovalPrompt(APPROVAL_PROMPT).addRefreshListener(new DataStoreCredentialRefreshListener(getUserId(), DATA_STORE_FACTORY)).build();
+        DATA_STORE_FACTORY).setAccessType(ACCESS_TYPE).setApprovalPrompt(APPROVAL_PROMPT).build();
   }
 
   /**

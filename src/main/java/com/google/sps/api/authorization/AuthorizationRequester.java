@@ -17,6 +17,7 @@
 
 package com.google.sps.api.authorization;
 
+import com.google.api.client.auth.oauth2.DataStoreCredentialRefreshListener;
 import com.google.api.client.extensions.appengine.datastore.AppEngineDataStoreFactory;
 import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
@@ -34,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.List;
 
 public class AuthorizationRequester {
 
@@ -46,13 +48,17 @@ public class AuthorizationRequester {
    */
   public static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
   public static final String CLIENT_SECRETS_PATH = "/client_secrets.json";
-  public static final String ACCESS_TYPE = "online";
+  public static final String ACCESS_TYPE = "offline";
+  public static final String APPROVAL_PROMPT = "force";
+
+
   /**
    * Global instance of the {@link DataStoreFactory}. The best practice is to make it a single
    * globally shared instance across your application.
    */
   private static final AppEngineDataStoreFactory DATA_STORE_FACTORY =
       AppEngineDataStoreFactory.getDefaultInstance();
+  public static final List<String> ACCESS_SCOPES = Arrays.asList(CalendarScopes.CALENDAR_EVENTS, TasksScopes.TASKS);
   private static GoogleClientSecrets clientSecrets = null;
 
   /**
@@ -80,9 +86,12 @@ public class AuthorizationRequester {
    * Gets a new OAuth2 authorization code flow for a request.
    */
   public static GoogleAuthorizationCodeFlow newFlow() throws IOException {
-    return new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
-        getClientCredential(), Arrays.asList(CalendarScopes.CALENDAR_EVENTS, TasksScopes.TASKS)).setDataStoreFactory(
-        DATA_STORE_FACTORY).setAccessType(ACCESS_TYPE).build();
+    return new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, getClientCredential(), ACCESS_SCOPES)
+        .setDataStoreFactory(DATA_STORE_FACTORY)
+        .setAccessType(ACCESS_TYPE)
+        .setApprovalPrompt(APPROVAL_PROMPT)
+        .addRefreshListener(new DataStoreCredentialRefreshListener(getUserId(), DATA_STORE_FACTORY))
+        .build();
   }
 
   /**
@@ -91,5 +100,13 @@ public class AuthorizationRequester {
   public static String getUserEmail() {
     User user = UserServiceFactory.getUserService().getCurrentUser();
     return user.getEmail();
+  }
+
+  /**
+   * Returns the user's ID.
+   */
+  public static String getUserId() {
+    User user = UserServiceFactory.getUserService().getCurrentUser();
+    return user.getUserId();
   }
 }

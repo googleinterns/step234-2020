@@ -48,6 +48,7 @@ public class AuthorizationRequester {
   public static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
   public static final String CLIENT_SECRETS_PATH = "/client_secrets.json";
   public static final String ACCESS_TYPE = "offline";
+  public static final String APPROVAL_PROMPT = "force";
 
 
   /**
@@ -56,7 +57,6 @@ public class AuthorizationRequester {
    */
   private static final AppEngineDataStoreFactory DATA_STORE_FACTORY =
       AppEngineDataStoreFactory.getDefaultInstance();
-  public static final String APPROVAL_PROMPT = "force";
   private static GoogleClientSecrets clientSecrets = null;
 
   /**

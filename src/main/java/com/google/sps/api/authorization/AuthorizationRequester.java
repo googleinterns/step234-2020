@@ -17,6 +17,7 @@
 
 package com.google.sps.api.authorization;
 
+import com.google.api.client.auth.oauth2.DataStoreCredentialRefreshListener;
 import com.google.api.client.extensions.appengine.datastore.AppEngineDataStoreFactory;
 import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
@@ -46,13 +47,16 @@ public class AuthorizationRequester {
    */
   public static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
   public static final String CLIENT_SECRETS_PATH = "/client_secrets.json";
-  public static final String ACCESS_TYPE = "online";
+  public static final String ACCESS_TYPE = "offline";
+
+
   /**
    * Global instance of the {@link DataStoreFactory}. The best practice is to make it a single
    * globally shared instance across your application.
    */
   private static final AppEngineDataStoreFactory DATA_STORE_FACTORY =
       AppEngineDataStoreFactory.getDefaultInstance();
+  public static final String APPROVAL_PROMPT = "force";
   private static GoogleClientSecrets clientSecrets = null;
 
   /**
@@ -82,7 +86,7 @@ public class AuthorizationRequester {
   public static GoogleAuthorizationCodeFlow newFlow() throws IOException {
     return new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
         getClientCredential(), Arrays.asList(CalendarScopes.CALENDAR_EVENTS, TasksScopes.TASKS)).setDataStoreFactory(
-        DATA_STORE_FACTORY).setAccessType(ACCESS_TYPE).build();
+        DATA_STORE_FACTORY).setAccessType(ACCESS_TYPE).setApprovalPrompt(APPROVAL_PROMPT).addRefreshListener(new DataStoreCredentialRefreshListener(getUserId(), DATA_STORE_FACTORY)).build();
   }
 
   /**
@@ -91,5 +95,13 @@ public class AuthorizationRequester {
   public static String getUserEmail() {
     User user = UserServiceFactory.getUserService().getCurrentUser();
     return user.getEmail();
+  }
+
+  /**
+   * Returns the user's ID.
+   */
+  public static String getUserId() {
+    User user = UserServiceFactory.getUserService().getCurrentUser();
+    return user.getUserId();
   }
 }

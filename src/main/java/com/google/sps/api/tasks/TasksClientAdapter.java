@@ -30,6 +30,7 @@ import java.util.List;
  * Provides access to the Tasks API.
  */
 public class TasksClientAdapter {
+  private final static int MAX_ALLOWED_RESULTS = 100; // max results allowed by the API
   private final Tasks tasksClient;
 
   public TasksClientAdapter() throws IOException {
@@ -54,7 +55,7 @@ public class TasksClientAdapter {
    * belonging to the task list specified.
    */
   public List<Task> getTasks(String tasksListId) throws IOException {
-    List<Task> tasks = tasksClient.tasks().list(tasksListId).execute().getItems();
+    List<Task> tasks = tasksClient.tasks().list(tasksListId).setMaxResults(MAX_ALLOWED_RESULTS).execute().getItems();
     if (tasks == null) {
       return Collections.emptyList();
     }

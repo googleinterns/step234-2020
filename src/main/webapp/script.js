@@ -29,28 +29,52 @@ function loadTasks() {
 }
 
 function renderTasks(tasks) {
-  // TODO: check the size of tasks and show a warning if zero
   $("#task-list").empty();
-  tasks.forEach(renderSingleTask);
+  $("#schedule-button").prop("disabled", !tasks.length);
+  $("#empty-message").toggle(!tasks.length);
+  if (tasks.length > 0) {
+    tasks.forEach(renderSingleTask);
+  }
 }
 
 function renderSingleTask(task) {
   id = task.id;
-  newTask = $("<p></p>", {"id": id});
-  checkBox = $("<input>", {"name": "taskId", "value": id, "type": "checkbox"});
-  checkBox.appendTo(newTask);
-  newTask.append(task.title);
-  newTask.addClass("task");
-  newTask.appendTo("#task-list");
+  $("#task-list").append(
+    `<li>
+      <label class="mdc-list-item" role="checkbox" aria-checked="false">
+        <span class="mdc-list-item__ripple"></span>
+        <span class="mdc-list-item__graphic">
+          <div class="mdc-checkbox">
+            <input type="checkbox" name="taskId" id="${id}" class="mdc-checkbox__native-control" value="${id}" />
+            <div class="mdc-checkbox__background">
+              <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                <path class="mdc-checkbox__checkmark-path" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
+              </svg>
+              <div class="mdc-checkbox__mixedmark"></div>
+            </div>
+          </div>
+        </span>
+        <label class="mdc-list-item__text" for="${id}">${task.title}</label>
+      </label>
+    </li>`);
 }
 
 /**
  * Provides feedback to the user that tasks were scheduled, and
  * reports if there are problems.
  */
-function updateView(results) {
-  $("#message").html(results.message);
+function updateView(result) {
+  showResultMessage(result);
   loadTasks();
+}
+
+/**
+ * Shows the result of scheduling.
+ */
+function showResultMessage(result) {
+  $("#snackbar-result-text").text(result.message);
+  const mdcSnackbar = new mdc.snackbar.MDCSnackbar($("#snackbar-result")[0]);
+  mdcSnackbar.open();
 }
 
 function schedule() {
@@ -91,17 +115,6 @@ function getJsonIfOk(response) {
 }
 
 /**
- * Handles response by checking it and converting it to text.
- */
-function handleTextResponse(response) {
-  if (!response.ok) {
-    throw new Error("Response error while fetching data: " +
-        response.status + " (" + response.statusText + ")");
-  }
-  return response.text();
-}
-
-/**
  * Loads the user's email and sets the source
  * of the calendar iframe.
  */
@@ -132,3 +145,10 @@ function refreshCalendar() {
   calendarIframe.src = calendarIframe.src;
 }
 
+/**
+ * Toggles all tasks checkboxes.
+ */
+function toggleAll() {
+  const toggleStatus = $("#toggle-all").prop("checked");
+  $("#task-list input[type=checkbox]").prop("checked", toggleStatus);
+}

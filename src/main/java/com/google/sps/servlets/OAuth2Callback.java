@@ -34,7 +34,7 @@ public class OAuth2Callback extends AbstractAppEngineAuthorizationCodeCallbackSe
   @Override
   protected void onSuccess(HttpServletRequest req, HttpServletResponse resp, Credential credential)
       throws ServletException, IOException {
-    resp.sendRedirect("/authorization");
+    resp.sendRedirect("/");
   }
 
   @Override

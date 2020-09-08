@@ -1,31 +1,85 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Tasks Scheduler</title>
-    <link href="/style.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Tasks Scheduler</title>
+  <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Roboto+Mono:400,500|Material+Icons">
+  <link rel="stylesheet" href="/daterangepicker.css">
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <div class="container">
   <div class="tasks-container">
+
+    <ul class="mdc-list no-padding">
+      <li class="mdc-list-item default-cursor" role="checkbox" aria-checked="true">
+        <span class="mdc-list-item__graphic">
+          <div class="mdc-checkbox">
+            <input type="checkbox" id="toggle-all" class="mdc-checkbox__native-control" onclick="toggleAll()">
+            <div class="mdc-checkbox__background">
+              <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                <path class="mdc-checkbox__checkmark-path" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
+              </svg>
+              <div class="mdc-checkbox__mixedmark"></div>
+            </div>
+            <div class="mdc-checkbox__ripple"></div>
+          </div>
+        </span>
+        <label class="mdc-list-item__text" for="toggle-all">Task title</label>
+      </li>
+      <li role="separator" class="mdc-list-divider"></li>
+    </ul>
+
     <form id="schedule-form">
-      <div id="task-list">
-      </div>
+      <ul id="task-list" class="mdc-list no-padding" role="group"></ul>
     </form>
-    <input id="daterange" type="daterange" name="daterange">
-    <button id="schedule-button" onclick="schedule()">Schedule!</button>
-    <br>
-    <span id="message"></span>
+
+    <ul class="mdc-list">
+      <li id="empty-message" class="mdc-list-item default-cursor">
+        <span class="mdc-list-item__text">There are no tasks to schedule</span>
+      </li>
+      <li role="separator" class="mdc-list-divider"></li>
+      <li class="mdc-list-item">
+        <span class="mdc-list-item__text">
+          <label for="daterange">Select date range </label>
+          <label class="mdc-text-field mdc-text-field--filled mdc-text-field--with-leading-icon date-picker">
+            <span class="mdc-text-field__ripple"></span>
+            <i class="material-icons mdc-text-field__icon mdc-text-field__icon--leading" tabindex="0" role="button">date_range</i>
+            <input class="mdc-text-field__input" id="daterange" type="daterange" name="daterange">
+          </label>
+        </span>
+      </li>
+    </ul>
+
+    <button id="schedule-button" class="mdc-button mdc-button--raised fixed" onclick="schedule()">
+      <span class="mdc-button__label">Schedule!</span>
+      <div class="mdc-button__ripple"></div>
+    </button>
   </div>
+
   <div class="calendar-container">
     <iframe id="calendar" frameborder="0" scrolling="no"></iframe>
   </div>
 </div>
+<script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="/script.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 <script src="/datepicker.js"></script>
+
+<div id="snackbar-result" class="mdc-snackbar">
+  <div class="mdc-snackbar__surface">
+    <div id="snackbar-result-text"
+         class="mdc-snackbar__label"
+         role="status"
+         aria-live="polite">
+    </div>
+    <div class="mdc-snackbar__actions">
+      <button class="mdc-icon-button mdc-snackbar__dismiss material-icons" title="Dismiss">close</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

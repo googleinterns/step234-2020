@@ -5,9 +5,8 @@
   <title>Tasks Scheduler</title>
   <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Roboto+Mono:400,500|Material+Icons">
-  <link rel="stylesheet" href="daterangepicker.css">
-  <link rel="stylesheet" href="style.css">
-  <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+  <link rel="stylesheet" href="/daterangepicker.css">
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <div class="container">
@@ -28,7 +27,8 @@
           </div>
         </span>
         <label class="mdc-list-item__text" for="toggle-all">Task title</label>
-      </li><li role="separator" class="mdc-list-divider"></li>
+      </li>
+      <li role="separator" class="mdc-list-divider"></li>
     </ul>
 
     <form id="schedule-form">
@@ -36,6 +36,9 @@
     </form>
 
     <ul class="mdc-list">
+      <li id="empty-message" class="mdc-list-item default-cursor">
+        <span class="mdc-list-item__text">There are no tasks to schedule</span>
+      </li>
       <li role="separator" class="mdc-list-divider"></li>
       <li class="mdc-list-item">
         <span class="mdc-list-item__text">
@@ -59,6 +62,7 @@
     <iframe id="calendar" frameborder="0" scrolling="no"></iframe>
   </div>
 </div>
+<script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="/script.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>

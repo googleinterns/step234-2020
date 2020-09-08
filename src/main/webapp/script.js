@@ -29,17 +29,11 @@ function loadTasks() {
 }
 
 function renderTasks(tasks) {
-  const taskList = $("#task-list");
-  taskList.empty();
+  $("#task-list").empty();
+  $("#schedule-button").prop("disabled", !tasks.length);
+  $("#empty-message").toggle(!tasks.length);
   if (tasks.length > 0) {
-    $("#schedule-button").prop("disabled", false);
     tasks.forEach(renderSingleTask);
-  } else {
-    $("#schedule-button").prop("disabled", true);
-    taskList.html(
-      `<li class="mdc-list-item default-cursor">
-        <span class="mdc-list-item__text">There are no tasks to schedule</span>
-       </li>`);
   }
 }
 
@@ -156,5 +150,5 @@ function refreshCalendar() {
  */
 function toggleAll() {
   const toggleStatus = $("#toggle-all").prop("checked");
-  $("input[type=checkbox], input[name=taskId]").prop("checked", toggleStatus);
+  $("#task-list input[type=checkbox]").prop("checked", toggleStatus);
 }

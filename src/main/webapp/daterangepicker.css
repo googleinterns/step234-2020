@@ -1,3 +1,11 @@
+/*
+This is a copy of https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css
+Changes from the original:
+- font-family set to "Roboto, sans-serif";
+- font-size set to 16px;
+- background-color from #08c to #668CD9.
+*/
+
 .daterangepicker {
   position: absolute;
   color: inherit;

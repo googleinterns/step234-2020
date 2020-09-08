@@ -46,6 +46,10 @@ body {
   height: 68px;
 }
 
+#empty-message {
+  display: none;
+}
+
 :root {
   --mdc-theme-primary: #668CD9;
 }

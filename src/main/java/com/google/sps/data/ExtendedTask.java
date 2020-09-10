@@ -21,7 +21,10 @@ import com.google.api.client.util.Key;
 import com.google.api.services.tasks.model.Task;
 import java.util.Comparator;
 
+// Override equals and hashcode by extending GenericData
+// Two tasks are equal if all of their properties match (It makes testing easier)
 public class ExtendedTask extends GenericData {
+  public static final Comparator<ExtendedTask> BY_DURATION = Comparator.comparing(ExtendedTask::getDuration);
   @Key
   private Task task;
   @Key
@@ -32,8 +35,8 @@ public class ExtendedTask extends GenericData {
     this.duration = duration;
   }
 
-  public static ExtendedTask getExtendedTaskWithDuration(long duration){
-     return new ExtendedTask(new Task(), duration);
+  public static ExtendedTask getExtendedTaskWithDuration(long duration) {
+    return new ExtendedTask(new Task(), duration);
   }
 
   public Task getTask() {
@@ -53,15 +56,13 @@ public class ExtendedTask extends GenericData {
     this.duration = duration;
   }
 
-  public String getId(){
+  public String getId() {
     return task.getId();
   }
 
-  public String getTitle(){
+  public String getTitle() {
     return task.getTitle();
   }
-
-  public static final Comparator<ExtendedTask> BY_DURATION = Comparator.comparing(ExtendedTask::getDuration);
 }
 
 

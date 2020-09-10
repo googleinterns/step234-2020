@@ -22,7 +22,6 @@ import com.google.api.services.tasks.model.TaskList;
 import com.google.api.services.tasks.model.TaskLists;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.sps.api.authorization.AuthorizationRequester;
-import com.google.sps.data.ExtendedTask;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +30,9 @@ import java.util.List;
  * Provides access to the Tasks API.
  */
 public class TasksClientAdapter {
-  /** Max results allowed by the API. */
+  /**
+   * Max results allowed by the API.
+   */
   private final static int MAX_ALLOWED_RESULTS = 100;
   private final Tasks tasksClient;
 
@@ -39,9 +40,9 @@ public class TasksClientAdapter {
     String userId = UserServiceFactory.getUserService().getCurrentUser().getUserId();
     Credential credential = AuthorizationRequester.newFlow().loadCredential(userId);
     tasksClient = new Tasks(
-      AuthorizationRequester.HTTP_TRANSPORT,
-      AuthorizationRequester.JSON_FACTORY,
-      credential);
+        AuthorizationRequester.HTTP_TRANSPORT,
+        AuthorizationRequester.JSON_FACTORY,
+        credential);
   }
 
   /**
@@ -88,6 +89,7 @@ public class TasksClientAdapter {
   /**
    * Updates the date of the specified task.
    * The date is specified using a RFC 3339 timestamp.
+   *
    * @param dueDate due date as an <a href='http://tools.ietf.org/html/rfc3339'>RFC 3339</a> value.
    */
   public void updateDateTimeTask(String taskListId, String taskId, String dueDate) throws IOException {

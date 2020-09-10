@@ -36,9 +36,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,7 +79,7 @@ public class ScheduleServlet extends HttpServlet {
     try {
       startDate = LocalDate.parse(startDateString);
       endDate = LocalDate.parse(endDateString);
-    } catch(DateTimeParseException | NullPointerException exception) { //If date was not received or is in wrong format, schedule for tomorrow
+    } catch (DateTimeParseException | NullPointerException exception) { //If date was not received or is in wrong format, schedule for tomorrow
       startDate = calendarClientAdapter.getUsersTomorrowStart().toLocalDate();
       endDate = startDate;
     }
@@ -92,8 +92,8 @@ public class ScheduleServlet extends HttpServlet {
     List<Event> calendarEvents = calendarClientAdapter.getAcceptedEventsInTimerange(startDateTime, endDateTime);
 
     // Schedules
-    List<ExtendedTask> scheduledExtendedTasks = Scheduler.scheduleInRange(
-        calendarEvents, tasksToSchedule, timeZone, startDate, endDate);
+    Scheduler scheduler = new Scheduler(calendarEvents, tasksToSchedule, timeZone);
+    List<ExtendedTask> scheduledExtendedTasks = scheduler.scheduleInRange(startDate, endDate);
 
     List<Task> scheduledTasks = scheduledExtendedTasks.stream().map(ExtendedTask::getTask).collect(Collectors.toList());
     // Updates Tasks and Calendar
@@ -107,7 +107,7 @@ public class ScheduleServlet extends HttpServlet {
   /**
    * Returns the task objects having the ids contained in the array.
    */
-   List<Task> getSelectedTasks(
+  List<Task> getSelectedTasks(
       String[] tasksIds, TasksClientAdapter tasksClientAdapter, String tasksListId) {
     List<Task> tasks = new ArrayList<>();
 
@@ -127,7 +127,7 @@ public class ScheduleServlet extends HttpServlet {
    * Creates a calendar event for each task with the same title, description and
    * start time. The duration is the default one.
    */
-   List<Event> createEventsFromTasks(List<Task> tasks, String timeZone) {
+  List<Event> createEventsFromTasks(List<Task> tasks, String timeZone) {
     List<Event> calendarEvents = new ArrayList<>();
 
     for (Task task : tasks) {
@@ -142,7 +142,7 @@ public class ScheduleServlet extends HttpServlet {
    * Creates a calendar event with the same title, description and
    * start time of the task. The duration is the default one.
    */
-   Event createEventFromTask(Task task, String timeZone) {
+  Event createEventFromTask(Task task, String timeZone) {
     DateTime startTime = new DateTime(task.getDue());
     long endEpoch = startTime.getValue() + Scheduler.DEFAULT_DURATION_IN_MILLISECONDS;
     DateTime endTime = TimeConverter.epochToDateTime(endEpoch, timeZone);

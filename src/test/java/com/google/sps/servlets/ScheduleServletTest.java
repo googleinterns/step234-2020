@@ -35,9 +35,7 @@ import static com.google.sps.api.calendar.CalendarClientHelper.createPrivateEven
 import static com.google.sps.api.tasks.TasksClientHelper.createDefaultDurationTaskWithDue;
 import static com.google.sps.converter.TimeConverter.createDateTime;
 import static org.mockito.AdditionalMatchers.not;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 
 public class ScheduleServletTest {
   private final static ImmutableSet<String> TASKS_IDS = ImmutableSet.of(

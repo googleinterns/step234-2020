@@ -36,7 +36,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -90,9 +89,8 @@ public class ScheduleServlet extends HttpServlet {
 
 
     // Schedules
-    //TODO: Schedule to an interval of days, from startDate to endDate
-    List<Task> scheduledTasks = Scheduler.schedule(
-        calendarEvents, tasksToSchedule, timeZone, startDate);
+    List<Task> scheduledTasks = Scheduler.scheduleInRange(
+        calendarEvents, tasksToSchedule, timeZone, startDate, endDate);
 
     // Updates Tasks and Calendar
     tasksClientAdapter.updateTasks(tasksListId, scheduledTasks);

@@ -51,12 +51,22 @@ public class TasksClientHelper {
   }
 
   /**
-   * Returns a task with the given due date.
+   * Returns an ExtendedTask with the given due date, with default duration.
    */
   public static ExtendedTask createDefaultDurationTaskWithDue(DateTime dueDate) {
     Task task = new Task();
     task.setDue(dueDate.toStringRfc3339());
     ExtendedTask extendedTask = new ExtendedTask(task, Scheduler.DEFAULT_DURATION_IN_MILLISECONDS);
+    return extendedTask;
+  }
+
+  /**
+   * Returns an ExtendedTask with specified due date and duration.
+   */
+  public static ExtendedTask createCustomDurationTaskWithDue(DateTime dueDate, Long duration) {
+    Task task = new Task();
+    task.setDue(dueDate.toStringRfc3339());
+    ExtendedTask extendedTask = new ExtendedTask(task, duration);
     return extendedTask;
   }
 }

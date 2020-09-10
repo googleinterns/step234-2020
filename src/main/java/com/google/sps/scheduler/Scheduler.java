@@ -115,7 +115,7 @@ public class Scheduler {
       long limit, long lastEnd, String timeZone, TreeMultimap<Long, ExtendedTask> longestFirstOrderedTasks, List<ExtendedTask> scheduledTasks) {
 
     long scheduleInterval = limit - lastEnd;
-    while (scheduleInterval >= DEFAULT_DURATION_IN_MILLISECONDS && !longestFirstOrderedTasks.isEmpty()) {
+    while (!longestFirstOrderedTasks.isEmpty()) {
       DateTime startTime = epochToDateTime(lastEnd, timeZone);
 
       Long longestFittingLength = longestFirstOrderedTasks.asMap().floorKey(scheduleInterval);

@@ -24,6 +24,7 @@ import com.google.sps.api.calendar.CalendarClientHelper;
 import com.google.sps.api.tasks.TasksClientAdapter;
 import com.google.sps.api.tasks.TasksClientHelper;
 import com.google.sps.converter.TimeConverter;
+import com.google.sps.data.ExtendedTask;
 import com.google.sps.data.ScheduleMessage;
 import com.google.sps.scheduler.Scheduler;
 import javax.servlet.annotation.WebServlet;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Schedules tasks on tomorrow.
@@ -61,8 +63,11 @@ public class ScheduleServlet extends HttpServlet {
     TasksClientAdapter tasksClientAdapter = new TasksClientAdapter();
     String tasksListId = TasksClientHelper.getMostRecentTaskListId(
         tasksClientAdapter.getTasksLists());
-    List<Task> tasksToSchedule = getSelectedTasks(
-        request.getParameterValues(TASK_ID_LIST_KEY), tasksClientAdapter, tasksListId);
+    List<ExtendedTask> tasksToSchedule = getSelectedTasks(
+        request.getParameterValues(TASK_ID_LIST_KEY), tasksClientAdapter, tasksListId)
+        .stream().map(task -> new ExtendedTask(task, Scheduler.DEFAULT_DURATION_IN_MILLISECONDS))
+        .collect(Collectors.toList());
+
 
     CalendarClientAdapter calendarClientAdapter = new CalendarClientAdapter();
     String timeZone = calendarClientAdapter.getPrimaryCalendarTimeZone();
@@ -86,12 +91,11 @@ public class ScheduleServlet extends HttpServlet {
 
     List<Event> calendarEvents = calendarClientAdapter.getAcceptedEventsInTimerange(startDateTime, endDateTime);
 
-
-
     // Schedules
-    List<Task> scheduledTasks = Scheduler.scheduleInRange(
+    List<ExtendedTask> scheduledExtendedTasks = Scheduler.scheduleInRange(
         calendarEvents, tasksToSchedule, timeZone, startDate, endDate);
 
+    List<Task> scheduledTasks = scheduledExtendedTasks.stream().map(ExtendedTask::getTask).collect(Collectors.toList());
     // Updates Tasks and Calendar
     tasksClientAdapter.updateTasks(tasksListId, scheduledTasks);
     calendarClientAdapter.insertEventsToPrimary(

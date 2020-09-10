@@ -16,13 +16,17 @@ package com.google.sps.scheduler;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
-import com.google.api.services.tasks.model.Task;
+import com.google.common.collect.Ordering;
+import com.google.common.collect.TreeMultimap;
+import com.google.sps.data.ExtendedTask;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
@@ -46,19 +50,25 @@ public class Scheduler {
    * For each task that can be scheduled, the due time is set and a list of all scheduled tasks
    * is returned.
    */
-  public static List<Task> scheduleInRange(List<Event> calendarEvents, List<Task> tasks, String timeZone, LocalDate startDate, LocalDate endDate) {
+  public static List<ExtendedTask> scheduleInRange(List<Event> calendarEvents, List<ExtendedTask> tasks, String timeZone, LocalDate startDate, LocalDate endDate) {
     LocalDate scheduleDate = startDate;
-    List<Task> scheduledTasks = new ArrayList<>();
-    while (!scheduleDate.isAfter(endDate) && (scheduledTasks.size() < tasks.size())) {
-      scheduledTasks.addAll(scheduleForADay(calendarEvents, tasks.subList(scheduledTasks.size(), tasks.size()), timeZone, scheduleDate));
+    List<ExtendedTask> scheduledTasks = new ArrayList<>();
+
+    TreeMultimap<Long, ExtendedTask> longestFirstOrderedTasks = TreeMultimap.create(Ordering.<Long>natural(), Ordering.arbitrary()); // It is possible to omit the parameters, but then we would have to implement a comparator on the tasks
+    for(ExtendedTask task: tasks){
+      longestFirstOrderedTasks.put(task.getDuration(), task);
+    }
+
+    while (!scheduleDate.isAfter(endDate) && !longestFirstOrderedTasks.isEmpty()) {
+      scheduledTasks.addAll(scheduleForADay(calendarEvents, longestFirstOrderedTasks, timeZone, scheduleDate));
       scheduleDate = scheduleDate.plusDays(1);
     }
     return scheduledTasks;
   }
 
-  public static List<Task> scheduleForADay(
-      List<Event> calendarEvents, List<Task> tasks, String timeZone, LocalDate dayDate) {
-    List<Task> scheduledTasks = new ArrayList<>();
+  public static List<ExtendedTask> scheduleForADay(
+      List<Event> calendarEvents, TreeMultimap<Long, ExtendedTask> longestFirstOrderedTasks, String timeZone, LocalDate dayDate) {
+    List<ExtendedTask> scheduledTasks = new ArrayList<>();
 
     Set<Event> orderedCalendarEvents = new TreeSet<>(
         Comparator.comparingLong(event -> event.getStart().getDateTime().getValue()));
@@ -70,7 +80,6 @@ public class Scheduler {
         epochInMilliseconds(dayDate, LocalTime.of(END_HOUR, END_MINUTE), timeZone);
 
     long lastEnd = dayStartEpochMilliseconds;
-    Iterator<Task> tasksIterator = tasks.iterator();
 
     for (Event event : orderedCalendarEvents) {
       long eventEnd = event.getEnd().getDateTime().getValue();
@@ -83,9 +92,9 @@ public class Scheduler {
         break;
       }
 
-      lastEnd = scheduleInterval(eventStart, lastEnd, timeZone, tasksIterator, scheduledTasks);
+      lastEnd = scheduleInterval(eventStart, lastEnd, timeZone, longestFirstOrderedTasks, scheduledTasks);
 
-      if (!tasksIterator.hasNext()) {
+      if (longestFirstOrderedTasks.isEmpty()) {
         break;
       }
 
@@ -94,7 +103,7 @@ public class Scheduler {
       }
     }
 
-    scheduleInterval(dayEndEpochMilliseconds, lastEnd, timeZone, tasksIterator, scheduledTasks);
+    scheduleInterval(dayEndEpochMilliseconds, lastEnd, timeZone, longestFirstOrderedTasks, scheduledTasks);
 
     return scheduledTasks;
   }
@@ -103,14 +112,25 @@ public class Scheduler {
    * Schedules the tasks in the free intervals between lastEnd and limit.
    */
   private static long scheduleInterval(
-      long limit, long lastEnd, String timeZone, Iterator<Task> tasksIterator, List<Task> scheduledTasks) {
+      long limit, long lastEnd, String timeZone, TreeMultimap<Long, ExtendedTask> longestFirstOrderedTasks, List<ExtendedTask> scheduledTasks) {
 
-    while (limit - lastEnd >= DEFAULT_DURATION_IN_MILLISECONDS && tasksIterator.hasNext()) {
+    long scheduleInterval = limit - lastEnd;
+    while (scheduleInterval >= DEFAULT_DURATION_IN_MILLISECONDS && !longestFirstOrderedTasks.isEmpty()) {
       DateTime startTime = epochToDateTime(lastEnd, timeZone);
-      Task task = tasksIterator.next();
-      task.setDue(startTime.toStringRfc3339());
+
+      Long longestFittingLength = longestFirstOrderedTasks.asMap().floorKey(scheduleInterval);
+
+      // Potential improvement: do not look up the same length again.
+      // This is marginal as long as we are working such a small amount of tasks (And especially such small amount of different possible durations)
+      if(longestFittingLength == null){
+        return lastEnd;
+      }
+      ExtendedTask task = longestFirstOrderedTasks.get(longestFittingLength).pollFirst();
+
+      task.getTask().setDue(startTime.toStringRfc3339());
       scheduledTasks.add(task);
-      lastEnd += DEFAULT_DURATION_IN_MILLISECONDS;
+      lastEnd += task.getDuration();
+      scheduleInterval = limit - lastEnd;
     }
 
     return lastEnd;

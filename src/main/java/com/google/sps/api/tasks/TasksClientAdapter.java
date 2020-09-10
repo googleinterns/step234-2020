@@ -22,6 +22,7 @@ import com.google.api.services.tasks.model.TaskList;
 import com.google.api.services.tasks.model.TaskLists;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.sps.api.authorization.AuthorizationRequester;
+import com.google.sps.data.ExtendedTask;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;

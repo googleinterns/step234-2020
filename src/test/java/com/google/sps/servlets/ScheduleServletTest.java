@@ -19,6 +19,7 @@ import com.google.api.services.tasks.model.Task;
 import com.google.common.collect.ImmutableSet;
 import com.google.sps.api.calendar.CalendarClientHelper;
 import com.google.sps.api.tasks.TasksClientAdapter;
+import com.google.sps.data.ExtendedTask;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +32,7 @@ import java.util.List;
 
 import static com.google.sps.api.calendar.CalendarClientHelper.createEventWithSummary;
 import static com.google.sps.api.calendar.CalendarClientHelper.createPrivateEventWithSummaryAndDescription;
-import static com.google.sps.api.tasks.TasksClientHelper.createTaskWithDue;
+import static com.google.sps.api.tasks.TasksClientHelper.createDefaultDurationTaskWithDue;
 import static com.google.sps.converter.TimeConverter.createDateTime;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -52,7 +53,7 @@ public class ScheduleServletTest {
   @Before
   public void setUp() throws IOException {
     scheduleServlet = new ScheduleServlet();
-    tasks = new ArrayList<>();
+    tasks = new ArrayList<Task>();
     tasksClientAdapter = Mockito.mock(TasksClientAdapter.class);
     for (String taskId : TASKS_IDS) {
       Task task = new Task();
@@ -124,11 +125,11 @@ public class ScheduleServletTest {
   @Test
   public void createEventFromTask_withoutDescription() {
     LocalDate day = LocalDate.of(2020, 11, 9);
-    Task task = createTaskWithDue(
+    ExtendedTask task = createDefaultDurationTaskWithDue(
         createDateTime(day, 11, 30, ZURICH_TIME_ZONE)
     );
     String title = "Task without description";
-    task.setTitle(title);
+    task.getTask().setTitle(title);
 
     Event expectedEvent = createEventWithSummary(
         createDateTime(day, 11, 30, ZURICH_TIME_ZONE),
@@ -136,7 +137,7 @@ public class ScheduleServletTest {
         ZURICH_TIME_ZONE, title
     );
     expectedEvent.setVisibility(CalendarClientHelper.PRIVATE_VISIBILITY);
-    Event actualEvent = scheduleServlet.createEventFromTask(task, ZURICH_TIME_ZONE);
+    Event actualEvent = scheduleServlet.createEventFromTask(task.getTask(), ZURICH_TIME_ZONE);
 
     Assert.assertEquals(expectedEvent, actualEvent);
   }
@@ -144,20 +145,20 @@ public class ScheduleServletTest {
   @Test
   public void createEventFromTask_withDescription() {
     LocalDate day = LocalDate.of(2022, 4, 9);
-    Task task = createTaskWithDue(
+    ExtendedTask task = createDefaultDurationTaskWithDue(
         createDateTime(day, 15, 0, UTC_TIME_ZONE)
     );
     String title = "Task with description";
-    task.setTitle(title);
+    task.getTask().setTitle(title);
     String description = "Description of the task";
-    task.setNotes(description);
+    task.getTask().setNotes(description);
 
     Event expectedEvent = createPrivateEventWithSummaryAndDescription(
         createDateTime(day, 15, 0, UTC_TIME_ZONE),
         createDateTime(day, 15, 30, UTC_TIME_ZONE),
         UTC_TIME_ZONE, title, description
     );
-    Event actualEvent = scheduleServlet.createEventFromTask(task, UTC_TIME_ZONE);
+    Event actualEvent = scheduleServlet.createEventFromTask(task.getTask(), UTC_TIME_ZONE);
 
     Assert.assertEquals(expectedEvent, actualEvent);
   }

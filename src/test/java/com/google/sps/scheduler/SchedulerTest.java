@@ -379,6 +379,7 @@ public class SchedulerTest {
     List<Event> calendarEvents = new ArrayList<>();
     LocalDate day = LocalDate.of(2023, 12, 31);
     LocalDate nextDay = LocalDate.of(2024, 1, 1);
+    LocalDate farAhead = LocalDate.of(2026, 1, 1);
     Event eventA = createEvent(
         createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
         createDateTime(day, 10, 0, ZURICH_TIME_ZONE),
@@ -427,7 +428,7 @@ public class SchedulerTest {
     calendarEvents.add(eventG);
     calendarEvents.add(eventJ);
 
-    List<Task> actualScheduledTasks = scheduleInRange(calendarEvents, sampleTasks, ZURICH_TIME_ZONE, day, nextDay);
+    List<Task> actualScheduledTasks = scheduleInRange(calendarEvents, sampleTasks, ZURICH_TIME_ZONE, day, farAhead);
     List<Task> expectedScheduledTasks = Arrays.asList(
         createTaskWithDue(
             createDateTime(day, 11, 0, ZURICH_TIME_ZONE)),

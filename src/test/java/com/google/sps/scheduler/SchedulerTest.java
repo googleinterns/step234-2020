@@ -30,7 +30,6 @@ import static com.google.sps.api.calendar.CalendarClientHelper.createEvent;
 import static com.google.sps.api.tasks.TasksClientHelper.createTaskWithDue;
 import static com.google.sps.converter.TimeConverter.createDateTime;
 import static com.google.sps.scheduler.Scheduler.scheduleForADay;
-import static com.google.sps.scheduler.Scheduler.scheduleInRange;
 
 @RunWith(JUnit4.class)
 public class SchedulerTest {
@@ -428,7 +427,9 @@ public class SchedulerTest {
     calendarEvents.add(eventG);
     calendarEvents.add(eventJ);
 
-    List<Task> actualScheduledTasks = scheduleInRange(calendarEvents, sampleTasks, ZURICH_TIME_ZONE, day, farAhead);
+    Scheduler scheduler = new Scheduler(calendarEvents, sampleTasks);
+    List<Task> actualScheduledTasks = scheduler
+        .scheduleInRange(ZURICH_TIME_ZONE, day, farAhead);
     List<Task> expectedScheduledTasks = Arrays.asList(
         createTaskWithDue(
             createDateTime(day, 11, 0, ZURICH_TIME_ZONE)),
@@ -501,7 +502,9 @@ public class SchedulerTest {
     calendarEvents.add(eventG);
     calendarEvents.add(eventJ);
 
-    List<Task> actualScheduledTasks = scheduleInRange(calendarEvents, sampleTasks, ZURICH_TIME_ZONE, day, nextDay);
+    Scheduler scheduler = new Scheduler(calendarEvents, sampleTasks);
+    List<Task> actualScheduledTasks = scheduler
+        .scheduleInRange(ZURICH_TIME_ZONE, day, nextDay);
     List<Task> expectedScheduledTasks = Arrays.asList(
         createTaskWithDue(
             createDateTime(day, 11, 0, ZURICH_TIME_ZONE)),
@@ -532,7 +535,8 @@ public class SchedulerTest {
     calendarEvents.add(eventA);
     calendarEvents.add(eventB);
 
-    List<Task> actualScheduledTasks = scheduleInRange(calendarEvents, sampleTasks, ZURICH_TIME_ZONE, day, day);
+    Scheduler scheduler = new Scheduler(calendarEvents, sampleTasks);
+    List<Task> actualScheduledTasks = scheduler.scheduleInRange(ZURICH_TIME_ZONE, day, day);
     List<Task> expectedScheduledTasks = Arrays.asList(
         createTaskWithDue(
             createDateTime(day, 10, 0, ZURICH_TIME_ZONE)),

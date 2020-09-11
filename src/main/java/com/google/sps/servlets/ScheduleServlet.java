@@ -68,6 +68,31 @@ public class ScheduleServlet extends HttpServlet {
     String timeZone = calendarClientAdapter.getPrimaryCalendarTimeZone();
     ZoneId zoneId = ZoneId.of(timeZone);
 
+    LocalDate defaultStartTime = calendarClientAdapter.getUsersTomorrowStart().toLocalDate();
+    RequestParameters params = getRequestParameters(request,
+        defaultStartTime);
+
+    ZonedDateTime zonedStartpoint = params.getStartDate().atStartOfDay(zoneId);
+    DateTime startDateTime = new DateTime(zonedStartpoint.toInstant().toEpochMilli());
+    ZonedDateTime zonedEndpoint = params.getEndDate().atStartOfDay(zoneId).plusDays(1);
+    DateTime endDateTime = new DateTime(zonedEndpoint.toInstant().toEpochMilli());
+
+    List<Event> calendarEvents = calendarClientAdapter.getAcceptedEventsInTimerange(startDateTime, endDateTime);
+
+    // Schedules
+    Scheduler scheduler = new Scheduler(calendarEvents, tasksToSchedule);
+    List<Task> scheduledTasks = scheduler
+        .scheduleInRange(timeZone, params.getStartDate(), params.getEndDate());
+
+    // Updates Tasks and Calendar
+    tasksClientAdapter.updateTasks(tasksListId, scheduledTasks);
+    calendarClientAdapter.insertEventsToPrimary(
+        createEventsFromTasks(scheduledTasks, timeZone));
+    sendJsonResponse(response, scheduledTasks.size() + " tasks inserted on " + params.getStartDate());
+  }
+
+  private RequestParameters getRequestParameters(HttpServletRequest request,
+      LocalDate defaultStartTime) {
     String startDateString = request.getParameter("startDate");
     String endDateString = request.getParameter("endDate");
     LocalDate startDate, endDate;
@@ -75,29 +100,11 @@ public class ScheduleServlet extends HttpServlet {
       startDate = LocalDate.parse(startDateString);
       endDate = LocalDate.parse(endDateString);
     } catch(DateTimeParseException | NullPointerException exception) { //If date was not received or is in wrong format, schedule for tomorrow
-      startDate = calendarClientAdapter.getUsersTomorrowStart().toLocalDate();
+      startDate = defaultStartTime;
       endDate = startDate;
     }
 
-    ZonedDateTime zonedStartpoint = startDate.atStartOfDay(zoneId);
-    DateTime startDateTime = new DateTime(zonedStartpoint.toInstant().toEpochMilli());
-    ZonedDateTime zonedEndpoint = endDate.atStartOfDay(zoneId).plusDays(1);
-    DateTime endDateTime = new DateTime(zonedEndpoint.toInstant().toEpochMilli());
-
-    List<Event> calendarEvents = calendarClientAdapter.getAcceptedEventsInTimerange(startDateTime, endDateTime);
-
-
-
-    // Schedules
-    List<Task> scheduledTasks = Scheduler.scheduleInRange(
-        calendarEvents, tasksToSchedule, timeZone, startDate, endDate);
-
-    // Updates Tasks and Calendar
-    tasksClientAdapter.updateTasks(tasksListId, scheduledTasks);
-    calendarClientAdapter.insertEventsToPrimary(
-        createEventsFromTasks(scheduledTasks, timeZone));
-
-    sendJsonResponse(response, scheduledTasks.size() + " tasks inserted on " + startDate);
+    return new RequestParameters(startDate, endDate);
   }
 
   /**
@@ -156,6 +163,25 @@ public class ScheduleServlet extends HttpServlet {
       response.getWriter().println(jsonMessage);
     } catch (JsonProcessingException exception) {
       throw new IOException(exception);
+    }
+  }
+
+  private class RequestParameters {
+
+    private final LocalDate startDate;
+    private final LocalDate endDate;
+
+    public RequestParameters(LocalDate startDate, LocalDate endDate) {
+      this.startDate = startDate;
+      this.endDate = endDate;
+    }
+
+    public LocalDate getStartDate() {
+      return startDate;
+    }
+
+    public LocalDate getEndDate() {
+      return endDate;
     }
   }
 }

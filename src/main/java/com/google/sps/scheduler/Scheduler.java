@@ -39,24 +39,15 @@ public class Scheduler {
   public static final int END_HOUR = 18;
   public static final int END_MINUTE = 0;
   public static final long DEFAULT_DURATION_IN_MILLISECONDS = TimeUnit.MINUTES.toMillis(30);
+  private final List<Event> calendarEvents;
+  private final List<Task> tasks;
 
-  /**
-   * Schedules the tasks in the free time slot of the calendar events, which must be of the same day
-   * specified in the parameter.
-   * For each task that can be scheduled, the due time is set and a list of all scheduled tasks
-   * is returned.
-   */
-  public static List<Task> scheduleInRange(List<Event> calendarEvents, List<Task> tasks, String timeZone, LocalDate startDate, LocalDate endDate) {
-    LocalDate scheduleDate = startDate;
-    List<Task> scheduledTasks = new ArrayList<>();
-    while (!scheduleDate.isAfter(endDate) && (scheduledTasks.size() < tasks.size())) {
-      scheduledTasks.addAll(scheduleForADay(calendarEvents, tasks.subList(scheduledTasks.size(), tasks.size()), timeZone, scheduleDate));
-      scheduleDate = scheduleDate.plusDays(1);
-    }
-    return scheduledTasks;
+  public Scheduler(List<Event> calendarEvents, List<Task> tasks) {
+    this.calendarEvents = calendarEvents;
+    this.tasks = tasks;
   }
 
-  public static List<Task> scheduleForADay(
+  static List<Task> scheduleForADay(
       List<Event> calendarEvents, List<Task> tasks, String timeZone, LocalDate dayDate) {
     List<Task> scheduledTasks = new ArrayList<>();
 
@@ -114,5 +105,23 @@ public class Scheduler {
     }
 
     return lastEnd;
+  }
+
+  /**
+   * Schedules the tasks in the free time slot of the calendar events, which must be of the same day
+   * specified in the parameter.
+   * For each task that can be scheduled, the due time is set and a list of all scheduled tasks
+   * is returned.
+   */
+  public List<Task> scheduleInRange(String timeZone, LocalDate startDate,
+      LocalDate endDate) {
+    LocalDate scheduleDate = startDate;
+    List<Task> scheduledTasks = new ArrayList<>();
+    while (!scheduleDate.isAfter(endDate) && (scheduledTasks.size() < tasks.size())) {
+      scheduledTasks.addAll(scheduleForADay(
+          calendarEvents, tasks.subList(scheduledTasks.size(), tasks.size()), timeZone, scheduleDate));
+      scheduleDate = scheduleDate.plusDays(1);
+    }
+    return scheduledTasks;
   }
 }

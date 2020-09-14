@@ -21,7 +21,11 @@ function init() {
   loadCalendar();
 }
 
+const linearProgress = new mdc.linearProgress.MDCLinearProgress(document.querySelector('#progress-bar'));
+const scheduleButton = $("#schedule-button");
+
 function loadTasks() {
+  linearProgress.open();
   fetch("/load_tasks")
       .then(getJsonIfOk)
       .then(renderTasks)
@@ -29,8 +33,8 @@ function loadTasks() {
 }
 
 function renderTasks(tasks) {
+  linearProgress.close();
   $("#task-list").empty();
-  $("#schedule-button").prop("disabled", !tasks.length);
   $("#empty-message").toggle(!tasks.length);
   if (tasks.length > 0) {
     tasks.forEach(renderSingleTask);
@@ -45,7 +49,7 @@ function renderSingleTask(task) {
         <span class="mdc-list-item__ripple"></span>
         <span class="mdc-list-item__graphic">
           <div class="mdc-checkbox">
-            <input type="checkbox" name="taskId" id="${id}" class="mdc-checkbox__native-control" value="${id}" />
+            <input type="checkbox" name="taskId" id="${id}" class="mdc-checkbox__native-control" value="${id}" onclick="disableScheduleButtonIfNoTaskIsSelected()"/>
             <div class="mdc-checkbox__background">
               <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
                 <path class="mdc-checkbox__checkmark-path" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
@@ -59,6 +63,10 @@ function renderSingleTask(task) {
     </li>`);
 }
 
+function disableScheduleButtonIfNoTaskIsSelected() {
+  isAnyChecked = $(":checkbox[name='taskId']:checked").length > 0;
+  scheduleButton.prop("disabled", !isAnyChecked);
+}
 /**
  * Provides feedback to the user that tasks were scheduled, and
  * reports if there are problems.
@@ -151,4 +159,6 @@ function refreshCalendar() {
 function toggleAll() {
   const toggleStatus = $("#toggle-all").prop("checked");
   $("#task-list input[type=checkbox]").prop("checked", toggleStatus);
+  disableScheduleButtonIfNoTaskIsSelected();
+  // Todo: Find a way to add an eventhandler to the checkboxes on change
 }

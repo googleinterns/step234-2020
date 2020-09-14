@@ -29,10 +29,26 @@
         <label class="mdc-list-item__text" for="toggle-all">Task title</label>
       </li>
       <li role="separator" class="mdc-list-divider"></li>
+      <li role="progress-bar" id="progress-bar" class="mdc-linear-progress mdc-linear-progress--indeterminate" aria-label="Progress Bar" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0">
+        <div class="mdc-linear-progress__buffer">
+          <div class="mdc-linear-progress__buffer-bar"></div>
+          <div class="mdc-linear-progress__buffer-dots"></div>
+        </div>
+        <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+          <span class="mdc-linear-progress__bar-inner"></span>
+        </div>
+        <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+          <span class="mdc-linear-progress__bar-inner"></span>
+        </div>
+      </li>
     </ul>
 
+
+
     <form id="schedule-form">
-      <ul id="task-list" class="mdc-list no-padding" role="group"></ul>
+      <ul id="task-list" class="mdc-list no-padding" role="group">
+
+      </ul>
     </form>
 
     <div id="bottom-controls">
@@ -53,7 +69,7 @@
       </li>
     </ul>
 
-    <button id="schedule-button" class="mdc-button mdc-button--raised fixed" onclick="schedule()">
+    <button id="schedule-button" class="mdc-button mdc-button--raised fixed" onclick="schedule()" disabled>
       <span class="mdc-button__label">Schedule!</span>
       <div class="mdc-button__ripple"></div>
     </button>

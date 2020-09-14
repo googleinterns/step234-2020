@@ -63,6 +63,7 @@ public class ScheduleServlet extends HttpServlet {
     TasksClientAdapter tasksClientAdapter = new TasksClientAdapter();
     String tasksListId = TasksClientHelper.getMostRecentTaskListId(
         tasksClientAdapter.getTasksLists());
+    // Todo: get duration of tasks from request
     List<ExtendedTask> tasksToSchedule = getSelectedTasks(
         request.getParameterValues(TASK_ID_LIST_KEY), tasksClientAdapter, tasksListId)
         .stream().map(task -> new ExtendedTask(task, Scheduler.DEFAULT_DURATION_IN_MILLISECONDS))
@@ -98,6 +99,7 @@ public class ScheduleServlet extends HttpServlet {
     List<Task> scheduledTasks = scheduledExtendedTasks.stream().map(ExtendedTask::getTask).collect(Collectors.toList());
     // Updates Tasks and Calendar
     tasksClientAdapter.updateTasks(tasksListId, scheduledTasks);
+    // Todo: add events to calendar with appropriate duration
     calendarClientAdapter.insertEventsToPrimary(
         createEventsFromTasks(scheduledTasks, timeZone));
 

@@ -34,6 +34,7 @@ import static com.google.sps.converter.TimeConverter.epochToDateTime;
 
 /**
  * Schedules some tasks in the free time slot of the calendar.
+ * A new instance should be created for each scheduling.
  */
 public class Scheduler {
   public static final int START_HOUR = 9;
@@ -43,13 +44,11 @@ public class Scheduler {
   public static final long DEFAULT_DURATION_IN_MILLISECONDS = TimeUnit.MINUTES.toMillis(30);
   private String timeZone;
   private TreeMultimap<Long, ExtendedTask> longestFirstOrderedTasks;
-  private List<ExtendedTask> tasks;
   private Set<Event> orderedCalendarEvents;
   private List<ExtendedTask> scheduledTasks;
 
   public Scheduler(Collection<Event> calendarEvents, List<ExtendedTask> tasks, String timeZone) {
     this.timeZone = timeZone;
-    this.tasks = tasks;
 
     orderedCalendarEvents = new TreeSet<>(
         Comparator.comparingLong(event -> event.getStart().getDateTime().getValue()));
@@ -57,7 +56,7 @@ public class Scheduler {
 
     // It is possible to omit the parameters, but then we would have to implement a comparator on the tasks
     longestFirstOrderedTasks = TreeMultimap.create(Ordering.natural(), Ordering.arbitrary());
-    for (ExtendedTask task : this.tasks) {
+    for (ExtendedTask task : tasks) {
       longestFirstOrderedTasks.put(task.getDuration(), task);
     }
   }
@@ -71,7 +70,6 @@ public class Scheduler {
   public List<ExtendedTask> scheduleInRange(LocalDate startDate, LocalDate endDate) {
     scheduledTasks = new ArrayList<>();
     LocalDate scheduleDate = startDate;
-
 
     while (!scheduleDate.isAfter(endDate) && !longestFirstOrderedTasks.isEmpty()) {
       scheduleForADay(scheduleDate);
@@ -117,8 +115,7 @@ public class Scheduler {
   /**
    * Schedules the tasks in the free intervals between lastEnd and limit.
    */
-  private long scheduleInterval(
-      long limit, long lastEnd) {
+  private long scheduleInterval(long limit, long lastEnd) {
 
     long scheduleInterval = limit - lastEnd;
     while (!longestFirstOrderedTasks.isEmpty()) {

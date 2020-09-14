@@ -43,11 +43,6 @@ public class ExtendedTask extends GenericData {
     return task;
   }
 
-  //TODO: Consider if you really need setters?
-  public void setTask(Task task) {
-    this.task = task;
-  }
-
   public long getDuration() {
     return duration;
   }

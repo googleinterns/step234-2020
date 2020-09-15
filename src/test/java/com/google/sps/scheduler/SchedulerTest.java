@@ -643,7 +643,7 @@ public class SchedulerTest {
   public void varyingDurations() {
     // Events :    |-A|  |-B--|               |-C---|
     // Day    : |----------------------------------------|
-    // Tasks  : |5m|  |1h|    |-2h-|30m|10m|5m|     |-2h-|
+    // Tasks  : |5m|  |1h|    |-2h-|30m|10m|        |-2h-|
     List<Event> calendarEvents = new ArrayList<>();
     LocalDate day = LocalDate.of(2048, 6, 23);
     Event eventA = createEvent(
@@ -691,6 +691,7 @@ public class SchedulerTest {
     List<Event> calendarEvents = new ArrayList<>();
     LocalDate day = LocalDate.of(2048, 6, 23);
     LocalDate nextDay = LocalDate.of(2048, 6, 24);
+    LocalDate farFutureDay = LocalDate.of(2048, 8, 24);
     Event eventA = createEvent(
         createDateTime(day, Scheduler.START_HOUR + 3, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
         createDateTime(day, Scheduler.END_HOUR - 1, Scheduler.END_MINUTE, ZURICH_TIME_ZONE),
@@ -726,7 +727,7 @@ public class SchedulerTest {
     List<ExtendedTask> tasks =  Arrays.asList(ninetyMinsTask, fourHoursTask, twoHoursTask, secondNinetyMinsTask);
 
     Scheduler scheduler = new Scheduler(calendarEvents, tasks, ZURICH_TIME_ZONE);
-    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, nextDay);
+    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, farFutureDay);
     List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
         createCustomDurationTaskWithDue(
             createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE), TWO_HOURS),

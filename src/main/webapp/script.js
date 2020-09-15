@@ -29,34 +29,33 @@ function loadTasks() {
 }
 
 function renderTasks(tasks) {
-  $("#task-list").empty();
+  $("#task-list > .task").remove();
   $("#schedule-button").prop("disabled", !tasks.length);
   $("#empty-message").toggle(!tasks.length);
   if (tasks.length > 0) {
     tasks.forEach(renderSingleTask);
   }
+  initDropdowns();
 }
 
+/**
+ * Compiles the task template with the actual task data and
+ * adds it to the task list.
+ */
 function renderSingleTask(task) {
-  id = task.id;
-  $("#task-list").append(
-    `<li>
-      <label class="mdc-list-item" role="checkbox" aria-checked="false">
-        <span class="mdc-list-item__ripple"></span>
-        <span class="mdc-list-item__graphic">
-          <div class="mdc-checkbox">
-            <input type="checkbox" name="taskId" id="${id}" class="mdc-checkbox__native-control" value="${id}" />
-            <div class="mdc-checkbox__background">
-              <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
-                <path class="mdc-checkbox__checkmark-path" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
-              </svg>
-              <div class="mdc-checkbox__mixedmark"></div>
-            </div>
-          </div>
-        </span>
-        <label class="mdc-list-item__text" for="${id}">${task.title}</label>
-      </label>
-    </li>`);
+  const taskTemplateElement = document.getElementById("task-template").innerHTML;
+  const taskTemplate = Handlebars.compile(taskTemplateElement);
+  $("#task-list").append(taskTemplate(task));
+}
+
+/**
+ * Initializes the dropdowns selection components.
+ */
+function initDropdowns() {
+  $(".mdc-select").each(
+      function() {
+        mdc.select.MDCSelect.attachTo(this);
+      });
 }
 
 /**
@@ -83,11 +82,27 @@ function schedule() {
   [startDate, endDate] = daterange.split(' - ');
   formContent.append("startDate", startDate.trim());
   formContent.append("endDate", endDate.trim());
+  appendDurations(formContent);
   postData("/schedule", new URLSearchParams(formContent).toString())
       .then(getJsonIfOk)
       .then(updateView)
       .then(refreshCalendar)
       .catch(handleNetworkError);
+}
+
+/**
+ * Appends to the form data the selected values for the duration of each task.
+ */
+function appendDurations(formData) {
+  $("input[name=taskId]").each(
+      function () {
+        if (this.checked) {
+          const durationSelect = $(this).closest(".task-title").next()[0];
+          const mdcDurationSelect = new mdc.select.MDCSelect(durationSelect);
+          formData.append("taskDuration", mdcDurationSelect.value);
+        }
+      }
+  );
 }
 
 function postData(url, data) {

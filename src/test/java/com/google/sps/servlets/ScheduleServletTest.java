@@ -20,18 +20,20 @@ import com.google.common.collect.ImmutableSet;
 import com.google.sps.api.calendar.CalendarClientHelper;
 import com.google.sps.api.tasks.TasksClientAdapter;
 import com.google.sps.data.ExtendedTask;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
 
 import static com.google.sps.api.calendar.CalendarClientHelper.createEventWithSummary;
 import static com.google.sps.api.calendar.CalendarClientHelper.createPrivateEventWithSummaryAndDescription;
+import static com.google.sps.api.tasks.TasksClientHelper.createCustomDurationTaskWithDue;
 import static com.google.sps.api.tasks.TasksClientHelper.createDefaultDurationTaskWithDue;
 import static com.google.sps.converter.TimeConverter.createDateTime;
 import static org.mockito.AdditionalMatchers.not;
@@ -51,7 +53,7 @@ public class ScheduleServletTest {
   @Before
   public void setUp() throws IOException {
     scheduleServlet = new ScheduleServlet();
-    tasks = new ArrayList<Task>();
+    tasks = new ArrayList<>();
     tasksClientAdapter = Mockito.mock(TasksClientAdapter.class);
     for (String taskId : TASKS_IDS) {
       Task task = new Task();
@@ -121,7 +123,7 @@ public class ScheduleServletTest {
   }
 
   @Test
-  public void createEventFromTask_withoutDescription() {
+  public void createEventFromExtendedTask_withoutDescription() {
     LocalDate day = LocalDate.of(2020, 11, 9);
     ExtendedTask task = createDefaultDurationTaskWithDue(
         createDateTime(day, 11, 30, ZURICH_TIME_ZONE)
@@ -135,13 +137,13 @@ public class ScheduleServletTest {
         ZURICH_TIME_ZONE, title
     );
     expectedEvent.setVisibility(CalendarClientHelper.PRIVATE_VISIBILITY);
-    Event actualEvent = scheduleServlet.createEventFromTask(task.getTask(), ZURICH_TIME_ZONE);
+    Event actualEvent = scheduleServlet.createEventFromExtendedTask(task, ZURICH_TIME_ZONE);
 
     Assert.assertEquals(expectedEvent, actualEvent);
   }
 
   @Test
-  public void createEventFromTask_withDescription() {
+  public void createEventFromExtendedTask_withDescription() {
     LocalDate day = LocalDate.of(2022, 4, 9);
     ExtendedTask task = createDefaultDurationTaskWithDue(
         createDateTime(day, 15, 0, UTC_TIME_ZONE)
@@ -156,7 +158,73 @@ public class ScheduleServletTest {
         createDateTime(day, 15, 30, UTC_TIME_ZONE),
         UTC_TIME_ZONE, title, description
     );
-    Event actualEvent = scheduleServlet.createEventFromTask(task.getTask(), UTC_TIME_ZONE);
+    Event actualEvent = scheduleServlet.createEventFromExtendedTask(task, UTC_TIME_ZONE);
+
+    Assert.assertEquals(expectedEvent, actualEvent);
+  }
+
+  @Test
+  public void createEventFromExtendedTask_duration15mins() {
+    LocalDate day = LocalDate.of(2023, 6, 12);
+    ExtendedTask task = createCustomDurationTaskWithDue(
+        createDateTime(day, 18, 0, UTC_TIME_ZONE),
+        TimeUnit.MINUTES.toMillis(15)
+    );
+    String title = "Task 15 mins";
+    task.getTask().setTitle(title);
+    String description = "Task with a duration of 15 minutes";
+    task.getTask().setNotes(description);
+
+    Event expectedEvent = createPrivateEventWithSummaryAndDescription(
+        createDateTime(day, 18, 0, UTC_TIME_ZONE),
+        createDateTime(day, 18, 15, UTC_TIME_ZONE),
+        UTC_TIME_ZONE, title, description
+    );
+    Event actualEvent = scheduleServlet.createEventFromExtendedTask(task, UTC_TIME_ZONE);
+
+    Assert.assertEquals(expectedEvent, actualEvent);
+  }
+
+  @Test
+  public void createEventFromExtendedTask_duration1hr() {
+    LocalDate day = LocalDate.of(2025, 2, 22);
+    ExtendedTask task = createCustomDurationTaskWithDue(
+        createDateTime(day, 12, 0, ZURICH_TIME_ZONE),
+        TimeUnit.HOURS.toMillis(1)
+    );
+    String title = "Task 1 hr";
+    task.getTask().setTitle(title);
+    String description = "Task with a duration of 1 hour";
+    task.getTask().setNotes(description);
+
+    Event expectedEvent = createPrivateEventWithSummaryAndDescription(
+        createDateTime(day, 12, 0, ZURICH_TIME_ZONE),
+        createDateTime(day, 13, 0, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE, title, description
+    );
+    Event actualEvent = scheduleServlet.createEventFromExtendedTask(task, ZURICH_TIME_ZONE);
+
+    Assert.assertEquals(expectedEvent, actualEvent);
+  }
+
+  @Test
+  public void createEventFromExtendedTask_duration1hr30mins() {
+    LocalDate day = LocalDate.of(2026, 11, 2);
+    ExtendedTask task = createCustomDurationTaskWithDue(
+        createDateTime(day, 8, 0, UTC_TIME_ZONE),
+        TimeUnit.HOURS.toMillis(1) + TimeUnit.MINUTES.toMillis(30)
+    );
+    String title = "Task 1.5 hrs";
+    task.getTask().setTitle(title);
+    String description = "Task with a duration of 1 hour and 30 minutes";
+    task.getTask().setNotes(description);
+
+    Event expectedEvent = createPrivateEventWithSummaryAndDescription(
+        createDateTime(day, 8, 0, UTC_TIME_ZONE),
+        createDateTime(day, 9, 30, UTC_TIME_ZONE),
+        UTC_TIME_ZONE, title, description
+    );
+    Event actualEvent = scheduleServlet.createEventFromExtendedTask(task, UTC_TIME_ZONE);
 
     Assert.assertEquals(expectedEvent, actualEvent);
   }

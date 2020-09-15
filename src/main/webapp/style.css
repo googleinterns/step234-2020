@@ -50,6 +50,24 @@ body {
   display: none;
 }
 
+.task {
+  display: flex;
+}
+
+.task-title {
+  flex-grow: 1;
+}
+
+.task-duration {
+  align-self: flex-end;
+  margin-right: 10px;
+  min-width: 122px;
+}
+
+.task-duration .mdc-select__anchor {
+  height: 48px;
+}
+
 :root {
   --mdc-theme-primary: #668CD9;
 }

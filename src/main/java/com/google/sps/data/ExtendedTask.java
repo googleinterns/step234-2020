@@ -20,6 +20,7 @@ import com.google.api.client.util.GenericData;
 import com.google.api.client.util.Key;
 import com.google.api.services.tasks.model.Task;
 import java.util.Comparator;
+import java.util.concurrent.TimeUnit;
 
 // Override equals and hashcode by extending GenericData
 // Two tasks are equal if all of their properties match (It makes testing easier)
@@ -30,9 +31,22 @@ public class ExtendedTask extends GenericData {
   @Key
   private long duration;
 
+  /**
+   * @param task represented task
+   * @param duration duration of the task in milliseconds
+   */
   public ExtendedTask(Task task, Long duration) {
     this.task = task;
     this.duration = duration;
+  }
+
+  /**
+   * @param task represented task
+   * @param minutes duration of the task in minutes
+   */
+  public ExtendedTask(Task task, String minutes) {
+    this.task = task;
+    this.duration = TimeUnit.MINUTES.toMillis(Long.parseLong(minutes));
   }
 
   public static ExtendedTask getExtendedTaskWithDuration(long duration) {
@@ -57,6 +71,14 @@ public class ExtendedTask extends GenericData {
 
   public String getTitle() {
     return task.getTitle();
+  }
+
+  public String getNotes() {
+    return task.getNotes();
+  }
+
+  public String getDue() {
+    return task.getDue();
   }
 }
 

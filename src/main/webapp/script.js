@@ -16,7 +16,7 @@
 
 $(document).ready(init);
 
-const linearProgress = new mdc.linearProgress.MDCLinearProgress(document.querySelector('#progress-bar'));
+const taskLoadingProgressBar = new mdc.linearProgress.MDCLinearProgress(document.querySelector('#progress-bar'));
 const scheduleButton = $("#schedule-button");
 
 function init() {
@@ -25,6 +25,8 @@ function init() {
   loadCalendar();
 }
 
+
+
 function initCheckboxChangeHandlers() {
   $("#toggle-all").on("change", disableScheduleButtonIfNoTaskIsSelected);
   $("#task-list").on("change", "input[type=checkbox]", disableScheduleButtonIfNoTaskIsSelected);
@@ -32,7 +34,7 @@ function initCheckboxChangeHandlers() {
 
 
 function loadTasks() {
-  linearProgress.open();
+  taskLoadingProgressBar.open();
   fetch("/load_tasks")
       .then(getJsonIfOk)
       .then(renderTasks)
@@ -40,7 +42,7 @@ function loadTasks() {
 }
 
 function renderTasks(tasks) {
-  linearProgress.close();
+  taskLoadingProgressBar.close();
   $("#task-list").empty();
   $("#empty-message").toggle(!tasks.length);
   if (tasks.length > 0) {
@@ -79,6 +81,8 @@ function disableScheduleButtonIfNoTaskIsSelected() {
  * reports if there are problems.
  */
 function updateView(result) {
+  $("#scheduling-progress").hide();
+  scheduleButton.show();
   showResultMessage(result);
   loadTasks();
 }
@@ -93,6 +97,8 @@ function showResultMessage(result) {
 }
 
 function schedule() {
+  scheduleButton.hide();
+  $("#scheduling-progress").show();
   const formContent = new FormData($("#schedule-form")[0]);
   daterange = $("#daterange").val();
   [startDate, endDate] = daterange.split(' - ');

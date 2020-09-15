@@ -42,7 +42,7 @@ body {
 }
 
 #schedule-button {
-  margin: 5px 20px;
+  margin: 6px 20px;
 }
 
 .no-padding {
@@ -63,4 +63,9 @@ body {
 
 .mdc-list-item.default-cursor {
   cursor: default;
+}
+
+#scheduling-progress{
+  display: none;
+  margin: auto;
 }

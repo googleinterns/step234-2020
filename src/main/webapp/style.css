@@ -27,6 +27,24 @@ body {
   height: 100%;
 }
 
+.banner{
+  padding: 8px;
+}
+
+.banner-text{
+  line-height: 20px;
+  font-size: 14px;
+  margin:  0px;
+}
+
+.banner-button{
+  float: right;
+}
+
+#header-title{
+  font-weight: bold;
+}
+
 #schedule-form {
   overflow-y: auto;
 }

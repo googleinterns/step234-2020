@@ -12,8 +12,19 @@
 <div class="container">
   <div class="tasks-container">
 
+    <div class="banner" id="info">
+      <p class="banner-text"> Hey! Select some tasks you would like to move to your calendar, and hit schedule! You can also select the timerange of scheduling, and set duration for tasks.</p>
+      <div class="mdc-touch-target-wrapper banner-button" onclick="hideInfo()">
+        <button class="mdc-button mdc-button--touch">
+          <div class="mdc-button__ripple"></div>
+          <span class="mdc-button__label">GOT IT</span>
+          <div class="mdc-button__touch"></div>
+        </button>
+      </div>
+    </div>
+
     <ul class="mdc-list no-padding">
-      <li class="mdc-list-item default-cursor" role="checkbox" aria-checked="true">
+      <li id="header-title" class="mdc-list-item default-cursor" role="checkbox" aria-checked="true">
         <span class="mdc-list-item__graphic">
           <div class="mdc-checkbox">
             <input type="checkbox" id="toggle-all" class="mdc-checkbox__native-control" onclick="toggleAll()">

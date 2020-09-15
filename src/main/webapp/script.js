@@ -20,18 +20,27 @@ const taskLoadingProgressBar = new mdc.linearProgress.MDCLinearProgress(document
 const scheduleButton = $("#schedule-button");
 
 function init() {
+  hideDismissedInfo();
   initCheckboxChangeHandlers();
   loadTasks();
   loadCalendar();
 }
 
-
-
-function initCheckboxChangeHandlers() {
-  $("#toggle-all").on("change", disableScheduleButtonIfNoTaskIsSelected);
-  $("#task-list").on("change", "input[type=checkbox]", disableScheduleButtonIfNoTaskIsSelected);
+function hideDismissedInfo() {
+  if (localStorage.getItem("closedInfo")) {
+    $("#info").hide();
+  }
 }
 
+function initCheckboxChangeHandlers() {
+  $("#toggle-all").on("change", handleEmptySelection);
+  $("#task-list").on("change", "input[type=checkbox]", handleEmptySelection);
+}
+
+function hideInfo() {
+  $("#info").hide();
+  localStorage.setItem("closedInfo", "true");
+}
 
 function loadTasks() {
   taskLoadingProgressBar.open();
@@ -72,9 +81,12 @@ function renderSingleTask(task) {
     </li>`);
 }
 
-function disableScheduleButtonIfNoTaskIsSelected() {
+function handleEmptySelection() {
   isAnyChecked = $(":checkbox[name='taskId']:checked").length > 0;
   scheduleButton.prop("disabled", !isAnyChecked);
+  if(!isAnyChecked){
+    $("#toggle-all").prop("checked", false);
+  }
 }
 /**
  * Provides feedback to the user that tasks were scheduled, and

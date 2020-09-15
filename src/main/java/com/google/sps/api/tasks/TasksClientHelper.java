@@ -18,6 +18,8 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.tasks.model.Task;
 import com.google.api.services.tasks.model.TaskList;
 import com.google.sps.converter.TimeConverter;
+import com.google.sps.data.ExtendedTask;
+import com.google.sps.scheduler.Scheduler;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,11 +50,19 @@ public class TasksClientHelper {
   }
 
   /**
-   * Returns a task with the given due date.
+   * Returns an ExtendedTask with the given due date, with default duration.
    */
-  public static Task createTaskWithDue(DateTime dueDate) {
+  public static ExtendedTask createDefaultDurationTaskWithDue(DateTime dueDate) {
+    return createCustomDurationTaskWithDue(dueDate, Scheduler.DEFAULT_DURATION_IN_MILLISECONDS);
+  }
+
+  /**
+   * Returns an ExtendedTask with specified due date and duration.
+   */
+  public static ExtendedTask createCustomDurationTaskWithDue(DateTime dueDate, Long duration) {
     Task task = new Task();
     task.setDue(dueDate.toStringRfc3339());
-    return task;
+    ExtendedTask extendedTask = new ExtendedTask(task, duration);
+    return extendedTask;
   }
 }

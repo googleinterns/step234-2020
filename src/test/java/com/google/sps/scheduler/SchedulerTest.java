@@ -15,7 +15,7 @@
 package com.google.sps.scheduler;
 
 import com.google.api.services.calendar.model.Event;
-import com.google.api.services.tasks.model.Task;
+import com.google.sps.data.ExtendedTask;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,13 +24,14 @@ import org.junit.runners.JUnit4;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.google.sps.api.calendar.CalendarClientHelper.createEvent;
-import static com.google.sps.api.tasks.TasksClientHelper.createTaskWithDue;
+import static com.google.sps.api.tasks.TasksClientHelper.createCustomDurationTaskWithDue;
+import static com.google.sps.api.tasks.TasksClientHelper.createDefaultDurationTaskWithDue;
 import static com.google.sps.converter.TimeConverter.createDateTime;
-import static com.google.sps.scheduler.Scheduler.scheduleForADay;
-import static com.google.sps.scheduler.Scheduler.scheduleInRange;
 
 @RunWith(JUnit4.class)
 public class SchedulerTest {
@@ -39,16 +40,78 @@ public class SchedulerTest {
   private final static String LOS_ANGELES_TIME_ZONE = "America/Los_Angeles";
   private final static String SHANGHAI_TIME_ZONE = "Asia/Shanghai";
   private final static int TOTAL_SAMPLES = 5;
-  private List<Task> sampleTasks;
+  private final long WORKING_HOURS = TimeUnit.MINUTES.toMillis((Scheduler.END_HOUR - Scheduler.START_HOUR) * 60 + Scheduler.END_MINUTE - Scheduler.START_MINUTE);
+  private final long SIX_HOURS = TimeUnit.HOURS.toMillis(6);
+  private final long FOUR_HOURS = TimeUnit.HOURS.toMillis(4);
+  private final long TWO_HOURS = TimeUnit.HOURS.toMillis(2);
+  private final long AN_HOUR_AND_A_HALF = TimeUnit.MINUTES.toMillis(90);
+  private final long ONE_HOUR = TimeUnit.HOURS.toMillis(1);
+  private final long HALF_AN_HOUR = TimeUnit.MINUTES.toMillis(30);
+  private final long TEN_MINS = TimeUnit.MINUTES.toMillis(10);
+  private final long FIVE_MINS = TimeUnit.MINUTES.toMillis(5);
+  private ExtendedTask workingHourslong;
+  private ExtendedTask sixHoursTask;
+  private ExtendedTask fourHoursTask;
+  private ExtendedTask twoHoursTask;
+  private ExtendedTask secondTwoHoursTask;
+  private ExtendedTask ninetyMinsTask;
+  private ExtendedTask secondNinetyMinsTask;
+  private ExtendedTask oneHourTask;
+  private ExtendedTask halfAnHourTask;
+  private ExtendedTask tenMinsTask;
+  private ExtendedTask fiveMinsTask;
+
+
+  private List<ExtendedTask> defaultDurationSample;
+  private List<ExtendedTask> varyingDurationSample;
+
 
   @Before
   public void setUp() {
-    sampleTasks = new ArrayList<>();
+    defaultDurationSample = new ArrayList<>();
     for (int i = 0; i < TOTAL_SAMPLES; i++) {
-      Task task = new Task();
-      task.setId("Index " + i);
-      sampleTasks.add(new Task());
+      defaultDurationSample.add(ExtendedTask.getExtendedTaskWithDuration(Scheduler.DEFAULT_DURATION_IN_MILLISECONDS));
     }
+
+    workingHourslong = ExtendedTask.getExtendedTaskWithDuration(WORKING_HOURS);
+    sixHoursTask = ExtendedTask.getExtendedTaskWithDuration(SIX_HOURS);
+    fourHoursTask = ExtendedTask.getExtendedTaskWithDuration(FOUR_HOURS);
+    twoHoursTask = ExtendedTask.getExtendedTaskWithDuration(TWO_HOURS);
+    secondTwoHoursTask = ExtendedTask.getExtendedTaskWithDuration(TWO_HOURS);
+    ninetyMinsTask = ExtendedTask.getExtendedTaskWithDuration(AN_HOUR_AND_A_HALF);
+    secondNinetyMinsTask = ExtendedTask.getExtendedTaskWithDuration(AN_HOUR_AND_A_HALF);
+    oneHourTask = ExtendedTask.getExtendedTaskWithDuration(ONE_HOUR);
+    halfAnHourTask = ExtendedTask.getExtendedTaskWithDuration(HALF_AN_HOUR);
+    tenMinsTask = ExtendedTask.getExtendedTaskWithDuration(TEN_MINS);
+    fiveMinsTask = ExtendedTask.getExtendedTaskWithDuration(FIVE_MINS);
+    varyingDurationSample = Arrays.asList(workingHourslong, sixHoursTask, twoHoursTask, secondTwoHoursTask, ninetyMinsTask, secondNinetyMinsTask, oneHourTask, halfAnHourTask, tenMinsTask, fiveMinsTask);
+
+  }
+
+  @Test
+  public void noTasks() {
+    // Events : |----A----|  |----B---|
+    // Day    : |---------------------|
+    // Tasks  :
+    List<Event> calendarEvents = new ArrayList<>();
+    LocalDate day = LocalDate.of(2010, 3, 9);
+    Event eventA = createEvent(
+        createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, 13, 0, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+    Event eventB = createEvent(
+        createDateTime(day, 13, 30, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.END_HOUR, Scheduler.END_MINUTE, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+
+    calendarEvents.add(eventA);
+    calendarEvents.add(eventB);
+
+    Scheduler scheduler = new Scheduler(calendarEvents, Collections.emptyList(), ZURICH_TIME_ZONE);
+    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, day);
+    List<ExtendedTask> expectedScheduledTasks = Collections.emptyList();
+
+    Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
   }
 
   @Test
@@ -64,8 +127,8 @@ public class SchedulerTest {
         ZURICH_TIME_ZONE);
 
     calendarEvents.add(eventAllDay);
-
-    List<Task> actualScheduledTasks = scheduleForADay(calendarEvents, sampleTasks, ZURICH_TIME_ZONE, day);
+    Scheduler scheduler = new Scheduler(calendarEvents, defaultDurationSample, ZURICH_TIME_ZONE);
+    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, day);
     List<Event> expectedScheduledTasks = Arrays.asList();
 
     Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
@@ -90,9 +153,10 @@ public class SchedulerTest {
     calendarEvents.add(eventA);
     calendarEvents.add(eventB);
 
-    List<Task> actualScheduledTasks = scheduleForADay(calendarEvents, sampleTasks, ZURICH_TIME_ZONE, day);
-    List<Task> expectedScheduledTasks = Arrays.asList(
-        createTaskWithDue(
+    Scheduler scheduler = new Scheduler(calendarEvents, defaultDurationSample, ZURICH_TIME_ZONE);
+    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, day);
+    List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 13, 0, ZURICH_TIME_ZONE)));
 
     Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
@@ -112,11 +176,12 @@ public class SchedulerTest {
 
     calendarEvents.add(eventA);
 
-    List<Task> actualScheduledTasks = scheduleForADay(calendarEvents, sampleTasks, ZURICH_TIME_ZONE, day);
-    List<Task> expectedScheduledTasks = Arrays.asList(
-        createTaskWithDue(
+    Scheduler scheduler = new Scheduler(calendarEvents, defaultDurationSample, ZURICH_TIME_ZONE);
+    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, day);
+    List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 17, 30, ZURICH_TIME_ZONE)));
 
     Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
@@ -141,17 +206,18 @@ public class SchedulerTest {
     calendarEvents.add(eventA);
     calendarEvents.add(eventB);
 
-    List<Task> actualScheduledTasks = scheduleForADay(calendarEvents, sampleTasks, ZURICH_TIME_ZONE, day);
-    List<Task> expectedScheduledTasks = Arrays.asList(
-        createTaskWithDue(
+    Scheduler scheduler = new Scheduler(calendarEvents, defaultDurationSample, ZURICH_TIME_ZONE);
+    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, day);
+    List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 10, 0, ZURICH_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 10, 30, ZURICH_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 13, 0, ZURICH_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 13, 30, ZURICH_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 14, 0, ZURICH_TIME_ZONE)));
 
     Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
@@ -186,13 +252,14 @@ public class SchedulerTest {
     calendarEvents.add(eventC);
     calendarEvents.add(eventD);
 
-    List<Task> actualScheduledTasks = scheduleForADay(calendarEvents, sampleTasks, ZURICH_TIME_ZONE, day);
-    List<Task> expectedScheduledTasks = Arrays.asList(
-        createTaskWithDue(
+    Scheduler scheduler = new Scheduler(calendarEvents, defaultDurationSample, ZURICH_TIME_ZONE);
+    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, day);
+    List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 10, 0, ZURICH_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 13, 50, ZURICH_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 16, 34, ZURICH_TIME_ZONE)));
 
     Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
@@ -239,11 +306,12 @@ public class SchedulerTest {
     calendarEvents.add(eventB);
     calendarEvents.add(eventA);
 
-    List<Task> actualScheduledTasks = scheduleForADay(calendarEvents, sampleTasks, ZURICH_TIME_ZONE, day);
-    List<Task> expectedScheduledTasks = Arrays.asList(
-        createTaskWithDue(
+    Scheduler scheduler = new Scheduler(calendarEvents, defaultDurationSample, ZURICH_TIME_ZONE);
+    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, day);
+    List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 11, 0, ZURICH_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 16, 30, ZURICH_TIME_ZONE)));
 
     Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
@@ -268,9 +336,10 @@ public class SchedulerTest {
     calendarEvents.add(eventA);
     calendarEvents.add(eventB);
 
-    List<Task> actualScheduledTasks = scheduleForADay(calendarEvents, sampleTasks, ZURICH_TIME_ZONE, day);
-    List<Task> expectedScheduledTasks = Arrays.asList(
-        createTaskWithDue(
+    Scheduler scheduler = new Scheduler(calendarEvents, defaultDurationSample, ZURICH_TIME_ZONE);
+    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, day);
+    List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 13, 0, ZURICH_TIME_ZONE)));
 
     Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
@@ -301,17 +370,18 @@ public class SchedulerTest {
     calendarEvents.add(eventB);
     calendarEvents.add(eventC);
 
-    List<Task> actualScheduledTasks = scheduleForADay(calendarEvents, sampleTasks, UTC_TIME_ZONE, day);
-    List<Task> expectedScheduledTasks = Arrays.asList(
-        createTaskWithDue(
+    Scheduler scheduler = new Scheduler(calendarEvents, defaultDurationSample, UTC_TIME_ZONE);
+    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, day);
+    List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 10, 0, UTC_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 10, 30, UTC_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 16, 0, UTC_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 16, 30, UTC_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 17, 30, UTC_TIME_ZONE)));
 
     Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
@@ -360,11 +430,12 @@ public class SchedulerTest {
     calendarEvents.add(eventB);
     calendarEvents.add(eventA);
 
-    List<Task> actualScheduledTasks = scheduleForADay(calendarEvents, sampleTasks, LOS_ANGELES_TIME_ZONE, day);
-    List<Task> expectedScheduledTasks = Arrays.asList(
-        createTaskWithDue(
+    Scheduler scheduler = new Scheduler(calendarEvents, defaultDurationSample, LOS_ANGELES_TIME_ZONE);
+    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, day);
+    List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 11, 0, LOS_ANGELES_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 16, 30, LOS_ANGELES_TIME_ZONE)));
 
     Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
@@ -428,17 +499,18 @@ public class SchedulerTest {
     calendarEvents.add(eventG);
     calendarEvents.add(eventJ);
 
-    List<Task> actualScheduledTasks = scheduleInRange(calendarEvents, sampleTasks, ZURICH_TIME_ZONE, day, farAhead);
-    List<Task> expectedScheduledTasks = Arrays.asList(
-        createTaskWithDue(
+    Scheduler scheduler = new Scheduler(calendarEvents, defaultDurationSample, ZURICH_TIME_ZONE);
+    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, farAhead);
+    List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 11, 0, ZURICH_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 16, 30, ZURICH_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(nextDay, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(nextDay, 10, 30, ZURICH_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(nextDay, 11, 30, ZURICH_TIME_ZONE)));
 
     Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
@@ -501,13 +573,14 @@ public class SchedulerTest {
     calendarEvents.add(eventG);
     calendarEvents.add(eventJ);
 
-    List<Task> actualScheduledTasks = scheduleInRange(calendarEvents, sampleTasks, ZURICH_TIME_ZONE, day, nextDay);
-    List<Task> expectedScheduledTasks = Arrays.asList(
-        createTaskWithDue(
+    Scheduler scheduler = new Scheduler(calendarEvents, defaultDurationSample, ZURICH_TIME_ZONE);
+    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, nextDay);
+    List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 11, 0, ZURICH_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 16, 30, ZURICH_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(nextDay, 10, 30, ZURICH_TIME_ZONE)));
 
     Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
@@ -532,19 +605,140 @@ public class SchedulerTest {
     calendarEvents.add(eventA);
     calendarEvents.add(eventB);
 
-    List<Task> actualScheduledTasks = scheduleInRange(calendarEvents, sampleTasks, ZURICH_TIME_ZONE, day, day);
-    List<Task> expectedScheduledTasks = Arrays.asList(
-        createTaskWithDue(
+    Scheduler scheduler = new Scheduler(calendarEvents, defaultDurationSample, ZURICH_TIME_ZONE);
+    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, day);
+    List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 10, 0, ZURICH_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 10, 30, ZURICH_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 13, 0, ZURICH_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 13, 30, ZURICH_TIME_ZONE)),
-        createTaskWithDue(
+        createDefaultDurationTaskWithDue(
             createDateTime(day, 14, 0, ZURICH_TIME_ZONE)));
 
     Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
   }
+
+  @Test
+  public void fitSingleWorkhourslong() {
+    // Events :
+    // Day    : |-------------------------------|
+    // Tasks  : |-------------------------------|
+    List<Event> calendarEvents = Collections.emptyList();
+    LocalDate day = LocalDate.of(2048, 6, 23);
+
+    Scheduler scheduler = new Scheduler(calendarEvents, varyingDurationSample, ZURICH_TIME_ZONE);
+    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, day);
+    List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
+        createCustomDurationTaskWithDue(createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE), WORKING_HOURS)
+    );
+
+    Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
+  }
+
+  @Test
+  public void varyingDurations() {
+    // Events :    |-A|  |-B--|               |-C---|
+    // Day    : |----------------------------------------|
+    // Tasks  : |5m|  |1h|    |-2h-|30m|10m|        |-2h-|
+    List<Event> calendarEvents = new ArrayList<>();
+    LocalDate day = LocalDate.of(2048, 6, 23);
+    Event eventA = createEvent(
+        createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE + 5, ZURICH_TIME_ZONE),
+        createDateTime(day, 10, 0, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+    Event eventB = createEvent(
+        createDateTime(day, 11, 0, ZURICH_TIME_ZONE),
+        createDateTime(day, 12, 0, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+    Event eventC = createEvent(
+        createDateTime(day, 15, 0, ZURICH_TIME_ZONE),
+        createDateTime(day, 16, 0, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+
+    calendarEvents.add(eventA);
+    calendarEvents.add(eventB);
+    calendarEvents.add(eventC);
+
+    Scheduler scheduler = new Scheduler(calendarEvents, varyingDurationSample, ZURICH_TIME_ZONE);
+    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, day);
+    List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
+        createCustomDurationTaskWithDue(
+            createDateTime(day,Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE), FIVE_MINS),
+        createCustomDurationTaskWithDue(
+            createDateTime(day, 10, 0, ZURICH_TIME_ZONE), ONE_HOUR),
+        createCustomDurationTaskWithDue(
+            createDateTime(day, 12, 0, ZURICH_TIME_ZONE), TWO_HOURS),
+        createCustomDurationTaskWithDue(
+            createDateTime(day, 14, 0, ZURICH_TIME_ZONE), HALF_AN_HOUR),
+        createCustomDurationTaskWithDue(
+            createDateTime(day, 14, 30, ZURICH_TIME_ZONE), TEN_MINS),
+        createCustomDurationTaskWithDue(
+            createDateTime(day, 16, 0, ZURICH_TIME_ZONE), TWO_HOURS));
+
+    Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
+  }
+
+  @Test
+  public void outOfTasks() {
+    //                              A                   B    C          D        E     F
+    // Events :        |----------long------------|    |1m||1m|       |6m|     |10m| |10m|
+    // Days   : |------------------------------------|-------------------------------------|
+    // Tasks  : |-2h-|                                        |90m|90m|  |-4h-|
+    List<Event> calendarEvents = new ArrayList<>();
+    LocalDate day = LocalDate.of(2048, 6, 23);
+    LocalDate nextDay = LocalDate.of(2048, 6, 24);
+    LocalDate farFutureDay = LocalDate.of(2048, 8, 24);
+    Event eventA = createEvent(
+        createDateTime(day, Scheduler.START_HOUR + 3, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.END_HOUR - 1, Scheduler.END_MINUTE, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+    Event eventB = createEvent(
+        createDateTime(nextDay, 9, 1, ZURICH_TIME_ZONE),
+        createDateTime(nextDay, 9, 2, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+    Event eventC = createEvent(
+        createDateTime(nextDay, 9, 3, ZURICH_TIME_ZONE),
+        createDateTime(nextDay, 9, 4, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+    Event eventD = createEvent(
+        createDateTime(nextDay, 12, 4, ZURICH_TIME_ZONE),
+        createDateTime(nextDay, 12, 10, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+    Event eventE = createEvent(
+        createDateTime(nextDay, 16, 10, ZURICH_TIME_ZONE),
+        createDateTime(nextDay, 16, 20, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+    Event eventF = createEvent(
+        createDateTime(nextDay, 16, 30, ZURICH_TIME_ZONE),
+        createDateTime(nextDay, 16, 40, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+
+    calendarEvents.add(eventA);
+    calendarEvents.add(eventB);
+    calendarEvents.add(eventC);
+    calendarEvents.add(eventD);
+    calendarEvents.add(eventE);
+    calendarEvents.add(eventF);
+
+    List<ExtendedTask> tasks =  Arrays.asList(ninetyMinsTask, fourHoursTask, twoHoursTask, secondNinetyMinsTask);
+
+    Scheduler scheduler = new Scheduler(calendarEvents, tasks, ZURICH_TIME_ZONE);
+    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, farFutureDay);
+    List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
+        createCustomDurationTaskWithDue(
+            createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE), TWO_HOURS),
+        createCustomDurationTaskWithDue(
+            createDateTime(nextDay, 9, 4, ZURICH_TIME_ZONE), AN_HOUR_AND_A_HALF),
+        createCustomDurationTaskWithDue(
+            createDateTime(nextDay, 10, 34, ZURICH_TIME_ZONE), AN_HOUR_AND_A_HALF),
+        createCustomDurationTaskWithDue(
+            createDateTime(nextDay, 12, 10, ZURICH_TIME_ZONE), FOUR_HOURS));
+
+    Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
+  }
+
 }

@@ -28,9 +28,9 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.services.calendar.CalendarScopes;
+import com.google.api.services.tasks.TasksScopes;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserServiceFactory;
-import com.google.api.services.tasks.TasksScopes;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -50,15 +50,13 @@ public class AuthorizationRequester {
   public static final String CLIENT_SECRETS_PATH = "/client_secrets.json";
   public static final String ACCESS_TYPE = "offline";
   public static final String APPROVAL_PROMPT = "force";
-
-
+  public static final List<String> ACCESS_SCOPES = Arrays.asList(CalendarScopes.CALENDAR_EVENTS, TasksScopes.TASKS);
   /**
    * Global instance of the {@link DataStoreFactory}. The best practice is to make it a single
    * globally shared instance across your application.
    */
   private static final AppEngineDataStoreFactory DATA_STORE_FACTORY =
       AppEngineDataStoreFactory.getDefaultInstance();
-  public static final List<String> ACCESS_SCOPES = Arrays.asList(CalendarScopes.CALENDAR_EVENTS, TasksScopes.TASKS);
   private static GoogleClientSecrets clientSecrets = null;
 
   /**

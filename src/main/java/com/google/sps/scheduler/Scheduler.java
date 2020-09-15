@@ -42,23 +42,19 @@ public class Scheduler {
   public static final int END_HOUR = 18;
   public static final int END_MINUTE = 0;
   public static final long DEFAULT_DURATION_IN_MILLISECONDS = TimeUnit.MINUTES.toMillis(30);
+  private List<ExtendedTask> tasks;
   private String timeZone;
   private TreeMultimap<Long, ExtendedTask> longestFirstOrderedTasks;
   private Set<Event> orderedCalendarEvents;
   private List<ExtendedTask> scheduledTasks;
 
   public Scheduler(Collection<Event> calendarEvents, List<ExtendedTask> tasks, String timeZone) {
+    this.tasks = tasks;
     this.timeZone = timeZone;
 
     orderedCalendarEvents = new TreeSet<>(
         Comparator.comparingLong(event -> event.getStart().getDateTime().getValue()));
     orderedCalendarEvents.addAll(calendarEvents);
-
-    // It is possible to omit the parameters, but then we would have to implement a comparator on the tasks
-    longestFirstOrderedTasks = TreeMultimap.create(Ordering.natural(), Ordering.arbitrary());
-    for (ExtendedTask task : tasks) {
-      longestFirstOrderedTasks.put(task.getDuration(), task);
-    }
   }
 
   /**
@@ -69,6 +65,13 @@ public class Scheduler {
    */
   public List<ExtendedTask> scheduleInRange(LocalDate startDate, LocalDate endDate) {
     scheduledTasks = new ArrayList<>();
+
+    // It is possible to omit the parameters, but then we would have to implement a comparator on the tasks
+    longestFirstOrderedTasks = TreeMultimap.create(Ordering.natural(), Ordering.arbitrary());
+    for (ExtendedTask task : tasks) {
+      longestFirstOrderedTasks.put(task.getDuration(), task);
+    }
+
     LocalDate scheduleDate = startDate;
 
     while (!scheduleDate.isAfter(endDate) && !longestFirstOrderedTasks.isEmpty()) {

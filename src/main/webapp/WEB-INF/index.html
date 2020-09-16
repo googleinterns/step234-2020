@@ -13,11 +13,11 @@
   <div class="tasks-container">
 
     <div class="banner" id="info">
-      <p class="banner-text"> Hey! Select some tasks you would like to move to your calendar, and hit schedule! You can also select the timerange of scheduling, and set duration for tasks.</p>
+      <p class="banner-text"> Select tasks to schedule to free timeframes. Optionally set duration for tasks and scheduling daterange.</p>
       <div class="mdc-touch-target-wrapper banner-button" onclick="hideInfo()">
         <button class="mdc-button mdc-button--touch">
           <div class="mdc-button__ripple"></div>
-          <span class="mdc-button__label">GOT IT</span>
+          <span class="mdc-button__label">Got it</span>
           <div class="mdc-button__touch"></div>
         </button>
       </div>
@@ -52,6 +52,9 @@
           <span class="mdc-linear-progress__bar-inner"></span>
         </div>
       </li>
+      <li id="empty-message" class="mdc-list-item default-cursor">
+        <div id="empty-message-text">Add tasks in Google Tasks, or edit a list that is not empty.</div>
+      </li>
     </ul>
 
 
@@ -64,9 +67,7 @@
 
     <div id="bottom-controls">
       <ul class="mdc-list">
-        <li id="empty-message" class="mdc-list-item default-cursor">
-          <span class="mdc-list-item__text">There are no tasks to schedule</span>
-        </li>
+
         <li role="separator" class="mdc-list-divider"></li>
         <li class="mdc-list-item">
           <span class="mdc-list-item__text">

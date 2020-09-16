@@ -16,10 +16,10 @@
 
 $(document).ready(init);
 
-const taskLoadingProgressBar = new mdc.linearProgress.MDCLinearProgress(document.querySelector('#progress-bar'));
-const scheduleButton = $("#schedule-button");
+var taskLoadingProgressBar;
 
 function init() {
+  taskLoadingProgressBar = new mdc.linearProgress.MDCLinearProgress(document.querySelector('#progress-bar'));
   hideDismissedInfo();
   initCheckboxChangeHandlers();
   loadTasks();
@@ -62,7 +62,7 @@ function renderTasks(tasks) {
 function renderSingleTask(task) {
   id = task.id;
   $("#task-list").append(
-    `<li>
+      `<li>
       <label class="mdc-list-item" role="checkbox" aria-checked="false">
         <span class="mdc-list-item__ripple"></span>
         <span class="mdc-list-item__graphic">
@@ -82,19 +82,20 @@ function renderSingleTask(task) {
 }
 
 function handleEmptySelection() {
-  isAnyChecked = $(":checkbox[name='taskId']:checked").length > 0;
-  scheduleButton.prop("disabled", !isAnyChecked);
-  if(!isAnyChecked){
+  const isAnyChecked = $("input:checkbox[name='taskId']:checked").length > 0;
+  $("#schedule-button").prop("disabled", !isAnyChecked);
+  if (!isAnyChecked) {
     $("#toggle-all").prop("checked", false);
   }
 }
+
 /**
  * Provides feedback to the user that tasks were scheduled, and
  * reports if there are problems.
  */
 function updateView(result) {
   $("#scheduling-progress").hide();
-  scheduleButton.show();
+  $("#schedule-button").show();
   showResultMessage(result);
   loadTasks();
 }
@@ -109,7 +110,8 @@ function showResultMessage(result) {
 }
 
 function schedule() {
-  scheduleButton.hide();
+  $("#schedule-button").prop("disabled", true);
+  $("#schedule-button").hide();
   $("#scheduling-progress").show();
   const formContent = new FormData($("#schedule-form")[0]);
   daterange = $("#daterange").val();
@@ -153,9 +155,9 @@ function getJsonIfOk(response) {
  */
 function loadCalendar() {
   fetch("/user")
-    .then(getJsonIfOk)
-    .then(setCalendar)
-    .catch(handleNetworkError);
+      .then(getJsonIfOk)
+      .then(setCalendar)
+      .catch(handleNetworkError);
 }
 
 /**

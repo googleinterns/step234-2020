@@ -34,7 +34,7 @@ body {
 .banner-text{
   line-height: 20px;
   font-size: 14px;
-  margin:  0px;
+  margin:  0;
 }
 
 .banner-button{
@@ -73,6 +73,11 @@ body {
 
 #empty-message {
   display: none;
+}
+
+#empty-message-text{
+  margin: auto;
+  width: fit-content;
 }
 
 :root {

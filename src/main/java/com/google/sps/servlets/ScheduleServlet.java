@@ -122,7 +122,7 @@ public class ScheduleServlet extends HttpServlet {
         Task task = tasksClientAdapter.getTask(tasksListId, tasksIds[i]);
         extendedTasks.add(
             new ExtendedTask(task, minsToMillis(tasksDurations[i])));
-      } catch (IOException IoException) {
+      } catch (IOException exception) {
         // Continue the loop if the id doesn't exist
       }
     }

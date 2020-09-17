@@ -28,6 +28,8 @@ function init() {
   initSnackbar();
   loadTasks();
   loadCalendar();
+  // Todo: add onchange listener to working hours form, save entries to localStorage
+  // Also read entries from localStorage
 }
 
 /**
@@ -126,6 +128,7 @@ function showResultMessage(result) {
   mdcSnackbar.open();
 }
 
+
 function schedule() {
   $("#schedule-button").prop("disabled", true);
   $("#schedule-button").hide();
@@ -136,11 +139,20 @@ function schedule() {
   formContent.append("startDate", startDate.trim());
   formContent.append("endDate", endDate.trim());
   appendDurations(formContent);
+  formData = appendWorkingHours(formContent); // JavaScript seems pass by reference, maybe = is unnecessary, but increases readability
   postData("/schedule", new URLSearchParams(formContent).toString())
       .then(getJsonIfOk)
       .then(updateView)
       .then(refreshCalendar)
       .catch(handleNetworkError);
+}
+
+function appendWorkingHours(formData) {
+  const workingHoursFormData = new FormData($("#working-hours")[0]);
+  for([key, value] of workingHoursFormData.entries()){
+    formData.append(key, value);
+  }
+  return formData;
 }
 
 /**

@@ -155,7 +155,20 @@
             </label>
           </span>
         </li>
-      </ul>
+      <li>
+        Set custom working hours:
+        <form id="working-hours">
+          <label for="start-hour">Start hour</label>
+          <input type="text" name="startHour" id="start-hour">
+          <label for="start-min"></label>
+          <input type="text" name="startMin" id="start-min">
+          <label for="end-hour"></label>
+          <input type="text" name="endHour" id="end-hour">
+          <label for="end-min"></label>
+          <input type="text" name="endMin" id="end-min">
+        </form>
+      </li>
+    </ul>
 
       <button id="schedule-button" class="mdc-button mdc-button--raised fixed" onclick="schedule()" disabled>
         <span class="mdc-button__label">Schedule!</span>

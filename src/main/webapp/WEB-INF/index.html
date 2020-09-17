@@ -12,8 +12,19 @@
 <div class="container">
   <div class="tasks-container">
 
+    <div class="banner" id="info">
+      <p class="banner-text"> Select tasks to schedule to free timeframes. Optionally set duration for tasks and scheduling daterange.</p>
+      <div class="mdc-touch-target-wrapper banner-button" onclick="hideInfo()">
+        <button class="mdc-button mdc-button--touch">
+          <div class="mdc-button__ripple"></div>
+          <span class="mdc-button__label">Got it</span>
+          <div class="mdc-button__touch"></div>
+        </button>
+      </div>
+    </div>
+
     <ul class="mdc-list no-padding">
-      <li class="mdc-list-item default-cursor" role="checkbox" aria-checked="true">
+      <li id="header-title" class="mdc-list-item default-cursor" role="checkbox" aria-checked="true">
         <span class="mdc-list-item__graphic">
           <div class="mdc-checkbox">
             <input type="checkbox" id="toggle-all" class="mdc-checkbox__native-control" onclick="toggleAll()">
@@ -29,7 +40,24 @@
         <label class="mdc-list-item__text" for="toggle-all">Task title</label>
       </li>
       <li role="separator" class="mdc-list-divider"></li>
+      <li role="progress-bar" id="progress-bar" class="mdc-linear-progress mdc-linear-progress--indeterminate" aria-label="Progress Bar" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0">
+        <div class="mdc-linear-progress__buffer">
+          <div class="mdc-linear-progress__buffer-bar"></div>
+          <div class="mdc-linear-progress__buffer-dots"></div>
+        </div>
+        <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+          <span class="mdc-linear-progress__bar-inner"></span>
+        </div>
+        <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+          <span class="mdc-linear-progress__bar-inner"></span>
+        </div>
+      </li>
+      <li id="empty-message" class="mdc-list-item default-cursor">
+        <div id="empty-message-text">Add tasks in Google Tasks, or edit a list that is not empty.</div>
+      </li>
     </ul>
+
+
 
     <form id="schedule-form">
       <ul id="task-list" class="mdc-list no-padding" role="group">
@@ -113,28 +141,55 @@
       </ul>
     </form>
 
-    <ul class="mdc-list">
-      <li id="empty-message" class="mdc-list-item default-cursor">
-        <span class="mdc-list-item__text">There are no tasks to schedule</span>
-      </li>
-      <li role="separator" class="mdc-list-divider"></li>
-      <li class="mdc-list-item">
-        <span class="mdc-list-item__text">
-          <label for="daterange">Select date range </label>
-          <label class="mdc-text-field mdc-text-field--filled mdc-text-field--with-leading-icon date-picker">
-            <span class="mdc-text-field__ripple"></span>
-            <i class="material-icons mdc-text-field__icon mdc-text-field__icon--leading" tabindex="0" role="button">date_range</i>
-            <input class="mdc-text-field__input" id="daterange" type="daterange" name="daterange">
-          </label>
-        </span>
-      </li>
-    </ul>
+    <div id="bottom-controls">
+      <ul class="mdc-list">
 
-    <button id="schedule-button" class="mdc-button mdc-button--raised fixed" onclick="schedule()">
-      <span class="mdc-button__label">Schedule!</span>
-      <div class="mdc-button__ripple"></div>
-    </button>
+        <li role="separator" class="mdc-list-divider"></li>
+        <li class="mdc-list-item">
+          <span class="mdc-list-item__text">
+            <label for="daterange">Select date range </label>
+            <label class="mdc-text-field mdc-text-field--filled mdc-text-field--with-leading-icon date-picker">
+              <span class="mdc-text-field__ripple"></span>
+              <i class="material-icons mdc-text-field__icon mdc-text-field__icon--leading" tabindex="0" role="button">date_range</i>
+              <input class="mdc-text-field__input" id="daterange" type="daterange" name="daterange">
+            </label>
+          </span>
+        </li>
+      </ul>
+
+      <button id="schedule-button" class="mdc-button mdc-button--raised fixed" onclick="schedule()" disabled>
+        <span class="mdc-button__label">Schedule!</span>
+        <div class="mdc-button__ripple"></div>
+      </button>
+
+      <div id="scheduling-progress" class="mdc-circular-progress mdc-circular-progress--indeterminate" style="width:48px;height:48px;" role="progressbar" aria-label="Example Progress Bar" aria-valuemin="0" aria-valuemax="1">
+        <div class="mdc-circular-progress__determinate-container">
+          <svg class="mdc-circular-progress__determinate-circle-graphic" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <circle class="mdc-circular-progress__determinate-track" cx="24" cy="24" r="18" stroke-width="4"/>
+            <circle class="mdc-circular-progress__determinate-circle" cx="24" cy="24" r="18" stroke-dasharray="113.097" stroke-dashoffset="113.097" stroke-width="4"/>
+          </svg>
+        </div>
+        <div class="mdc-circular-progress__indeterminate-container">
+          <div class="mdc-circular-progress__spinner-layer">
+            <div class="mdc-circular-progress__circle-clipper mdc-circular-progress__circle-left">
+              <svg class="mdc-circular-progress__indeterminate-circle-graphic" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="24" cy="24" r="18" stroke-dasharray="113.097" stroke-dashoffset="56.549" stroke-width="4"/>
+              </svg>
+            </div><div class="mdc-circular-progress__gap-patch">
+            <svg class="mdc-circular-progress__indeterminate-circle-graphic" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="24" cy="24" r="18" stroke-dasharray="113.097" stroke-dashoffset="56.549" stroke-width="3.2"/>
+            </svg>
+          </div><div class="mdc-circular-progress__circle-clipper mdc-circular-progress__circle-right">
+            <svg class="mdc-circular-progress__indeterminate-circle-graphic" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="24" cy="24" r="18" stroke-dasharray="113.097" stroke-dashoffset="56.549" stroke-width="4"/>
+            </svg>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
 
   <div class="calendar-container">
     <iframe id="calendar" frameborder="0" scrolling="no"></iframe>

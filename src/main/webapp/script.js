@@ -57,12 +57,13 @@ function renderTasks(tasks) {
   if (tasks.length > 0) {
     tasks.forEach(renderSingleTask);
   }
+  handleEmptySelection();
 }
 
 function renderSingleTask(task) {
   id = task.id;
   $("#task-list").append(
-      `<li>
+    `<li>
       <label class="mdc-list-item" role="checkbox" aria-checked="false">
         <span class="mdc-list-item__ripple"></span>
         <span class="mdc-list-item__graphic">

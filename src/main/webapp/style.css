@@ -15,6 +15,7 @@ body {
   flex-direction: column;
   justify-content: flex-start;
   max-height: 100%;
+  margin: 24px;
 }
 
 .calendar-container {
@@ -26,6 +27,24 @@ body {
   height: 100%;
 }
 
+.banner{
+  padding: 8px;
+}
+
+.banner-text{
+  line-height: 20px;
+  font-size: 14px;
+  margin:  0;
+}
+
+.banner-button{
+  float: right;
+}
+
+#header-title{
+  font-weight: bold;
+}
+
 #schedule-form {
   overflow-y: auto;
 }
@@ -34,8 +53,14 @@ body {
   flex: none;
 }
 
+#bottom-controls{
+  display: flex;
+  flex-direction: column;
+  margin-top: auto;
+}
+
 #schedule-button {
-  margin: 5px 20px;
+  margin: 6px 20px;
 }
 
 .no-padding {
@@ -50,10 +75,20 @@ body {
   display: none;
 }
 
+#empty-message-text{
+  margin: auto;
+  width: fit-content;
+}
+
 :root {
   --mdc-theme-primary: #668CD9;
 }
 
 .mdc-list-item.default-cursor {
   cursor: default;
+}
+
+#scheduling-progress{
+  display: none;
+  margin: auto;
 }

@@ -16,12 +16,34 @@
 
 $(document).ready(init);
 
+var taskLoadingProgressBar;
+
 function init() {
+  taskLoadingProgressBar = new mdc.linearProgress.MDCLinearProgress(document.querySelector('#progress-bar'));
+  hideDismissedInfo();
+  initCheckboxChangeHandlers();
   loadTasks();
   loadCalendar();
 }
 
+function hideDismissedInfo() {
+  if (localStorage.getItem("closedInfo")) {
+    $("#info").hide();
+  }
+}
+
+function initCheckboxChangeHandlers() {
+  $("#toggle-all").on("change", handleEmptySelection);
+  $("#task-list").on("change", "input[type=checkbox]", handleEmptySelection);
+}
+
+function hideInfo() {
+  $("#info").hide();
+  localStorage.setItem("closedInfo", "true");
+}
+
 function loadTasks() {
+  taskLoadingProgressBar.open();
   fetch("/load_tasks")
       .then(getJsonIfOk)
       .then(renderTasks)
@@ -29,12 +51,13 @@ function loadTasks() {
 }
 
 function renderTasks(tasks) {
+  taskLoadingProgressBar.close();
   $("#task-list").empty();
-  $("#schedule-button").prop("disabled", !tasks.length);
   $("#empty-message").toggle(!tasks.length);
   if (tasks.length > 0) {
     tasks.forEach(renderSingleTask);
   }
+  handleEmptySelection();
 }
 
 function renderSingleTask(task) {
@@ -45,7 +68,7 @@ function renderSingleTask(task) {
         <span class="mdc-list-item__ripple"></span>
         <span class="mdc-list-item__graphic">
           <div class="mdc-checkbox">
-            <input type="checkbox" name="taskId" id="${id}" class="mdc-checkbox__native-control" value="${id}" />
+            <input type="checkbox" name="taskId" id="${id}" class="mdc-checkbox__native-control" value="${id}"/>
             <div class="mdc-checkbox__background">
               <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
                 <path class="mdc-checkbox__checkmark-path" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
@@ -59,11 +82,21 @@ function renderSingleTask(task) {
     </li>`);
 }
 
+function handleEmptySelection() {
+  const isAnyChecked = $("input:checkbox[name='taskId']:checked").length > 0;
+  $("#schedule-button").prop("disabled", !isAnyChecked);
+  if (!isAnyChecked) {
+    $("#toggle-all").prop("checked", false);
+  }
+}
+
 /**
  * Provides feedback to the user that tasks were scheduled, and
  * reports if there are problems.
  */
 function updateView(result) {
+  $("#scheduling-progress").hide();
+  $("#schedule-button").show();
   showResultMessage(result);
   loadTasks();
 }
@@ -78,6 +111,9 @@ function showResultMessage(result) {
 }
 
 function schedule() {
+  $("#schedule-button").prop("disabled", true);
+  $("#schedule-button").hide();
+  $("#scheduling-progress").show();
   const formContent = new FormData($("#schedule-form")[0]);
   daterange = $("#daterange").val();
   [startDate, endDate] = daterange.split(' - ');
@@ -120,9 +156,9 @@ function getJsonIfOk(response) {
  */
 function loadCalendar() {
   fetch("/user")
-    .then(getJsonIfOk)
-    .then(setCalendar)
-    .catch(handleNetworkError);
+      .then(getJsonIfOk)
+      .then(setCalendar)
+      .catch(handleNetworkError);
 }
 
 /**

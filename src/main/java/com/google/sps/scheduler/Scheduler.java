@@ -19,6 +19,7 @@ import com.google.api.services.calendar.model.Event;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 import com.google.sps.data.ExtendedTask;
+import com.google.sps.data.WorkingHours;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -54,17 +55,17 @@ public class Scheduler {
 
 
   public Scheduler(Collection<Event> calendarEvents, List<ExtendedTask> tasks, String timeZone) {
-    this(calendarEvents, tasks, timeZone, DEFAULT_START_HOUR, DEFAULT_START_MINUTE, DEFAULT_END_HOUR, DEFAULT_END_MINUTE);
+    this(calendarEvents, tasks, timeZone, new WorkingHours(DEFAULT_START_HOUR, DEFAULT_START_MINUTE, DEFAULT_END_HOUR, DEFAULT_END_MINUTE));
   }
 
   // Todo: consider using builder pattern
-  public Scheduler(Collection<Event> calendarEvents, List<ExtendedTask> tasks, String timeZone, int startHour, int startMin, int endHour, int endMin) {
+  public Scheduler(Collection<Event> calendarEvents, List<ExtendedTask> tasks, String timeZone, WorkingHours workingHours) {
     this.tasks = tasks;
     this.timeZone = timeZone;
-    this.startHour = startHour;
-    this.startMin = startMin;
-    this.endHour = endHour;
-    this.endMin = endMin;
+    this.startHour = workingHours.getStartHour();
+    this.startMin = workingHours.getStartMin();
+    this.endHour = workingHours.getEndHour();
+    this.endMin = workingHours.getEndMin();
 
     orderedCalendarEvents = new TreeSet<>(
         Comparator.comparingLong(event -> event.getStart().getDateTime().getValue()));

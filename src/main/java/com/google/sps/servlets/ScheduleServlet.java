@@ -26,6 +26,7 @@ import com.google.sps.api.tasks.TasksClientHelper;
 import com.google.sps.converter.TimeConverter;
 import com.google.sps.data.ExtendedTask;
 import com.google.sps.data.ScheduleMessage;
+import com.google.sps.data.WorkingHours;
 import com.google.sps.scheduler.Scheduler;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -81,6 +82,9 @@ public class ScheduleServlet extends HttpServlet {
     int endHour = Integer.parseInt(request.getParameter("endHour"));
     int endMin = Integer.parseInt(request.getParameter("endMin"));
 
+    WorkingHours workingHours = new WorkingHours(startHour, startMin, endHour, endMin);
+
+
     String startDateString = request.getParameter("startDate");
     String endDateString = request.getParameter("endDate");
     LocalDate startDate, endDate;
@@ -100,7 +104,7 @@ public class ScheduleServlet extends HttpServlet {
     List<Event> calendarEvents = calendarClientAdapter.getAcceptedEventsInTimerange(startDateTime, endDateTime);
 
     // Schedules
-    Scheduler scheduler = new Scheduler(calendarEvents, tasksToSchedule, timeZone, startHour, startMin, endHour, endMin);
+    Scheduler scheduler = new Scheduler(calendarEvents, tasksToSchedule, timeZone, workingHours);
     List<ExtendedTask> scheduledExtendedTasks = scheduler.scheduleInRange(startDate, endDate);
 
     List<Task> scheduledTasks = scheduledExtendedTasks.stream().map(ExtendedTask::getTask).collect(Collectors.toList());

@@ -14,16 +14,35 @@
  * limitations under the License.
  */
 
-$(document).ready(init);
+let taskTemplate;
+let mdcSnackbar;
+let taskLoadingProgressBar;
 
-var taskLoadingProgressBar;
+$(document).ready(init);
 
 function init() {
   taskLoadingProgressBar = new mdc.linearProgress.MDCLinearProgress(document.querySelector('#progress-bar'));
   hideDismissedInfo();
   initCheckboxChangeHandlers();
+  compileTaskTemplate();
+  initSnackbar();
   loadTasks();
   loadCalendar();
+}
+
+/**
+ * Compiles the handlebars template representing a task.
+ */
+function compileTaskTemplate() {
+  const taskTemplateElement = document.getElementById("task-template").innerHTML;
+  taskTemplate = Handlebars.compile(taskTemplateElement);
+}
+
+/**
+ * Inits the snackbar component.
+ */
+function initSnackbar() {
+  mdcSnackbar = new mdc.snackbar.MDCSnackbar($("#snackbar-result")[0]);
 }
 
 function hideDismissedInfo() {
@@ -57,29 +76,27 @@ function renderTasks(tasks) {
   if (tasks.length > 0) {
     tasks.forEach(renderSingleTask);
   }
+  initDropdowns();
   handleEmptySelection();
 }
 
+/**
+ * Compiles the task template with the actual task data and
+ * adds it to the task list.
+ */
 function renderSingleTask(task) {
-  id = task.id;
-  $("#task-list").append(
-    `<li>
-      <label class="mdc-list-item" role="checkbox" aria-checked="false">
-        <span class="mdc-list-item__ripple"></span>
-        <span class="mdc-list-item__graphic">
-          <div class="mdc-checkbox">
-            <input type="checkbox" name="taskId" id="${id}" class="mdc-checkbox__native-control" value="${id}"/>
-            <div class="mdc-checkbox__background">
-              <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
-                <path class="mdc-checkbox__checkmark-path" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
-              </svg>
-              <div class="mdc-checkbox__mixedmark"></div>
-            </div>
-          </div>
-        </span>
-        <label class="mdc-list-item__text" for="${id}">${task.title}</label>
-      </label>
-    </li>`);
+  $("#task-list").append(taskTemplate(task));
+}
+
+/**
+ * Initializes the dropdowns selection components.
+ */
+function initDropdowns() {
+  $(".mdc-select").each(
+      function() {
+        const mdcSelect = new mdc.select.MDCSelect(this);
+        $(this).data("mdcSelect", mdcSelect);
+      });
 }
 
 function handleEmptySelection() {
@@ -106,7 +123,6 @@ function updateView(result) {
  */
 function showResultMessage(result) {
   $("#snackbar-result-text").text(result.message);
-  const mdcSnackbar = new mdc.snackbar.MDCSnackbar($("#snackbar-result")[0]);
   mdcSnackbar.open();
 }
 
@@ -119,11 +135,25 @@ function schedule() {
   [startDate, endDate] = daterange.split(' - ');
   formContent.append("startDate", startDate.trim());
   formContent.append("endDate", endDate.trim());
+  appendDurations(formContent);
   postData("/schedule", new URLSearchParams(formContent).toString())
       .then(getJsonIfOk)
       .then(updateView)
       .then(refreshCalendar)
       .catch(handleNetworkError);
+}
+
+/**
+ * Appends to the form data the selected values for the duration of each task.
+ */
+function appendDurations(formData) {
+  $("input:checkbox[name='taskId']:checked").each(
+      function () {
+        const durationSelect = $(this).closest(".task").find(".task-duration");
+        const mdcDurationSelect = $(durationSelect).data("mdcSelect");
+        formData.append("taskDuration", mdcDurationSelect.value);
+      }
+  );
 }
 
 function postData(url, data) {

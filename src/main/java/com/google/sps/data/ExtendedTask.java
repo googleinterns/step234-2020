@@ -30,6 +30,10 @@ public class ExtendedTask extends GenericData {
   @Key
   private long duration;
 
+  /**
+   * @param task represented task
+   * @param duration duration of the task in milliseconds
+   */
   public ExtendedTask(Task task, Long duration) {
     this.task = task;
     this.duration = duration;
@@ -57,6 +61,14 @@ public class ExtendedTask extends GenericData {
 
   public String getTitle() {
     return task.getTitle();
+  }
+
+  public String getNotes() {
+    return task.getNotes();
+  }
+
+  public String getDue() {
+    return task.getDue();
   }
 }
 

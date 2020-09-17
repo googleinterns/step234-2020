@@ -27,11 +27,6 @@ import com.google.sps.converter.TimeConverter;
 import com.google.sps.data.ExtendedTask;
 import com.google.sps.data.ScheduleMessage;
 import com.google.sps.scheduler.Scheduler;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -41,6 +36,13 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
+
+import static com.google.sps.converter.TimeConverter.minsToMillis;
 
 /**
  * Schedules tasks on tomorrow.
@@ -48,7 +50,8 @@ import java.util.stream.Collectors;
 @WebServlet("/schedule")
 public class ScheduleServlet extends HttpServlet {
 
-  public static final String TASK_ID_LIST_KEY = "taskId";
+  private static final String TASK_ID_LIST_KEY = "taskId";
+  private static final String TASK_DURATION_LIST_KEY = "taskDuration";
   private ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
@@ -63,12 +66,11 @@ public class ScheduleServlet extends HttpServlet {
     TasksClientAdapter tasksClientAdapter = new TasksClientAdapter();
     String tasksListId = TasksClientHelper.getMostRecentTaskListId(
         tasksClientAdapter.getTasksLists());
-    // Todo: get duration of tasks from request
-    List<ExtendedTask> tasksToSchedule = getSelectedTasks(
-        request.getParameterValues(TASK_ID_LIST_KEY), tasksClientAdapter, tasksListId)
-        .stream().map(task -> new ExtendedTask(task, Scheduler.DEFAULT_DURATION_IN_MILLISECONDS))
-        .collect(Collectors.toList());
 
+    List<ExtendedTask> tasksToSchedule = getSelectedTasksExtended(
+        request.getParameterValues(TASK_ID_LIST_KEY),
+        request.getParameterValues(TASK_DURATION_LIST_KEY),
+        tasksClientAdapter, tasksListId);
 
     CalendarClientAdapter calendarClientAdapter = new CalendarClientAdapter();
     String timeZone = calendarClientAdapter.getPrimaryCalendarTimeZone();
@@ -99,58 +101,61 @@ public class ScheduleServlet extends HttpServlet {
     List<Task> scheduledTasks = scheduledExtendedTasks.stream().map(ExtendedTask::getTask).collect(Collectors.toList());
     // Updates Tasks and Calendar
     tasksClientAdapter.updateTasks(tasksListId, scheduledTasks);
-    // Todo: add events to calendar with appropriate duration
     calendarClientAdapter.insertEventsToPrimary(
-        createEventsFromTasks(scheduledTasks, timeZone));
+        createEventsFromExtendedTasks(scheduledExtendedTasks, timeZone));
 
-    sendJsonResponse(response, scheduledTasks.size() + " tasks inserted on " + startDate);
+    sendJsonResponse(response, scheduledTasks.size() + " tasks inserted");
   }
 
   /**
-   * Returns the task objects having the ids contained in the array.
+   * Returns the task objects having the ids contained in the array nested into a wrapper
+   * class that also contains the durations.
+   * tasksIds and tasksDurations must have the same length.
    */
-  List<Task> getSelectedTasks(
-      String[] tasksIds, TasksClientAdapter tasksClientAdapter, String tasksListId) {
-    List<Task> tasks = new ArrayList<>();
+  List<ExtendedTask> getSelectedTasksExtended(
+      String[] tasksIds,  String[] tasksDurations, TasksClientAdapter tasksClientAdapter, String tasksListId) {
+    assert tasksIds.length == tasksDurations.length : "tasksIds and tasksDurations have different length";
 
-    for (String id : tasksIds) {
+    List<ExtendedTask> extendedTasks = new ArrayList<>();
+    for (int i = 0; i < tasksIds.length; i++) {
       try {
-        Task task = tasksClientAdapter.getTask(tasksListId, id);
-        tasks.add(task);
-      } catch (IOException IoException) {
+        Task task = tasksClientAdapter.getTask(tasksListId, tasksIds[i]);
+        extendedTasks.add(
+            new ExtendedTask(task, minsToMillis(tasksDurations[i])));
+      } catch (IOException exception) {
         // Continue the loop if the id doesn't exist
       }
     }
 
-    return tasks;
+    return extendedTasks;
   }
 
   /**
-   * Creates a calendar event for each task with the same title, description and
-   * start time. The duration is the default one.
+   * Creates a calendar event for each extended task with the same title, description,
+   * duration and start time.
    */
-  List<Event> createEventsFromTasks(List<Task> tasks, String timeZone) {
+  List<Event> createEventsFromExtendedTasks(List<ExtendedTask> extendedTasks, String timeZone) {
     List<Event> calendarEvents = new ArrayList<>();
 
-    for (Task task : tasks) {
+    for (ExtendedTask extendedTask : extendedTasks) {
       calendarEvents.add(
-          createEventFromTask(task, timeZone));
+          createEventFromExtendedTask(extendedTask, timeZone));
     }
 
     return calendarEvents;
   }
 
   /**
-   * Creates a calendar event with the same title, description and
-   * start time of the task. The duration is the default one.
+   * Creates a calendar event with the same title, description,
+   * duration and start time of the extended task.
    */
-  Event createEventFromTask(Task task, String timeZone) {
-    DateTime startTime = new DateTime(task.getDue());
-    long endEpoch = startTime.getValue() + Scheduler.DEFAULT_DURATION_IN_MILLISECONDS;
+  Event createEventFromExtendedTask(ExtendedTask extendedTask, String timeZone) {
+    DateTime startTime = new DateTime(extendedTask.getDue());
+    long endEpoch = startTime.getValue() + extendedTask.getDuration();
     DateTime endTime = TimeConverter.epochToDateTime(endEpoch, timeZone);
 
     return CalendarClientHelper.createPrivateEventWithSummaryAndDescription(
-        startTime, endTime, timeZone, task.getTitle(), task.getNotes());
+        startTime, endTime, timeZone, extendedTask.getTitle(), extendedTask.getNotes());
   }
 
   private void sendJsonResponse(HttpServletResponse response, String responseMessage) throws IOException {

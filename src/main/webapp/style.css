@@ -80,6 +80,28 @@ body {
   width: fit-content;
 }
 
+.task {
+  display: flex;
+}
+
+.task-title {
+  flex-grow: 1;
+}
+
+.task-duration {
+  align-self: flex-end;
+  margin-right: 10px;
+  /*
+  The min-width property is used to overwrite the one set in mdc-select.
+  This is the minimum width that fits all values in the selection.
+  */
+  min-width: 122px;
+}
+
+.task-duration .mdc-select__anchor {
+  height: 48px;
+}
+
 :root {
   --mdc-theme-primary: #668CD9;
 }

@@ -61,4 +61,11 @@ public class TimeConverter {
     long epoch = epochInMilliseconds(day, LocalTime.of(hour, minute), timeZone);
     return epochToDateTime(epoch, timeZone);
   }
+
+  /**
+   * Converts minutes into milliseconds.
+   */
+  public static long minsToMillis(String minutes) {
+    return TimeUnit.MINUTES.toMillis(Long.parseLong(minutes));
+  }
 }

@@ -37,20 +37,34 @@ import static com.google.sps.converter.TimeConverter.epochToDateTime;
  * A new instance should be created for each scheduling.
  */
 public class Scheduler {
-  public static final int START_HOUR = 9;
-  public static final int START_MINUTE = 0;
-  public static final int END_HOUR = 18;
-  public static final int END_MINUTE = 0;
+  public static final int DEFAULT_START_HOUR = 9;
+  public static final int DEFAULT_START_MINUTE = 0;
+  public static final int DEFAULT_END_HOUR = 18;
+  public static final int DEFAULT_END_MINUTE = 0;
   public static final long DEFAULT_DURATION_IN_MILLISECONDS = TimeUnit.MINUTES.toMillis(30);
   private List<ExtendedTask> tasks;
   private String timeZone;
+  private final int startHour;
+  private final int startMin;
+  private final int endHour;
+  private final int endMin;
   private TreeMultimap<Long, ExtendedTask> longestFirstOrderedTasks;
   private Set<Event> orderedCalendarEvents;
   private List<ExtendedTask> scheduledTasks;
 
+
   public Scheduler(Collection<Event> calendarEvents, List<ExtendedTask> tasks, String timeZone) {
+    this(calendarEvents, tasks, timeZone, DEFAULT_START_HOUR, DEFAULT_START_MINUTE, DEFAULT_END_HOUR, DEFAULT_END_MINUTE);
+  }
+
+  // Todo: consider using builder pattern
+  public Scheduler(Collection<Event> calendarEvents, List<ExtendedTask> tasks, String timeZone, int startHour, int startMin, int endHour, int endMin) {
     this.tasks = tasks;
     this.timeZone = timeZone;
+    this.startHour = startHour;
+    this.startMin = startMin;
+    this.endHour = endHour;
+    this.endMin = endMin;
 
     orderedCalendarEvents = new TreeSet<>(
         Comparator.comparingLong(event -> event.getStart().getDateTime().getValue()));
@@ -84,9 +98,9 @@ public class Scheduler {
   private void scheduleForADay(LocalDate dayDate) {
 
     long dayStartEpochMilliseconds =
-        epochInMilliseconds(dayDate, LocalTime.of(START_HOUR, START_MINUTE), timeZone);
+        epochInMilliseconds(dayDate, LocalTime.of(startHour, startMin), timeZone);
     long dayEndEpochMilliseconds =
-        epochInMilliseconds(dayDate, LocalTime.of(END_HOUR, END_MINUTE), timeZone);
+        epochInMilliseconds(dayDate, LocalTime.of(endHour, endMin), timeZone);
 
     long lastEnd = dayStartEpochMilliseconds;
 

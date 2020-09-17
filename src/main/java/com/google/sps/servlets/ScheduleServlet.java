@@ -76,6 +76,11 @@ public class ScheduleServlet extends HttpServlet {
     String timeZone = calendarClientAdapter.getPrimaryCalendarTimeZone();
     ZoneId zoneId = ZoneId.of(timeZone);
 
+    int startHour = Integer.parseInt(request.getParameter("startHour"));
+    int startMin = Integer.parseInt(request.getParameter("startMin"));
+    int endHour = Integer.parseInt(request.getParameter("endHour"));
+    int endMin = Integer.parseInt(request.getParameter("endMin"));
+
     String startDateString = request.getParameter("startDate");
     String endDateString = request.getParameter("endDate");
     LocalDate startDate, endDate;
@@ -95,7 +100,7 @@ public class ScheduleServlet extends HttpServlet {
     List<Event> calendarEvents = calendarClientAdapter.getAcceptedEventsInTimerange(startDateTime, endDateTime);
 
     // Schedules
-    Scheduler scheduler = new Scheduler(calendarEvents, tasksToSchedule, timeZone);
+    Scheduler scheduler = new Scheduler(calendarEvents, tasksToSchedule, timeZone, startHour, startMin, endHour, endMin);
     List<ExtendedTask> scheduledExtendedTasks = scheduler.scheduleInRange(startDate, endDate);
 
     List<Task> scheduledTasks = scheduledExtendedTasks.stream().map(ExtendedTask::getTask).collect(Collectors.toList());

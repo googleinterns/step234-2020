@@ -14,11 +14,31 @@
  * limitations under the License.
  */
 
+let taskTemplate;
+let mdcSnackbar;
+
 $(document).ready(init);
 
 function init() {
+  compileTaskTemplate();
+  initSnackbar();
   loadTasks();
   loadCalendar();
+}
+
+/**
+ * Compiles the handlebars template representing a task.
+ */
+function compileTaskTemplate() {
+  const taskTemplateElement = document.getElementById("task-template").innerHTML;
+  taskTemplate = Handlebars.compile(taskTemplateElement);
+}
+
+/**
+ * Inits the snackbar component.
+ */
+function initSnackbar() {
+  mdcSnackbar = new mdc.snackbar.MDCSnackbar($("#snackbar-result")[0]);
 }
 
 function loadTasks() {
@@ -29,7 +49,7 @@ function loadTasks() {
 }
 
 function renderTasks(tasks) {
-  $("#task-list > .task").remove();
+  $("#task-list").empty();
   $("#schedule-button").prop("disabled", !tasks.length);
   $("#empty-message").toggle(!tasks.length);
   if (tasks.length > 0) {
@@ -43,8 +63,6 @@ function renderTasks(tasks) {
  * adds it to the task list.
  */
 function renderSingleTask(task) {
-  const taskTemplateElement = document.getElementById("task-template").innerHTML;
-  const taskTemplate = Handlebars.compile(taskTemplateElement);
   $("#task-list").append(taskTemplate(task));
 }
 
@@ -54,7 +72,8 @@ function renderSingleTask(task) {
 function initDropdowns() {
   $(".mdc-select").each(
       function() {
-        mdc.select.MDCSelect.attachTo(this);
+        const mdcSelect = new mdc.select.MDCSelect(this);
+        $(this).data("mdcSelect", mdcSelect);
       });
 }
 
@@ -72,7 +91,6 @@ function updateView(result) {
  */
 function showResultMessage(result) {
   $("#snackbar-result-text").text(result.message);
-  const mdcSnackbar = new mdc.snackbar.MDCSnackbar($("#snackbar-result")[0]);
   mdcSnackbar.open();
 }
 
@@ -94,13 +112,11 @@ function schedule() {
  * Appends to the form data the selected values for the duration of each task.
  */
 function appendDurations(formData) {
-  $("input[name=taskId]").each(
+  $("input:checkbox[name='taskId']:checked").each(
       function () {
-        if (this.checked) {
-          const durationSelect = $(this).closest(".task-title").next()[0];
-          const mdcDurationSelect = new mdc.select.MDCSelect(durationSelect);
-          formData.append("taskDuration", mdcDurationSelect.value);
-        }
+        const durationSelect = $(this).closest(".task").find(".task-duration");
+        const mdcDurationSelect = $(durationSelect).data("mdcSelect");
+        formData.append("taskDuration", mdcDurationSelect.value);
       }
   );
 }

@@ -16,6 +16,7 @@ package com.google.sps.servlets;
 
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.tasks.model.Task;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.sps.api.calendar.CalendarClientHelper;
 import com.google.sps.api.tasks.TasksClientAdapter;
@@ -24,9 +25,11 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -36,30 +39,39 @@ import static com.google.sps.api.calendar.CalendarClientHelper.createPrivateEven
 import static com.google.sps.api.tasks.TasksClientHelper.createCustomDurationTaskWithDue;
 import static com.google.sps.api.tasks.TasksClientHelper.createDefaultDurationTaskWithDue;
 import static com.google.sps.converter.TimeConverter.createDateTime;
+import static com.google.sps.converter.TimeConverter.minsToMillis;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.*;
 
 public class ScheduleServletTest {
   private final static ImmutableSet<String> TASKS_IDS = ImmutableSet.of(
       "1", "2", "abcd", "RferEhJ65ytas", "656344234", "sdff&$%rewrETwe");
+  private final static ImmutableList<String> TASKS_DURATIONS_IN_MINUTES = ImmutableList.of(
+      "30", "60", "90", "120", "150", "180");
   private final static String TASKS_LIST_ID = "GgwefaUJHTyr34gsd";
   private final static String ZURICH_TIME_ZONE = "Europe/Zurich";
   private final static String UTC_TIME_ZONE = "UTC";
 
   private ScheduleServlet scheduleServlet;
   private TasksClientAdapter tasksClientAdapter;
-  private List<Task> tasks;
+  private List<ExtendedTask> extendedTasks;
 
   @Before
   public void setUp() throws IOException {
     scheduleServlet = new ScheduleServlet();
-    tasks = new ArrayList<>();
+    extendedTasks = new ArrayList<>();
     tasksClientAdapter = Mockito.mock(TasksClientAdapter.class);
-    for (String taskId : TASKS_IDS) {
+    Assume.assumeTrue("Ids and durations arrays have different length",
+        TASKS_IDS.size() == TASKS_DURATIONS_IN_MINUTES.size());
+    Iterator<String> idsIterator = TASKS_IDS.iterator();
+    Iterator<String> durationsIterator = TASKS_DURATIONS_IN_MINUTES.iterator();
+    while (idsIterator.hasNext() && durationsIterator.hasNext()) {
+      String taskId = idsIterator.next();
       Task task = new Task();
       task.setId(taskId);
       Mockito.when(tasksClientAdapter.getTask(TASKS_LIST_ID, taskId)).thenReturn(task);
-      tasks.add(task);
+      extendedTasks.add(
+          new ExtendedTask(task, minsToMillis(durationsIterator.next())));
     }
     // Throws an exception whenever the tasks list id is not valid
     Mockito.when(tasksClientAdapter.getTask(not(eq(TASKS_LIST_ID)), anyString()))
@@ -71,55 +83,66 @@ public class ScheduleServletTest {
   }
 
   @Test
-  public void getSelectedTasks_emptyIds() {
+  public void getSelectedTasksExtended_emptyIds() {
     String[] tasksIds = new String[0];
+    String[] tasksDurations = new String[0];
 
-    List<Task> expectedTasks = Collections.emptyList();
-    List<Task> actualTasks = scheduleServlet.getSelectedTasks(
-        tasksIds, tasksClientAdapter, TASKS_LIST_ID);
+    List<ExtendedTask> expectedExtendedTasks = Collections.emptyList();
+    List<ExtendedTask> actualExtendedTasks = scheduleServlet.getSelectedTasksExtended(
+        tasksIds, tasksDurations, tasksClientAdapter, TASKS_LIST_ID);
 
-    Assert.assertEquals(expectedTasks, actualTasks);
+    Assert.assertEquals(expectedExtendedTasks, actualExtendedTasks);
   }
 
   @Test
-  public void getSelectedTasks_allExistingTasks() {
+  public void getSelectedTasksExtended_allExistingTasks() {
     String[] tasksIds = new String[TASKS_IDS.size()];
     TASKS_IDS.toArray(tasksIds);
+    String[] tasksDurations = new String[TASKS_DURATIONS_IN_MINUTES.size()];
+    TASKS_DURATIONS_IN_MINUTES.toArray(tasksDurations);
 
-    List<Task> expectedTasks = new ArrayList<>(tasks);
-    List<Task> actualTasks = scheduleServlet.getSelectedTasks(
-        tasksIds, tasksClientAdapter, TASKS_LIST_ID);
+    List<ExtendedTask> expectedExtendedTasks = new ArrayList<>(extendedTasks);
+    List<ExtendedTask> actualExtendedTasks = scheduleServlet.getSelectedTasksExtended(
+        tasksIds, tasksDurations, tasksClientAdapter, TASKS_LIST_ID);
 
-    Assert.assertEquals(expectedTasks, actualTasks);
+    Assert.assertEquals(expectedExtendedTasks, actualExtendedTasks);
   }
 
   @Test
-  public void getSelectedTasks_someNonExistingTasks() {
+  public void getSelectedTasksExtended_someNonExistingTasks() {
     String[] tasksIds = new String[TASKS_IDS.size() + 2];
-    int indexTasksIds = 0;
-    tasksIds[indexTasksIds++] = "0";
-    for (String tasksId : TASKS_IDS) {
-      tasksIds[indexTasksIds++] = tasksId;
+    String[] tasksDurations = new String[TASKS_DURATIONS_IN_MINUTES.size() + 2];
+    int index = 0;
+    tasksDurations[index] = "30";
+    tasksIds[index++] = "0";
+    Iterator<String> idsIterator = TASKS_IDS.iterator();
+    Iterator<String> durationsIterator = TASKS_DURATIONS_IN_MINUTES.iterator();
+    while (idsIterator.hasNext() && durationsIterator.hasNext()) {
+      tasksDurations[index] = durationsIterator.next();
+      tasksIds[index++] = idsIterator.next();
     }
-    tasksIds[indexTasksIds] = "qaz";
+    tasksDurations[index] = "180";
+    tasksIds[index] = "qaz";
 
-    List<Task> expectedTasks = new ArrayList<>(tasks);
-    List<Task> actualTasks = scheduleServlet.getSelectedTasks(
-        tasksIds, tasksClientAdapter, TASKS_LIST_ID);
+    List<ExtendedTask> expectedExtendedTasks = new ArrayList<>(extendedTasks);
+    List<ExtendedTask> actualExtendedTasks = scheduleServlet.getSelectedTasksExtended(
+        tasksIds, tasksDurations, tasksClientAdapter, TASKS_LIST_ID);
 
-    Assert.assertEquals(expectedTasks, actualTasks);
+    Assert.assertEquals(expectedExtendedTasks, actualExtendedTasks);
   }
 
   @Test
-  public void getSelectedTasks_wrongTasksListId() {
+  public void getSelectedTasksExtended_wrongTasksListId() {
     String[] tasksIds = new String[TASKS_IDS.size()];
     TASKS_IDS.toArray(tasksIds);
+    String[] tasksDurations = new String[TASKS_DURATIONS_IN_MINUTES.size()];
+    TASKS_DURATIONS_IN_MINUTES.toArray(tasksDurations);
 
-    List<Task> expectedTasks = Collections.emptyList();
-    List<Task> actualTasks = scheduleServlet.getSelectedTasks(
-        tasksIds, tasksClientAdapter, TASKS_LIST_ID + "QwErTy");
+    List<ExtendedTask> expectedExtendedTasks = Collections.emptyList();
+    List<ExtendedTask> actualExtendedTasks = scheduleServlet.getSelectedTasksExtended(
+        tasksIds, tasksDurations, tasksClientAdapter, TASKS_LIST_ID + "QwErTy");
 
-    Assert.assertEquals(expectedTasks, actualTasks);
+    Assert.assertEquals(expectedExtendedTasks, actualExtendedTasks);
   }
 
   @Test

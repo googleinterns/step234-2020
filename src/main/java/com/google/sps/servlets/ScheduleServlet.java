@@ -35,13 +35,14 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.stream.Collectors;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
+
+import static com.google.sps.converter.TimeConverter.minsToMillis;
 
 /**
  * Schedules tasks on tomorrow.
@@ -66,9 +67,10 @@ public class ScheduleServlet extends HttpServlet {
     String tasksListId = TasksClientHelper.getMostRecentTaskListId(
         tasksClientAdapter.getTasksLists());
 
-    List<ExtendedTask> tasksToSchedule = createExtendedTasks(
-        getSelectedTasks(request.getParameterValues(TASK_ID_LIST_KEY), tasksClientAdapter, tasksListId),
-        request.getParameterValues(TASK_DURATION_LIST_KEY));
+    List<ExtendedTask> tasksToSchedule = getSelectedTasksExtended(
+        request.getParameterValues(TASK_ID_LIST_KEY),
+        request.getParameterValues(TASK_DURATION_LIST_KEY),
+        tasksClientAdapter, tasksListId);
 
     CalendarClientAdapter calendarClientAdapter = new CalendarClientAdapter();
     String timeZone = calendarClientAdapter.getPrimaryCalendarTimeZone();
@@ -106,34 +108,23 @@ public class ScheduleServlet extends HttpServlet {
   }
 
   /**
-   * Returns the task objects having the ids contained in the array.
+   * Returns the task objects having the ids contained in the array nested into a wrapper
+   * class that also contains the durations.
+   * tasksIds and tasksDurations must have the same length.
    */
-  List<Task> getSelectedTasks(
-      String[] tasksIds, TasksClientAdapter tasksClientAdapter, String tasksListId) {
-    List<Task> tasks = new ArrayList<>();
+  List<ExtendedTask> getSelectedTasksExtended(
+      String[] tasksIds,  String[] tasksDurations, TasksClientAdapter tasksClientAdapter, String tasksListId) {
+    assert tasksIds.length == tasksDurations.length : "tasksIds and tasksDurations have different length";
 
-    for (String id : tasksIds) {
+    List<ExtendedTask> extendedTasks = new ArrayList<>();
+    for (int i = 0; i < tasksIds.length; i++) {
       try {
-        Task task = tasksClientAdapter.getTask(tasksListId, id);
-        tasks.add(task);
+        Task task = tasksClientAdapter.getTask(tasksListId, tasksIds[i]);
+        extendedTasks.add(
+            new ExtendedTask(task, minsToMillis(tasksDurations[i])));
       } catch (IOException IoException) {
         // Continue the loop if the id doesn't exist
       }
-    }
-
-    return tasks;
-  }
-
-  /**
-   * Extends the tasks into a wrapper class that contains also the duration.
-   */
-  List<ExtendedTask> createExtendedTasks(List<Task> tasks, String[] tasksDurations) {
-    List<ExtendedTask> extendedTasks = new ArrayList<>();
-
-    for (ListIterator<Task> tasksIterator = tasks.listIterator(); tasksIterator.hasNext(); ) {
-      int index = tasksIterator.nextIndex();
-      ExtendedTask extendedTask = new ExtendedTask(tasksIterator.next(), tasksDurations[index]);
-      extendedTasks.add(extendedTask);
     }
 
     return extendedTasks;

@@ -61,6 +61,10 @@ body {
 .task-duration {
   align-self: flex-end;
   margin-right: 10px;
+  /*
+  The min-width property is used to overwrite the one set in mdc-select.
+  This is the minimum width that fits all values in the selection.
+  */
   min-width: 122px;
 }
 

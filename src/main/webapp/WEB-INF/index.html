@@ -155,23 +155,134 @@
             </label>
           </span>
         </li>
-      <li class="mdc-list-item">
-        <span class="mdc-list-item__text">
+      </ul>
+      <div>
+<!--        <span class="mdc-list-item__text">-->
         Set custom working hours:
           <form id="working-hours">
-            <label for="start-hour">Start time</label>
-            <input type="text" name="startHour" id="start-hour">
-            <label for="start-min">:</label>
-            <input type="text" name="startMin" id="start-min">
+
+            <script id="select-options-template" type="text/x-handlebars-template">
+              <div class="mdc-select__menu mdc-menu mdc-menu-surface">
+                <ul class="mdc-list">
+                  {{#each values}}
+                  <li class="mdc-list-item" data-value="{{this}}">
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">{{this}}</span>
+                  </li>
+                  {{/each}}
+                </ul>
+              </div>
+            </script>
+
+            <div id="start-hour" class="mdc-select mdc-select--filled hour-select">
+                <div class="mdc-select__anchor">
+                  <span class="mdc-select__ripple"></span>
+                  <span class="mdc-select__selected-text">9</span>
+                  <span class="mdc-select__dropdown-icon">
+                    <svg
+                        class="mdc-select__dropdown-icon-graphic"
+                        viewBox="7 10 10 5">
+                      <polygon
+                          class="mdc-select__dropdown-icon-inactive"
+                          stroke="none"
+                          fill-rule="evenodd"
+                          points="7 10 12 15 17 10">
+                      </polygon>
+                      <polygon
+                          class="mdc-select__dropdown-icon-active"
+                          stroke="none"
+                          fill-rule="evenodd"
+                          points="7 15 12 10 17 15">
+                      </polygon>
+                    </svg>
+                  </span>
+                  <span class="mdc-floating-label mdc-floating-label--float-above">Start hour</span>
+                  <span class="mdc-line-ripple"></span>
+                </div>
+              </div>
+            :
+            <div id="start-min" class="mdc-select mdc-select--filled min-select">
+              <div class="mdc-select__anchor">
+                <span class="mdc-select__ripple"></span>
+                <span class="mdc-select__selected-text">00</span>
+                <span class="mdc-select__dropdown-icon">
+                    <svg
+                        class="mdc-select__dropdown-icon-graphic"
+                        viewBox="7 10 10 5">
+                      <polygon
+                          class="mdc-select__dropdown-icon-inactive"
+                          stroke="none"
+                          fill-rule="evenodd"
+                          points="7 10 12 15 17 10">
+                      </polygon>
+                      <polygon
+                          class="mdc-select__dropdown-icon-active"
+                          stroke="none"
+                          fill-rule="evenodd"
+                          points="7 15 12 10 17 15">
+                      </polygon>
+                    </svg>
+                  </span>
+                <span class="mdc-floating-label mdc-floating-label--float-above">Start minute</span>
+                <span class="mdc-line-ripple"></span>
+              </div>
+            </div>
             <br>
-            <label for="end-hour">End time</label>
-            <input type="text" name="endHour" id="end-hour">
-            <label for="end-min">:</label>
-            <input type="text" name="endMin" id="end-min">
+            <div id="end-hour" class="mdc-select mdc-select--filled hour-select">
+              <div class="mdc-select__anchor">
+                <span class="mdc-select__ripple"></span>
+                <span class="mdc-select__selected-text">18</span>
+                <span class="mdc-select__dropdown-icon">
+                    <svg
+                        class="mdc-select__dropdown-icon-graphic"
+                        viewBox="7 10 10 5">
+                      <polygon
+                          class="mdc-select__dropdown-icon-inactive"
+                          stroke="none"
+                          fill-rule="evenodd"
+                          points="7 10 12 15 17 10">
+                      </polygon>
+                      <polygon
+                          class="mdc-select__dropdown-icon-active"
+                          stroke="none"
+                          fill-rule="evenodd"
+                          points="7 15 12 10 17 15">
+                      </polygon>
+                    </svg>
+                  </span>
+                <span class="mdc-floating-label mdc-floating-label--float-above">Start hour</span>
+                <span class="mdc-line-ripple"></span>
+              </div>
+            </div>
+            :
+            <div id="end-min" class="mdc-select mdc-select--filled min-select">
+              <div class="mdc-select__anchor">
+                <span class="mdc-select__ripple"></span>
+                <span class="mdc-select__selected-text">00</span>
+                <span class="mdc-select__dropdown-icon">
+                    <svg
+                        class="mdc-select__dropdown-icon-graphic"
+                        viewBox="7 10 10 5">
+                      <polygon
+                          class="mdc-select__dropdown-icon-inactive"
+                          stroke="none"
+                          fill-rule="evenodd"
+                          points="7 10 12 15 17 10">
+                      </polygon>
+                      <polygon
+                          class="mdc-select__dropdown-icon-active"
+                          stroke="none"
+                          fill-rule="evenodd"
+                          points="7 15 12 10 17 15">
+                      </polygon>
+                    </svg>
+                  </span>
+                <span class="mdc-floating-label mdc-floating-label--float-above">Start minute</span>
+                <span class="mdc-line-ripple"></span>
+              </div>
           </form>
-        </span>
-      </li>
-    </ul>
+<!--        </span>-->
+      </div>
 
       <button id="schedule-button" class="mdc-button mdc-button--raised fixed" onclick="schedule()" disabled>
         <span class="mdc-button__label">Schedule!</span>

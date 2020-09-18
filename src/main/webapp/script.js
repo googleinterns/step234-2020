@@ -15,6 +15,7 @@
  */
 
 let taskTemplate;
+let timeOptionTemplate;
 let mdcSnackbar;
 let taskLoadingProgressBar;
 
@@ -24,7 +25,8 @@ function init() {
   taskLoadingProgressBar = new mdc.linearProgress.MDCLinearProgress(document.querySelector('#progress-bar'));
   hideDismissedInfo();
   initCheckboxChangeHandlers();
-  compileTaskTemplate();
+  compileTemplates();
+  fillSelects();
   initSnackbar();
   loadTasks();
   loadCalendar();
@@ -35,9 +37,18 @@ function init() {
 /**
  * Compiles the handlebars template representing a task.
  */
-function compileTaskTemplate() {
+function compileTemplates() {
   const taskTemplateElement = document.getElementById("task-template").innerHTML;
+  const timeOptionTemplateElement = document.getElementById("select-option-template").innerHTML;
   taskTemplate = Handlebars.compile(taskTemplateElement);
+  timeOptionTemplate = Handlebars.compile(timeOptionTemplateElement);
+}
+
+function fillSelects() {
+  var minutes = ["00", "15", "30", "45"];
+  var hours = Array.from(Array(24).keys());
+  $(".min-select").each((index, select) => {minutes.forEach(minute => $(select).append(timeOptionTemplate(minute)))});
+  $(".hour-select").each((index, select) => {hours.forEach(minute => $(select).children(".mdc-list").append(timeOptionTemplate(minute)))});
 }
 
 /**

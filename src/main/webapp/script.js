@@ -96,7 +96,8 @@ function hideInfo() {
 function loadTasks() {
   taskLoadingProgressBar.open();
   fetch("/load_tasks")
-      .then(getJsonIfOk)
+      .then(checkResponse)
+      .then(getJson)
       .then(renderTasks)
       .catch(handleNetworkError);
 }
@@ -144,17 +145,24 @@ function handleEmptySelection() {
  * reports if there are problems.
  */
 function updateView(result) {
+  showScheduleButton();
+  showResultMessage(result.message);
+  loadTasks();
+}
+
+/**
+ * Shows the schedule button and hides the scheduling loader.
+ */
+function showScheduleButton() {
   $("#scheduling-progress").hide();
   $("#schedule-button").show();
-  showResultMessage(result);
-  loadTasks();
 }
 
 /**
  * Shows the result of scheduling.
  */
-function showResultMessage(result) {
-  $("#snackbar-result-text").text(result.message);
+function showResultMessage(message) {
+  $("#snackbar-result-text").text(message);
   mdcSnackbar.open();
 }
 
@@ -171,10 +179,20 @@ function schedule() {
   appendDurations(formContent);
   formData = appendWorkingHours(formContent); // JavaScript seems pass by reference, maybe = is unnecessary, but increases readability
   postData("/schedule", new URLSearchParams(formContent).toString())
-      .then(getJsonIfOk)
+      .then(checkResponse)
+      .then(getJson)
       .then(updateView)
       .then(refreshCalendar)
+      .catch(restoreScheduleButton)
       .catch(handleNetworkError);
+}
+
+/**
+ * Restores the schedule button as before clicking it.
+ */
+function restoreScheduleButton() {
+  showScheduleButton();
+  handleEmptySelection();
 }
 
 function appendWorkingHours(formData) {
@@ -213,12 +231,36 @@ function handleNetworkError(exception) {
   console.error(exception);
 }
 
-function getJsonIfOk(response) {
+/**
+ * Checks the status code of the response. If it is ok, then it returns the response,
+ * otherwise it shows and throws an error.
+ */
+function checkResponse(response) {
   if (!response.ok) {
-    throw new Error(`Server error detected: ${response.status} (${response.statusText})`);
-  } else {
-    return response.json();
+    if (response.status === 400) {
+      getJson(response)
+          .then((result) => {
+            return result.message;
+          })
+          .then(showResultMessage);
+    } else {
+      let message;
+      if (response.status > 400 && response.status <= 499) {
+        message = "Client error: " + response.statusText;
+      } else if (response.status >= 500 && response.status <= 599) {
+        message = "Server error";
+      } else {
+        message = "Error";
+      }
+      showResultMessage(message);
+    }
+    throw new Error(`Error detected: ${response.status} (${response.statusText})`);
   }
+  return response;
+}
+
+function getJson(response) {
+  return response.json();
 }
 
 /**
@@ -227,7 +269,8 @@ function getJsonIfOk(response) {
  */
 function loadCalendar() {
   fetch("/user")
-      .then(getJsonIfOk)
+      .then(checkResponse)
+      .then(getJson)
       .then(setCalendar)
       .catch(handleNetworkError);
 }

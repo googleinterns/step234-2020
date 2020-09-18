@@ -155,18 +155,21 @@
             </label>
           </span>
         </li>
-      <li>
+      <li class="mdc-list-item">
+        <span class="mdc-list-item__text">
         Set custom working hours:
-        <form id="working-hours">
-          <label for="start-hour">Start hour</label>
-          <input type="text" name="startHour" id="start-hour">
-          <label for="start-min"></label>
-          <input type="text" name="startMin" id="start-min">
-          <label for="end-hour"></label>
-          <input type="text" name="endHour" id="end-hour">
-          <label for="end-min"></label>
-          <input type="text" name="endMin" id="end-min">
-        </form>
+          <form id="working-hours">
+            <label for="start-hour">Start time</label>
+            <input type="text" name="startHour" id="start-hour">
+            <label for="start-min">:</label>
+            <input type="text" name="startMin" id="start-min">
+            <br>
+            <label for="end-hour">End time</label>
+            <input type="text" name="endHour" id="end-hour">
+            <label for="end-min">:</label>
+            <input type="text" name="endMin" id="end-min">
+          </form>
+        </span>
       </li>
     </ul>
 

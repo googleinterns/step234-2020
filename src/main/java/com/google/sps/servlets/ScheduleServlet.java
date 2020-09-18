@@ -58,11 +58,15 @@ public class ScheduleServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     if (!request.getParameterMap().containsKey(TASK_ID_LIST_KEY)) {
-      sendJsonResponse(response, "Select some tasks to schedule.");
+      badRequestResponse(response, "Select some tasks to schedule.");
       return;
     }
 
     // Scheduler parameters
+    WorkingHours workingHours = getWorkingHours(request, response);
+    if (workingHours == null) {
+      return;
+    }
 
     TasksClientAdapter tasksClientAdapter = new TasksClientAdapter();
     String tasksListId = TasksClientHelper.getMostRecentTaskListId(
@@ -76,13 +80,6 @@ public class ScheduleServlet extends HttpServlet {
     CalendarClientAdapter calendarClientAdapter = new CalendarClientAdapter();
     String timeZone = calendarClientAdapter.getPrimaryCalendarTimeZone();
     ZoneId zoneId = ZoneId.of(timeZone);
-
-    int startHour = Integer.parseInt(request.getParameter("startHour"));
-    int startMin = Integer.parseInt(request.getParameter("startMin"));
-    int endHour = Integer.parseInt(request.getParameter("endHour"));
-    int endMin = Integer.parseInt(request.getParameter("endMin"));
-
-    WorkingHours workingHours = new WorkingHours(startHour, startMin, endHour, endMin);
 
 
     String startDateString = request.getParameter("startDate");
@@ -177,5 +174,38 @@ public class ScheduleServlet extends HttpServlet {
     } catch (JsonProcessingException exception) {
       throw new IOException(exception);
     }
+  }
+
+  /**
+   * Creates response for a bad request by setting the status code and a message.
+   */
+  private void badRequestResponse(HttpServletResponse response, String message) throws IOException {
+    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    sendJsonResponse(response, message);
+  }
+
+  /**
+   * Returns the working hours contained in the request and checks if they are correct.
+   * If not, it returns null and sets the response as bad request.
+   */
+  private WorkingHours getWorkingHours(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    WorkingHours workingHours = null;
+
+    try {
+      int startHour = Integer.parseInt(request.getParameter("startHour"));
+      int startMin = Integer.parseInt(request.getParameter("startMin"));
+      int endHour = Integer.parseInt(request.getParameter("endHour"));
+      int endMin = Integer.parseInt(request.getParameter("endMin"));
+
+      if (endHour < startHour || (startHour == endHour && endMin <= startMin)) {
+        badRequestResponse(response, "Select valid working hours (end time must be greater than start time)");
+      } else {
+        workingHours = new WorkingHours(startHour, startMin, endHour, endMin);
+      }
+    } catch(NumberFormatException exception) {
+      badRequestResponse(response, "Working hours format is incorrect");
+    }
+
+    return workingHours;
   }
 }

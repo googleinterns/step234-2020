@@ -44,15 +44,30 @@ function compileTemplates() {
   selectOptionsTemplate = Handlebars.compile(selectOptionsTemplateElement);
 }
 
+const START_HOUR = "09";
+const START_MIN = "00";
+const END_HOUR = "18";
+const END_MIN = "00";
+
+function addZeroBefore(n) {
+  return (n < 10 ? '0' : '') + n;
+}
+
 function fillSelects() {
   const minutes = {values: ["00", "15", "30", "45"]};
-  const hours = {values: Array.from(Array(24).keys())};
+  const hours = {values: Array.from(Array(24).keys()).map((hour) => addZeroBefore(hour))};
+
   minOptions = selectOptionsTemplate(minutes);
   hourOptions = selectOptionsTemplate(hours);
 
   $(".min-select").each((index, element) => $(element).append(minOptions));
   $(".hour-select").each((index, element) => $(element).append(hourOptions));
+  $("#start-hour li[data-value=" + START_HOUR + " ]").addClass("mdc-list-item--selected");
+  $("#start-min li[data-value=" + START_MIN + " ]").addClass("mdc-list-item--selected");
+  $("#end-hour li[data-value=" + END_HOUR + " ]").addClass("mdc-list-item--selected");
+  $("#end-min li[data-value=" + END_MIN + " ]").addClass("mdc-list-item--selected");
 
+  initSelects();
 }
 
 /**
@@ -93,7 +108,7 @@ function renderTasks(tasks) {
   if (tasks.length > 0) {
     tasks.forEach(renderSingleTask);
   }
-  initDropdowns();
+  initSelects();
   handleEmptySelection();
 }
 
@@ -108,7 +123,7 @@ function renderSingleTask(task) {
 /**
  * Initializes the dropdowns selection components.
  */
-function initDropdowns() {
+function initSelects() {
   $(".mdc-select").each(
       function() {
         const mdcSelect = new mdc.select.MDCSelect(this);
@@ -163,11 +178,10 @@ function schedule() {
 }
 
 function appendWorkingHours(formData) {
-  const workingHoursFormData = new FormData($("#working-hours")[0]);
-  for([key, value] of workingHoursFormData.entries()){
-    formData.append(key, value);
-  }
-  return formData;
+  formData.append("start-hour", $("#start-hour").data("mdcSelect").value);
+  formData.append("startMin", $("#start-min").data("mdcSelect").value);
+  formData.append("endHour", $("#end-hour").data("mdcSelect").value);
+  formData.append("endMin", $("#end-min").data("mdcSelect").value);
 }
 
 /**

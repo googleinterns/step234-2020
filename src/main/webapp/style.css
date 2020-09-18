@@ -47,6 +47,7 @@ body {
 
 #schedule-form {
   overflow-y: auto;
+  flex-grow: 1;
 }
 
 .fixed {
@@ -57,6 +58,18 @@ body {
   display: flex;
   flex-direction: column;
   margin-top: auto;
+}
+
+.min-select{
+  /*
+  The min-width property is used to overwrite the one set in mdc-select.
+  This is the minimum width that allows Start minute to appear properly.
+  */
+  min-width: 132px;
+}
+
+.hour-select{
+  min-width: 132px;
 }
 
 #schedule-button {

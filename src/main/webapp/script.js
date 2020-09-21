@@ -196,7 +196,7 @@ function restoreScheduleButton() {
 }
 
 function appendWorkingHours(formData) {
-  formData.append("start-hour", $("#start-hour").data("mdcSelect").value);
+  formData.append("startHour", $("#start-hour").data("mdcSelect").value);
   formData.append("startMin", $("#start-min").data("mdcSelect").value);
   formData.append("endHour", $("#end-hour").data("mdcSelect").value);
   formData.append("endMin", $("#end-min").data("mdcSelect").value);

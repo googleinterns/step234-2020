@@ -30,8 +30,6 @@ function init() {
   initSnackbar();
   loadTasks();
   loadCalendar();
-  // Todo: add onchange listener to working hours form, save entries to localStorage
-  // Also read entries from localStorage
 }
 
 /**
@@ -44,13 +42,26 @@ function compileTemplates() {
   selectOptionsTemplate = Handlebars.compile(selectOptionsTemplateElement);
 }
 
-const START_HOUR = "09";
-const START_MIN = "00";
-const END_HOUR = "18";
-const END_MIN = "00";
+const DEFAULT_WORKING_HOURS = {
+  "start-hour": "09",
+  "start-min": "00",
+  "end-hour": "18",
+  "end-min": "00"
+}
 
 function addZeroBefore(n) {
   return (n < 10 ? '0' : '') + n;
+}
+
+function initSettings() {
+  workingHours = DEFAULT_WORKING_HOURS;
+
+  if(localStorage.hasOwnProperty("workingHours")){
+    workingHours = JSON.parse(localStorage.getItem("workingHours"));
+  }
+  for(settingId in workingHours){
+    $(`#${settingId} li[data-value=${workingHours[settingId]}]`).addClass("mdc-list-item--selected");
+  }
 }
 
 function fillSelects() {
@@ -62,10 +73,7 @@ function fillSelects() {
 
   $(".min-select").each((index, element) => $(element).append(minOptions));
   $(".hour-select").each((index, element) => $(element).append(hourOptions));
-  $("#start-hour li[data-value=" + START_HOUR + " ]").addClass("mdc-list-item--selected");
-  $("#start-min li[data-value=" + START_MIN + " ]").addClass("mdc-list-item--selected");
-  $("#end-hour li[data-value=" + END_HOUR + " ]").addClass("mdc-list-item--selected");
-  $("#end-min li[data-value=" + END_MIN + " ]").addClass("mdc-list-item--selected");
+  initSettings();
 
   initSelects();
 }
@@ -167,6 +175,11 @@ function showResultMessage(message) {
 }
 
 
+function saveSettings() {
+  workingHours = extractWorkingHours();
+  localStorage.setItem("workingHours", JSON.stringify(workingHours));
+}
+
 function schedule() {
   $("#schedule-button").prop("disabled", true);
   $("#schedule-button").hide();
@@ -177,7 +190,8 @@ function schedule() {
   formContent.append("startDate", startDate.trim());
   formContent.append("endDate", endDate.trim());
   appendDurations(formContent);
-  formData = appendWorkingHours(formContent); // JavaScript seems pass by reference, maybe = is unnecessary, but increases readability
+  formData = appendWorkingHours(formContent); // JavaScript seems pass by reference, maybe = is unnecessary, but could increase readability?
+  saveSettings();
   postData("/schedule", new URLSearchParams(formContent).toString())
       .then(checkResponse)
       .then(getJson)
@@ -196,10 +210,18 @@ function restoreScheduleButton() {
 }
 
 function appendWorkingHours(formData) {
-  formData.append("start-hour", $("#start-hour").data("mdcSelect").value);
-  formData.append("startMin", $("#start-min").data("mdcSelect").value);
-  formData.append("endHour", $("#end-hour").data("mdcSelect").value);
-  formData.append("endMin", $("#end-min").data("mdcSelect").value);
+  workingHours = extractWorkingHours();
+  for(setting in workingHours){
+    formData.append(setting, workingHours[setting]);
+  }
+}
+
+function extractWorkingHours(){
+  var workingHours = new Object();
+  for(element of $("#working-hours .mdc-select")){
+    workingHours[element.id] = $(element).data("mdcSelect").value;
+  }
+  return workingHours;
 }
 
 /**

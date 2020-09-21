@@ -192,10 +192,10 @@ public class ScheduleServlet extends HttpServlet {
     WorkingHours workingHours = null;
 
     try {
-      int startHour = Integer.parseInt(request.getParameter("startHour"));
-      int startMin = Integer.parseInt(request.getParameter("startMin"));
-      int endHour = Integer.parseInt(request.getParameter("endHour"));
-      int endMin = Integer.parseInt(request.getParameter("endMin"));
+      int startHour = Integer.parseInt(request.getParameter("start-hour"));
+      int startMin = Integer.parseInt(request.getParameter("start-min"));
+      int endHour = Integer.parseInt(request.getParameter("end-hour"));
+      int endMin = Integer.parseInt(request.getParameter("end-min"));
 
       if (endHour < startHour || (startHour == endHour && endMin <= startMin)) {
         badRequestResponse(response, "Select valid working hours (end time must be greater than start time)");

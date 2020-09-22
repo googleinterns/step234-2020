@@ -190,7 +190,7 @@ function schedule() {
   formContent.append("startDate", startDate.trim());
   formContent.append("endDate", endDate.trim());
   appendDurations(formContent);
-  formData = appendWorkingHours(formContent); // JavaScript seems pass by reference, maybe = is unnecessary, but could increase readability?
+  appendWorkingHours(formContent);
   saveSettings();
   postData("/schedule", new URLSearchParams(formContent).toString())
       .then(checkResponse)
@@ -217,7 +217,7 @@ function appendWorkingHours(formData) {
 }
 
 function extractWorkingHours(){
-  var workingHours = new Object();
+  var workingHours = {};
   for(element of $("#working-hours .mdc-select")){
     workingHours[element.id] = $(element).data("mdcSelect").value;
   }

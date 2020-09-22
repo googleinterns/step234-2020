@@ -261,9 +261,7 @@ function checkResponse(response) {
   if (!response.ok) {
     if (response.status === 400) {
       getJson(response)
-          .then((result) => {
-            return result.message;
-          })
+          .then((result) => result.message)
           .then(showResultMessage);
     } else {
       let message;

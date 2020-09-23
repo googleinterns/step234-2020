@@ -217,7 +217,7 @@ function appendWorkingHours(formData) {
 }
 
 function extractWorkingHours(){
-  var workingHours = {};
+  const workingHours = {};
   for(element of $("#working-hours .mdc-select")){
     workingHours[element.id] = $(element).data("mdcSelect").value;
   }

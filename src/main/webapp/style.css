@@ -70,7 +70,7 @@ body {
   This is the minimum width that allows Start minute to appear properly.
   */
   min-width: 132px;
-  marginh-top: 8px;
+  margin-top: 8px;
 }
 
 .hour-select{

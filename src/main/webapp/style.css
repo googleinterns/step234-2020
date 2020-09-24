@@ -133,3 +133,11 @@ body {
   display: none;
   margin: auto;
 }
+
+/*
+Introducing whitespace between the div elements of the MDC circular progress indicator produces a broken spinner.
+To prevent these problems (which could occur by e.g. auto-formatting the HTML), we add this style rule.
+*/
+.mdc-circular-progress__spinner-layer {
+  font-size: 0;
+}

@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <title>Tasks Scheduler</title>
   <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Roboto+Mono:400,500|Material+Icons">
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Roboto+Mono:400,500|Material+Icons">
   <link rel="stylesheet" href="/daterangepicker.css">
   <link rel="stylesheet" href="/style.css">
 </head>
@@ -13,7 +14,8 @@
   <div class="tasks-container">
 
     <div class="banner" id="info">
-      <p class="banner-text"> Select tasks to schedule to free timeframes. Optionally set duration for tasks and scheduling daterange.</p>
+      <p class="banner-text"> Select tasks to schedule to free timeframes. Optionally set duration for tasks and
+        scheduling daterange.</p>
       <div class="mdc-touch-target-wrapper banner-button" onclick="hideInfo()">
         <button class="mdc-button mdc-button--touch">
           <div class="mdc-button__ripple"></div>
@@ -40,7 +42,8 @@
         <label class="mdc-list-item__text" for="toggle-all">Task title</label>
       </li>
       <li role="separator" class="mdc-list-divider"></li>
-      <li role="progress-bar" id="progress-bar" class="mdc-linear-progress mdc-linear-progress--indeterminate" aria-label="Progress Bar" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0">
+      <li role="progress-bar" id="progress-bar" class="mdc-linear-progress mdc-linear-progress--indeterminate"
+          aria-label="Progress Bar" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0">
         <div class="mdc-linear-progress__buffer">
           <div class="mdc-linear-progress__buffer-bar"></div>
           <div class="mdc-linear-progress__buffer-dots"></div>
@@ -56,7 +59,6 @@
         <div id="empty-message-text">Add tasks in Google Tasks, or edit a list that is not empty.</div>
       </li>
     </ul>
-
 
 
     <form id="schedule-form">
@@ -156,34 +158,168 @@
           </span>
         </li>
       </ul>
+      <div id="working-hours">
+        <div>Set custom working hours:</div>
+
+        <script id="select-options-template" type="text/x-handlebars-template">
+          <div class="mdc-select__menu mdc-menu mdc-menu-surface">
+            <ul class="mdc-list">
+              {{#each values}}
+              <li class="mdc-list-item" data-value="{{this}}">
+                <span class="mdc-list-item__ripple"></span>
+                <span class="mdc-list-item__text">{{this}}</span>
+              </li>
+              {{/each}}
+            </ul>
+          </div>
+        </script>
+
+        <div id="start-hour" class="mdc-select mdc-select--filled hour-select">
+          <div class="mdc-select__anchor">
+            <span class="mdc-select__ripple"></span>
+            <span class="mdc-select__selected-text">9</span>
+            <span class="mdc-select__dropdown-icon">
+                    <svg
+                        class="mdc-select__dropdown-icon-graphic"
+                        viewBox="7 10 10 5">
+                      <polygon
+                          class="mdc-select__dropdown-icon-inactive"
+                          stroke="none"
+                          fill-rule="evenodd"
+                          points="7 10 12 15 17 10">
+                      </polygon>
+                      <polygon
+                          class="mdc-select__dropdown-icon-active"
+                          stroke="none"
+                          fill-rule="evenodd"
+                          points="7 15 12 10 17 15">
+                      </polygon>
+                    </svg>
+                  </span>
+            <span class="mdc-floating-label mdc-floating-label--float-above">Start hour</span>
+            <span class="mdc-line-ripple"></span>
+          </div>
+        </div>
+        :
+        <div id="start-min" class="mdc-select mdc-select--filled min-select">
+          <div class="mdc-select__anchor">
+            <span class="mdc-select__ripple"></span>
+            <span class="mdc-select__selected-text">00</span>
+            <span class="mdc-select__dropdown-icon">
+                    <svg
+                        class="mdc-select__dropdown-icon-graphic"
+                        viewBox="7 10 10 5">
+                      <polygon
+                          class="mdc-select__dropdown-icon-inactive"
+                          stroke="none"
+                          fill-rule="evenodd"
+                          points="7 10 12 15 17 10">
+                      </polygon>
+                      <polygon
+                          class="mdc-select__dropdown-icon-active"
+                          stroke="none"
+                          fill-rule="evenodd"
+                          points="7 15 12 10 17 15">
+                      </polygon>
+                    </svg>
+                  </span>
+            <span class="mdc-floating-label mdc-floating-label--float-above">Start minute</span>
+            <span class="mdc-line-ripple"></span>
+          </div>
+        </div>
+        <br>
+        <div id="end-hour" class="mdc-select mdc-select--filled hour-select">
+          <div class="mdc-select__anchor">
+            <span class="mdc-select__ripple"></span>
+            <span class="mdc-select__selected-text">18</span>
+            <span class="mdc-select__dropdown-icon">
+                    <svg
+                        class="mdc-select__dropdown-icon-graphic"
+                        viewBox="7 10 10 5">
+                      <polygon
+                          class="mdc-select__dropdown-icon-inactive"
+                          stroke="none"
+                          fill-rule="evenodd"
+                          points="7 10 12 15 17 10">
+                      </polygon>
+                      <polygon
+                          class="mdc-select__dropdown-icon-active"
+                          stroke="none"
+                          fill-rule="evenodd"
+                          points="7 15 12 10 17 15">
+                      </polygon>
+                    </svg>
+                  </span>
+            <span class="mdc-floating-label mdc-floating-label--float-above">End hour</span>
+            <span class="mdc-line-ripple"></span>
+          </div>
+        </div>
+        :
+        <div id="end-min" class="mdc-select mdc-select--filled min-select">
+          <div class="mdc-select__anchor">
+            <span class="mdc-select__ripple"></span>
+            <span class="mdc-select__selected-text">00</span>
+            <span class="mdc-select__dropdown-icon">
+                    <svg
+                        class="mdc-select__dropdown-icon-graphic"
+                        viewBox="7 10 10 5">
+                      <polygon
+                          class="mdc-select__dropdown-icon-inactive"
+                          stroke="none"
+                          fill-rule="evenodd"
+                          points="7 10 12 15 17 10">
+                      </polygon>
+                      <polygon
+                          class="mdc-select__dropdown-icon-active"
+                          stroke="none"
+                          fill-rule="evenodd"
+                          points="7 15 12 10 17 15">
+                      </polygon>
+                    </svg>
+                  </span>
+            <span class="mdc-floating-label mdc-floating-label--float-above">End minute</span>
+            <span class="mdc-line-ripple"></span>
+          </div>
+        </div>
+      </div>
 
       <button id="schedule-button" class="mdc-button mdc-button--raised fixed" onclick="schedule()" disabled>
         <span class="mdc-button__label">Schedule!</span>
         <div class="mdc-button__ripple"></div>
       </button>
 
-      <div id="scheduling-progress" class="mdc-circular-progress mdc-circular-progress--indeterminate" style="width:48px;height:48px;" role="progressbar" aria-label="Example Progress Bar" aria-valuemin="0" aria-valuemax="1">
+      <div id="scheduling-progress" class="mdc-circular-progress mdc-circular-progress--indeterminate"
+           style="width:48px;height:48px;" role="progressbar" aria-label="Example Progress Bar" aria-valuemin="0"
+           aria-valuemax="1">
         <div class="mdc-circular-progress__determinate-container">
-          <svg class="mdc-circular-progress__determinate-circle-graphic" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <svg class="mdc-circular-progress__determinate-circle-graphic" viewBox="0 0 48 48"
+               xmlns="http://www.w3.org/2000/svg">
             <circle class="mdc-circular-progress__determinate-track" cx="24" cy="24" r="18" stroke-width="4"/>
-            <circle class="mdc-circular-progress__determinate-circle" cx="24" cy="24" r="18" stroke-dasharray="113.097" stroke-dashoffset="113.097" stroke-width="4"/>
+            <circle class="mdc-circular-progress__determinate-circle" cx="24" cy="24" r="18" stroke-dasharray="113.097"
+                    stroke-dashoffset="113.097" stroke-width="4"/>
           </svg>
         </div>
         <div class="mdc-circular-progress__indeterminate-container">
           <div class="mdc-circular-progress__spinner-layer">
             <div class="mdc-circular-progress__circle-clipper mdc-circular-progress__circle-left">
-              <svg class="mdc-circular-progress__indeterminate-circle-graphic" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <svg class="mdc-circular-progress__indeterminate-circle-graphic" viewBox="0 0 48 48"
+                   xmlns="http://www.w3.org/2000/svg">
                 <circle cx="24" cy="24" r="18" stroke-dasharray="113.097" stroke-dashoffset="56.549" stroke-width="4"/>
               </svg>
-            </div><div class="mdc-circular-progress__gap-patch">
-            <svg class="mdc-circular-progress__indeterminate-circle-graphic" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="24" cy="24" r="18" stroke-dasharray="113.097" stroke-dashoffset="56.549" stroke-width="3.2"/>
-            </svg>
-          </div><div class="mdc-circular-progress__circle-clipper mdc-circular-progress__circle-right">
-            <svg class="mdc-circular-progress__indeterminate-circle-graphic" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="24" cy="24" r="18" stroke-dasharray="113.097" stroke-dashoffset="56.549" stroke-width="4"/>
-            </svg>
-          </div>
+            </div>
+            <div class="mdc-circular-progress__gap-patch">
+              <svg class="mdc-circular-progress__indeterminate-circle-graphic" viewBox="0 0 48 48"
+                   xmlns="http://www.w3.org/2000/svg">
+                <circle cx="24" cy="24" r="18" stroke-dasharray="113.097" stroke-dashoffset="56.549"
+                        stroke-width="3.2"/>
+              </svg>
+            </div>
+            <div class="mdc-circular-progress__circle-clipper mdc-circular-progress__circle-right">
+              <svg class="mdc-circular-progress__indeterminate-circle-graphic" viewBox="0 0 48 48"
+                   xmlns="http://www.w3.org/2000/svg">
+                <circle cx="24" cy="24" r="18" stroke-dasharray="113.097" stroke-dashoffset="56.549" stroke-width="4"/>
+              </svg>
+            </div>
           </div>
         </div>
       </div>
@@ -195,8 +331,10 @@
     <iframe id="calendar" frameborder="0" scrolling="no"></iframe>
   </div>
 </div>
-<script type="text/javascript" src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.6/handlebars.min.js"></script>
+<script type="text/javascript"
+        src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.6/handlebars.min.js"></script>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script type="text/javascript" src="/script.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>

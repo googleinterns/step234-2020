@@ -47,6 +47,7 @@ body {
 
 #schedule-form {
   overflow-y: auto;
+  flex-grow: 1;
 }
 
 .fixed {
@@ -57,6 +58,24 @@ body {
   display: flex;
   flex-direction: column;
   margin-top: auto;
+}
+
+#working-hours {
+  padding: 0 16px 0;
+}
+
+.min-select {
+  /*
+  The min-width property is used to overwrite the one set in mdc-select.
+  This is the minimum width that allows Start minute to appear properly.
+  */
+  min-width: 132px;
+  margin-top: 8px;
+}
+
+.hour-select{
+  min-width: 132px;
+  margin-top: 8px;
 }
 
 #schedule-button {
@@ -113,4 +132,12 @@ body {
 #scheduling-progress{
   display: none;
   margin: auto;
+}
+
+/*
+Introducing whitespace between the div elements of the MDC circular progress indicator produces a broken spinner.
+To prevent these problems (which could occur by e.g. auto-formatting the HTML), we add this style rule.
+*/
+.mdc-circular-progress__spinner-layer {
+  font-size: 0;
 }

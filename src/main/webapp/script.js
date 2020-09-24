@@ -15,6 +15,7 @@
  */
 
 let taskTemplate;
+let selectOptionsTemplate;
 let mdcSnackbar;
 let taskLoadingProgressBar;
 
@@ -24,7 +25,8 @@ function init() {
   taskLoadingProgressBar = new mdc.linearProgress.MDCLinearProgress(document.querySelector('#progress-bar'));
   hideDismissedInfo();
   initCheckboxChangeHandlers();
-  compileTaskTemplate();
+  compileTemplates();
+  fillSelects();
   initSnackbar();
   loadTasks();
   loadCalendar();
@@ -33,9 +35,47 @@ function init() {
 /**
  * Compiles the handlebars template representing a task.
  */
-function compileTaskTemplate() {
+function compileTemplates() {
   const taskTemplateElement = document.getElementById("task-template").innerHTML;
+  const selectOptionsTemplateElement = document.getElementById("select-options-template").innerHTML;
   taskTemplate = Handlebars.compile(taskTemplateElement);
+  selectOptionsTemplate = Handlebars.compile(selectOptionsTemplateElement);
+}
+
+const DEFAULT_WORKING_HOURS = {
+  "start-hour": "09",
+  "start-min": "00",
+  "end-hour": "18",
+  "end-min": "00"
+}
+
+function addZeroBefore(n) {
+  return (n < 10 ? '0' : '') + n;
+}
+
+function initSettings() {
+  workingHours = DEFAULT_WORKING_HOURS;
+
+  if(localStorage.hasOwnProperty("workingHours")){
+    workingHours = JSON.parse(localStorage.getItem("workingHours"));
+  }
+  for(settingId in workingHours){
+    $(`#${settingId} li[data-value=${workingHours[settingId]}]`).addClass("mdc-list-item--selected");
+  }
+}
+
+function fillSelects() {
+  const minutes = {values: ["00", "15", "30", "45"]};
+  const hours = {values: Array.from(Array(24).keys()).map((hour) => addZeroBefore(hour))};
+
+  minOptions = selectOptionsTemplate(minutes);
+  hourOptions = selectOptionsTemplate(hours);
+
+  $(".min-select").each((index, element) => $(element).append(minOptions));
+  $(".hour-select").each((index, element) => $(element).append(hourOptions));
+  initSettings();
+
+  initSelects();
 }
 
 /**
@@ -64,7 +104,8 @@ function hideInfo() {
 function loadTasks() {
   taskLoadingProgressBar.open();
   fetch("/load_tasks")
-      .then(getJsonIfOk)
+      .then(checkResponse)
+      .then(getJson)
       .then(renderTasks)
       .catch(handleNetworkError);
 }
@@ -76,7 +117,7 @@ function renderTasks(tasks) {
   if (tasks.length > 0) {
     tasks.forEach(renderSingleTask);
   }
-  initDropdowns();
+  initSelects();
   handleEmptySelection();
 }
 
@@ -91,7 +132,7 @@ function renderSingleTask(task) {
 /**
  * Initializes the dropdowns selection components.
  */
-function initDropdowns() {
+function initSelects() {
   $(".mdc-select").each(
       function() {
         const mdcSelect = new mdc.select.MDCSelect(this);
@@ -112,18 +153,31 @@ function handleEmptySelection() {
  * reports if there are problems.
  */
 function updateView(result) {
+  showScheduleButton();
+  showResultMessage(result.message);
+  loadTasks();
+}
+
+/**
+ * Shows the schedule button and hides the scheduling loader.
+ */
+function showScheduleButton() {
   $("#scheduling-progress").hide();
   $("#schedule-button").show();
-  showResultMessage(result);
-  loadTasks();
 }
 
 /**
  * Shows the result of scheduling.
  */
-function showResultMessage(result) {
-  $("#snackbar-result-text").text(result.message);
+function showResultMessage(message) {
+  $("#snackbar-result-text").text(message);
   mdcSnackbar.open();
+}
+
+
+function saveSettings() {
+  workingHours = extractWorkingHours();
+  localStorage.setItem("workingHours", JSON.stringify(workingHours));
 }
 
 function schedule() {
@@ -136,11 +190,38 @@ function schedule() {
   formContent.append("startDate", startDate.trim());
   formContent.append("endDate", endDate.trim());
   appendDurations(formContent);
+  appendWorkingHours(formContent);
+  saveSettings();
   postData("/schedule", new URLSearchParams(formContent).toString())
-      .then(getJsonIfOk)
+      .then(checkResponse)
+      .then(getJson)
       .then(updateView)
       .then(refreshCalendar)
+      .catch(restoreScheduleButton)
       .catch(handleNetworkError);
+}
+
+/**
+ * Restores the schedule button as before clicking it.
+ */
+function restoreScheduleButton() {
+  showScheduleButton();
+  handleEmptySelection();
+}
+
+function appendWorkingHours(formData) {
+  workingHours = extractWorkingHours();
+  for(setting in workingHours){
+    formData.append(setting, workingHours[setting]);
+  }
+}
+
+function extractWorkingHours(){
+  const workingHours = {};
+  for(element of $("#working-hours .mdc-select")){
+    workingHours[element.id] = $(element).data("mdcSelect").value;
+  }
+  return workingHours;
 }
 
 /**
@@ -172,12 +253,34 @@ function handleNetworkError(exception) {
   console.error(exception);
 }
 
-function getJsonIfOk(response) {
+/**
+ * Checks the status code of the response. If it is ok, then it returns the response,
+ * otherwise it shows and throws an error.
+ */
+function checkResponse(response) {
   if (!response.ok) {
-    throw new Error(`Server error detected: ${response.status} (${response.statusText})`);
-  } else {
-    return response.json();
+    if (response.status === 400) {
+      getJson(response)
+          .then((result) => result.message)
+          .then(showResultMessage);
+    } else {
+      let message;
+      if (response.status > 400 && response.status <= 499) {
+        message = "Client error: " + response.statusText;
+      } else if (response.status >= 500 && response.status <= 599) {
+        message = "Server error";
+      } else {
+        message = "Error";
+      }
+      showResultMessage(message);
+    }
+    throw new Error(`Error detected: ${response.status} (${response.statusText})`);
   }
+  return response;
+}
+
+function getJson(response) {
+  return response.json();
 }
 
 /**
@@ -186,7 +289,8 @@ function getJsonIfOk(response) {
  */
 function loadCalendar() {
   fetch("/user")
-      .then(getJsonIfOk)
+      .then(checkResponse)
+      .then(getJson)
       .then(setCalendar)
       .catch(handleNetworkError);
 }

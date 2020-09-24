@@ -26,6 +26,7 @@ import com.google.sps.api.tasks.TasksClientHelper;
 import com.google.sps.converter.TimeConverter;
 import com.google.sps.data.ExtendedTask;
 import com.google.sps.data.ScheduleMessage;
+import com.google.sps.data.WorkingHours;
 import com.google.sps.scheduler.Scheduler;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -57,11 +58,15 @@ public class ScheduleServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     if (!request.getParameterMap().containsKey(TASK_ID_LIST_KEY)) {
-      sendJsonResponse(response, "Select some tasks to schedule.");
+      badRequestResponse(response, "Select some tasks to schedule.");
       return;
     }
 
     // Scheduler parameters
+    WorkingHours workingHours = getWorkingHours(request, response);
+    if (workingHours == null) {
+      return;
+    }
 
     TasksClientAdapter tasksClientAdapter = new TasksClientAdapter();
     String tasksListId = TasksClientHelper.getMostRecentTaskListId(
@@ -75,6 +80,7 @@ public class ScheduleServlet extends HttpServlet {
     CalendarClientAdapter calendarClientAdapter = new CalendarClientAdapter();
     String timeZone = calendarClientAdapter.getPrimaryCalendarTimeZone();
     ZoneId zoneId = ZoneId.of(timeZone);
+
 
     String startDateString = request.getParameter("startDate");
     String endDateString = request.getParameter("endDate");
@@ -95,7 +101,7 @@ public class ScheduleServlet extends HttpServlet {
     List<Event> calendarEvents = calendarClientAdapter.getAcceptedEventsInTimerange(startDateTime, endDateTime);
 
     // Schedules
-    Scheduler scheduler = new Scheduler(calendarEvents, tasksToSchedule, timeZone);
+    Scheduler scheduler = new Scheduler(calendarEvents, tasksToSchedule, timeZone, workingHours);
     List<ExtendedTask> scheduledExtendedTasks = scheduler.scheduleInRange(startDate, endDate);
 
     List<Task> scheduledTasks = scheduledExtendedTasks.stream().map(ExtendedTask::getTask).collect(Collectors.toList());
@@ -168,5 +174,38 @@ public class ScheduleServlet extends HttpServlet {
     } catch (JsonProcessingException exception) {
       throw new IOException(exception);
     }
+  }
+
+  /**
+   * Creates response for a bad request by setting the status code and a message.
+   */
+  private void badRequestResponse(HttpServletResponse response, String message) throws IOException {
+    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    sendJsonResponse(response, message);
+  }
+
+  /**
+   * Returns the working hours contained in the request and checks if they are correct.
+   * If not, it returns null and sets the response as bad request.
+   */
+  private WorkingHours getWorkingHours(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    WorkingHours workingHours = null;
+
+    try {
+      int startHour = Integer.parseInt(request.getParameter("start-hour"));
+      int startMin = Integer.parseInt(request.getParameter("start-min"));
+      int endHour = Integer.parseInt(request.getParameter("end-hour"));
+      int endMin = Integer.parseInt(request.getParameter("end-min"));
+
+      if (endHour < startHour || (startHour == endHour && endMin <= startMin)) {
+        badRequestResponse(response, "Select valid working hours (end time must be greater than start time)");
+      } else {
+        workingHours = new WorkingHours(startHour, startMin, endHour, endMin);
+      }
+    } catch(NumberFormatException exception) {
+      badRequestResponse(response, "Working hours format is incorrect");
+    }
+
+    return workingHours;
   }
 }

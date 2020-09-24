@@ -16,6 +16,7 @@ package com.google.sps.scheduler;
 
 import com.google.api.services.calendar.model.Event;
 import com.google.sps.data.ExtendedTask;
+import com.google.sps.data.WorkingHours;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +41,7 @@ public class SchedulerTest {
   private final static String LOS_ANGELES_TIME_ZONE = "America/Los_Angeles";
   private final static String SHANGHAI_TIME_ZONE = "Asia/Shanghai";
   private final static int TOTAL_SAMPLES = 5;
-  private final long WORKING_HOURS = TimeUnit.MINUTES.toMillis((Scheduler.END_HOUR - Scheduler.START_HOUR) * 60 + Scheduler.END_MINUTE - Scheduler.START_MINUTE);
+  private final long WORKING_HOURS = TimeUnit.MINUTES.toMillis((Scheduler.DEFAULT_END_HOUR - Scheduler.DEFAULT_START_HOUR) * 60 + Scheduler.DEFAULT_END_MINUTE - Scheduler.DEFAULT_START_MINUTE);
   private final long SIX_HOURS = TimeUnit.HOURS.toMillis(6);
   private final long FOUR_HOURS = TimeUnit.HOURS.toMillis(4);
   private final long TWO_HOURS = TimeUnit.HOURS.toMillis(2);
@@ -96,12 +97,12 @@ public class SchedulerTest {
     List<Event> calendarEvents = new ArrayList<>();
     LocalDate day = LocalDate.of(2010, 3, 9);
     Event eventA = createEvent(
-        createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE),
         createDateTime(day, 13, 0, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
     Event eventB = createEvent(
         createDateTime(day, 13, 30, ZURICH_TIME_ZONE),
-        createDateTime(day, Scheduler.END_HOUR, Scheduler.END_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_END_HOUR, Scheduler.DEFAULT_END_MINUTE, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
 
     calendarEvents.add(eventA);
@@ -122,8 +123,8 @@ public class SchedulerTest {
     List<Event> calendarEvents = new ArrayList<>();
     LocalDate day = LocalDate.of(2020, 8, 20);
     Event eventAllDay = createEvent(
-        createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
-        createDateTime(day, Scheduler.END_HOUR, Scheduler.END_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_END_HOUR, Scheduler.DEFAULT_END_MINUTE, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
 
     calendarEvents.add(eventAllDay);
@@ -142,12 +143,12 @@ public class SchedulerTest {
     List<Event> calendarEvents = new ArrayList<>();
     LocalDate day = LocalDate.of(2010, 3, 9);
     Event eventA = createEvent(
-        createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE),
         createDateTime(day, 13, 0, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
     Event eventB = createEvent(
         createDateTime(day, 13, 30, ZURICH_TIME_ZONE),
-        createDateTime(day, Scheduler.END_HOUR, Scheduler.END_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_END_HOUR, Scheduler.DEFAULT_END_MINUTE, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
 
     calendarEvents.add(eventA);
@@ -180,7 +181,7 @@ public class SchedulerTest {
     List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, day);
     List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
         createDefaultDurationTaskWithDue(
-            createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE)),
+            createDateTime(day, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE)),
         createDefaultDurationTaskWithDue(
             createDateTime(day, 17, 30, ZURICH_TIME_ZONE)));
 
@@ -195,7 +196,7 @@ public class SchedulerTest {
     List<Event> calendarEvents = new ArrayList<>();
     LocalDate day = LocalDate.of(2048, 6, 23);
     Event eventA = createEvent(
-        createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE),
         createDateTime(day, 10, 0, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
     Event eventB = createEvent(
@@ -231,7 +232,7 @@ public class SchedulerTest {
     List<Event> calendarEvents = new ArrayList<>();
     LocalDate day = LocalDate.of(2110, 9, 28);
     Event eventA = createEvent(
-        createDateTime(day, Scheduler.START_HOUR - 1, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_START_HOUR - 1, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE),
         createDateTime(day, 10, 0, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
     Event eventB = createEvent(
@@ -244,7 +245,7 @@ public class SchedulerTest {
         ZURICH_TIME_ZONE);
     Event eventD = createEvent(
         createDateTime(day, 17, 15, ZURICH_TIME_ZONE),
-        createDateTime(day, Scheduler.END_HOUR + 1, Scheduler.END_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_END_HOUR + 1, Scheduler.DEFAULT_END_MINUTE, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
 
     calendarEvents.add(eventA);
@@ -274,11 +275,11 @@ public class SchedulerTest {
     List<Event> calendarEvents = new ArrayList<>();
     LocalDate day = LocalDate.of(2024, 2, 29);
     Event eventA = createEvent(
-        createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE),
         createDateTime(day, 10, 0, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
     Event eventB = createEvent(
-        createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE),
         createDateTime(day, 11, 0, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
     Event eventC = createEvent(
@@ -295,7 +296,7 @@ public class SchedulerTest {
         ZURICH_TIME_ZONE);
     Event eventF = createEvent(
         createDateTime(day, 17, 15, ZURICH_TIME_ZONE),
-        createDateTime(day, Scheduler.END_HOUR, Scheduler.END_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_END_HOUR, Scheduler.DEFAULT_END_MINUTE, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
 
     // Events inserted not in order
@@ -325,12 +326,12 @@ public class SchedulerTest {
     List<Event> calendarEvents = new ArrayList<>();
     LocalDate day = LocalDate.of(2025, 11, 15);
     Event eventA = createEvent(
-        createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE),
         createDateTime(day, 13, 0, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
     Event eventB = createEvent(
         createDateTime(day, 12, 30, UTC_TIME_ZONE),
-        createDateTime(day, Scheduler.END_HOUR, Scheduler.END_MINUTE, UTC_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_END_HOUR, Scheduler.DEFAULT_END_MINUTE, UTC_TIME_ZONE),
         UTC_TIME_ZONE);
 
     calendarEvents.add(eventA);
@@ -419,7 +420,7 @@ public class SchedulerTest {
         SHANGHAI_TIME_ZONE);
     Event eventF = createEvent(
         createDateTime(day, 17, 15, LOS_ANGELES_TIME_ZONE),
-        createDateTime(day, Scheduler.END_HOUR, Scheduler.END_MINUTE, LOS_ANGELES_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_END_HOUR, Scheduler.DEFAULT_END_MINUTE, LOS_ANGELES_TIME_ZONE),
         LOS_ANGELES_TIME_ZONE);
 
     // Events inserted not in order
@@ -452,11 +453,11 @@ public class SchedulerTest {
     LocalDate nextDay = LocalDate.of(2024, 1, 1);
     LocalDate farAhead = LocalDate.of(2026, 1, 1);
     Event eventA = createEvent(
-        createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE),
         createDateTime(day, 10, 0, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
     Event eventB = createEvent(
-        createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE),
         createDateTime(day, 11, 0, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
     Event eventC = createEvent(
@@ -473,10 +474,10 @@ public class SchedulerTest {
         ZURICH_TIME_ZONE);
     Event eventF = createEvent(
         createDateTime(day, 17, 15, ZURICH_TIME_ZONE),
-        createDateTime(day, Scheduler.END_HOUR, Scheduler.END_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_END_HOUR, Scheduler.DEFAULT_END_MINUTE, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
     Event eventG = createEvent(
-        createDateTime(nextDay, Scheduler.START_HOUR, Scheduler.START_MINUTE + 45, ZURICH_TIME_ZONE),
+        createDateTime(nextDay, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE + 45, ZURICH_TIME_ZONE),
         createDateTime(nextDay, 10, 15, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
     Event eventH = createEvent(
@@ -507,7 +508,7 @@ public class SchedulerTest {
         createDefaultDurationTaskWithDue(
             createDateTime(day, 16, 30, ZURICH_TIME_ZONE)),
         createDefaultDurationTaskWithDue(
-            createDateTime(nextDay, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE)),
+            createDateTime(nextDay, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE)),
         createDefaultDurationTaskWithDue(
             createDateTime(nextDay, 10, 30, ZURICH_TIME_ZONE)),
         createDefaultDurationTaskWithDue(
@@ -526,11 +527,11 @@ public class SchedulerTest {
     LocalDate day = LocalDate.of(2023, 12, 31);
     LocalDate nextDay = LocalDate.of(2024, 1, 1);
     Event eventA = createEvent(
-        createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE),
         createDateTime(day, 10, 0, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
     Event eventB = createEvent(
-        createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE),
         createDateTime(day, 11, 0, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
     Event eventC = createEvent(
@@ -547,10 +548,10 @@ public class SchedulerTest {
         ZURICH_TIME_ZONE);
     Event eventF = createEvent(
         createDateTime(day, 17, 15, ZURICH_TIME_ZONE),
-        createDateTime(day, Scheduler.END_HOUR, Scheduler.END_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_END_HOUR, Scheduler.DEFAULT_END_MINUTE, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
     Event eventG = createEvent(
-        createDateTime(nextDay, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(nextDay, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE),
         createDateTime(nextDay, 10, 15, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
     Event eventH = createEvent(
@@ -559,7 +560,7 @@ public class SchedulerTest {
         ZURICH_TIME_ZONE);
     Event eventJ = createEvent(
         createDateTime(nextDay, 11, 0, ZURICH_TIME_ZONE),
-        createDateTime(nextDay, Scheduler.END_HOUR, Scheduler.END_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(nextDay, Scheduler.DEFAULT_END_HOUR, Scheduler.DEFAULT_END_MINUTE, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
 
     // Events inserted not in order
@@ -594,7 +595,7 @@ public class SchedulerTest {
     List<Event> calendarEvents = new ArrayList<>();
     LocalDate day = LocalDate.of(2048, 6, 23);
     Event eventA = createEvent(
-        createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE),
         createDateTime(day, 10, 0, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
     Event eventB = createEvent(
@@ -633,7 +634,7 @@ public class SchedulerTest {
     Scheduler scheduler = new Scheduler(calendarEvents, varyingDurationSample, ZURICH_TIME_ZONE);
     List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, day);
     List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
-        createCustomDurationTaskWithDue(createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE), WORKING_HOURS)
+        createCustomDurationTaskWithDue(createDateTime(day, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE), WORKING_HOURS)
     );
 
     Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
@@ -647,7 +648,7 @@ public class SchedulerTest {
     List<Event> calendarEvents = new ArrayList<>();
     LocalDate day = LocalDate.of(2048, 6, 23);
     Event eventA = createEvent(
-        createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE + 5, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE + 5, ZURICH_TIME_ZONE),
         createDateTime(day, 10, 0, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
     Event eventB = createEvent(
@@ -667,7 +668,7 @@ public class SchedulerTest {
     List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, day);
     List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
         createCustomDurationTaskWithDue(
-            createDateTime(day,Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE), FIVE_MINS),
+            createDateTime(day,Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE), FIVE_MINS),
         createCustomDurationTaskWithDue(
             createDateTime(day, 10, 0, ZURICH_TIME_ZONE), ONE_HOUR),
         createCustomDurationTaskWithDue(
@@ -693,8 +694,8 @@ public class SchedulerTest {
     LocalDate nextDay = LocalDate.of(2048, 6, 24);
     LocalDate farFutureDay = LocalDate.of(2048, 8, 24);
     Event eventA = createEvent(
-        createDateTime(day, Scheduler.START_HOUR + 3, Scheduler.START_MINUTE, ZURICH_TIME_ZONE),
-        createDateTime(day, Scheduler.END_HOUR - 1, Scheduler.END_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_START_HOUR + 3, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, Scheduler.DEFAULT_END_HOUR - 1, Scheduler.DEFAULT_END_MINUTE, ZURICH_TIME_ZONE),
         ZURICH_TIME_ZONE);
     Event eventB = createEvent(
         createDateTime(nextDay, 9, 1, ZURICH_TIME_ZONE),
@@ -730,7 +731,7 @@ public class SchedulerTest {
     List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, farFutureDay);
     List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
         createCustomDurationTaskWithDue(
-            createDateTime(day, Scheduler.START_HOUR, Scheduler.START_MINUTE, ZURICH_TIME_ZONE), TWO_HOURS),
+            createDateTime(day, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE), TWO_HOURS),
         createCustomDurationTaskWithDue(
             createDateTime(nextDay, 9, 4, ZURICH_TIME_ZONE), AN_HOUR_AND_A_HALF),
         createCustomDurationTaskWithDue(
@@ -741,4 +742,91 @@ public class SchedulerTest {
     Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
   }
 
+  @Test
+  public void workingHoursSet() {
+    // Events : |--A--|      |----C----|     |F|     |-H-------|
+    //          |---B---|       |--D--|   |E| |-G-|                 |--I--|
+    // Days   :           |--------------|      |--------------------|
+    // Tasks  :           |--|                    |--|         |--|
+    List<Event> calendarEvents = new ArrayList<>();
+    LocalDate day = LocalDate.of(2023, 12, 31);
+    LocalDate nextDay = LocalDate.of(2024, 1, 1);
+    LocalDate farAhead = LocalDate.of(2026, 1, 1);
+    WorkingHours workingHours = new WorkingHours(11, 10, 16, 55);
+    Event eventA = createEvent(
+        createDateTime(day, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, 10, 0, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+    Event eventB = createEvent(
+        createDateTime(day, Scheduler.DEFAULT_START_HOUR, Scheduler.DEFAULT_START_MINUTE, ZURICH_TIME_ZONE),
+        createDateTime(day, 11, 0, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+    Event eventC = createEvent(
+        createDateTime(day, 11, 45, ZURICH_TIME_ZONE),
+        createDateTime(day, 16, 30, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+    Event eventD = createEvent(
+        createDateTime(day, 12, 15, ZURICH_TIME_ZONE),
+        createDateTime(day, 16, 0, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+    Event eventE = createEvent(
+        createDateTime(day, 17, 0, ZURICH_TIME_ZONE),
+        createDateTime(day, 17, 30, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+    Event eventF = createEvent(
+        createDateTime(nextDay, 8, 0, ZURICH_TIME_ZONE),
+        createDateTime(nextDay, 9, 30, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+    Event eventG = createEvent(
+        createDateTime(nextDay, 9, 15, ZURICH_TIME_ZONE),
+        createDateTime(nextDay, 11, 30, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+    Event eventH = createEvent(
+        createDateTime(nextDay, 12, 0, ZURICH_TIME_ZONE),
+        createDateTime(nextDay, 15, 0, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+    Event eventI = createEvent(
+        createDateTime(nextDay, 15, 50, ZURICH_TIME_ZONE),
+        createDateTime(nextDay, 18, 30, ZURICH_TIME_ZONE),
+        ZURICH_TIME_ZONE);
+
+    // Events inserted not in order
+    calendarEvents.add(eventH);
+    calendarEvents.add(eventF);
+    calendarEvents.add(eventE);
+    calendarEvents.add(eventD);
+    calendarEvents.add(eventC);
+    calendarEvents.add(eventB);
+    calendarEvents.add(eventA);
+    calendarEvents.add(eventG);
+    calendarEvents.add(eventI);
+
+    Scheduler scheduler = new Scheduler(calendarEvents, defaultDurationSample, ZURICH_TIME_ZONE, workingHours);
+    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, nextDay);
+    List<ExtendedTask> expectedScheduledTasks = Arrays.asList(
+        createDefaultDurationTaskWithDue(
+            createDateTime(day, 11, 10, ZURICH_TIME_ZONE)),
+        createDefaultDurationTaskWithDue(
+            createDateTime(nextDay, 11, 30, ZURICH_TIME_ZONE)),
+        createDefaultDurationTaskWithDue(
+            createDateTime(nextDay, 15, 0, ZURICH_TIME_ZONE)));
+
+    Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
+  }
+
+  @Test
+  public void notEnoughRoomShortWorkinghours() {
+    // Events :
+    // Day    : |-|
+    // Tasks  :
+    List<Event> calendarEvents = Collections.emptyList();
+    LocalDate day = LocalDate.of(2020, 8, 20);
+    WorkingHours workingHours = new WorkingHours(10,5,10,15);
+
+    Scheduler scheduler = new Scheduler(calendarEvents, defaultDurationSample, ZURICH_TIME_ZONE, workingHours);
+    List<ExtendedTask> actualScheduledTasks = scheduler.scheduleInRange(day, day);
+    List<Event> expectedScheduledTasks = Collections.emptyList();
+
+    Assert.assertEquals(expectedScheduledTasks, actualScheduledTasks);
+  }
 }
